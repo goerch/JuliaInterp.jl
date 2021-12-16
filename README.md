@@ -4,7 +4,7 @@ AST/IR interpretation of Julia test suite to improve  https://github.com/JuliaDe
 
 ## Install
 
-`Pkg.add("https://github.com/goerch/JuliaInterp.jl.git")`
+Clone the repository from GitHub.
 
 ## Run
 
