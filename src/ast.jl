@@ -191,7 +191,7 @@ function interprete_ast(interpstate, expr::Expr)
 end 
 
 function interprete_ast(mod::Module, expr::Expr)
-    interpstate = InterpState(false, 1, [ModuleState(mod)])
+    interpstate = InterpState(false, 1, 10, [ModuleState(mod)])
     ans = interprete_ast(interpstate, expr)
     pop!(interpstate.mods)
     ans
