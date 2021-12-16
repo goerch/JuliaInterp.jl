@@ -130,24 +130,41 @@ function handle_error(codestate, exception)
 end
 
 function interprete_lower(codestate, ::Val{T}, args) where T
-    codestate.ssavalues[codestate.pc] = lookup_lower(codestate, Expr(T, args...))
-    codestate.pc += 1
+    codestate.interpstate.debug && @show :interprete_lower T args
+    try
+        codestate.ssavalues[codestate.pc] = lookup_lower(codestate, Expr(T, args...))
+        codestate.pc += 1
+    catch exception
+        handle_error(codestate, exception)
+    end
 end
 
 function interprete_lower(codestate, ::Val{:enter}, args)     
     codestate.interpstate.debug && @show :interprete_lower :enter args
-    push!(codestate.handlers, args[1])
-    codestate.pc += 1
+    try
+        push!(codestate.handlers, args[1])
+        codestate.pc += 1
+    catch exception
+        handle_error(codestate, exception)
+    end
 end
 function interprete_lower(codestate, ::Val{:leave}, args) 
     codestate.interpstate.debug && @show :interprete_lower :leave args
-    pop!(codestate.handlers)
-    codestate.pc += 1
+    try
+        pop!(codestate.handlers)
+        codestate.pc += 1
+    catch exception
+        handle_error(codestate, exception)
+    end
 end
 function interprete_lower(codestate, ::Val{:pop_exception}, args)     
     codestate.interpstate.debug && @show :interprete_lower :pop_exception args
-    assign_lower(codestate, args[1], pop!(codestate.exceptions))
-    codestate.pc += 1
+    try
+        assign_lower(codestate, args[1], pop!(codestate.exceptions))
+        codestate.pc += 1
+    catch exception
+        handle_error(codestate, exception)
+    end
 end
 
 function interprete_lower(codestate, ::Val{:(=)}, args) 
@@ -190,38 +207,58 @@ function interprete_lower(codestate, ::Val{:method}, args)
 end
 function interprete_lower(codestate, ::Val{:const}, args) 
     codestate.interpstate.debug && @show :interprete_lower :const args
-    codestate.ssavalues[codestate.pc] = 
-        eval_ast_lower(codestate.interpstate, Expr(:const, args...))
-    codestate.pc += 1
+    try
+        codestate.ssavalues[codestate.pc] = 
+            eval_ast_lower(codestate.interpstate, Expr(:const, args...))
+        codestate.pc += 1
+    catch exception
+        handle_error(codestate, exception)
+    end
 end
 function interprete_lower(codestate, ::Val{:global}, args) 
     codestate.interpstate.debug && @show :interprete_lower :global args
-    codestate.ssavalues[codestate.pc] = 
-        eval_ast_lower(codestate.interpstate, Expr(:global, args...))
-    codestate.pc += 1
+    try
+        codestate.ssavalues[codestate.pc] = 
+            eval_ast_lower(codestate.interpstate, Expr(:global, args...))
+        codestate.pc += 1
+    catch exception
+        handle_error(codestate, exception)
+    end
 end
 function interprete_lower(codestate, ::Val{:using}, args) 
     codestate.interpstate.debug && @show :interprete_lower :using args
-    codestate.ssavalues[codestate.pc] = 
-        eval_ast_lower(codestate.interpstate, Expr(:using, args...))
-    codestate.pc += 1
+    try
+        codestate.ssavalues[codestate.pc] = 
+            eval_ast_lower(codestate.interpstate, Expr(:using, args...))
+        codestate.pc += 1
+    catch exception
+        handle_error(codestate, exception)
+    end
 end
 
 function interprete_lower(codestate, ::Val{:thunk}, args) 
     codestate.interpstate.debug && @show :interprete_lower :thunk args
-    # This works on 1.7.0
-    #= codestate.ssavalues[codestate.pc] = 
-        eval_ast(codestate.interpstate, Expr(:thunk, args...)) =#
-    # This works on 1.8.0 only...
-    codestate.ssavalues[codestate.pc] = 
-        interprete_lower(codestate.interpstate, codestate, args[1])
-    codestate.pc += 1
+    try
+        # This works on 1.7.0
+        #= codestate.ssavalues[codestate.pc] = 
+            eval_ast(codestate.interpstate, Expr(:thunk, args...)) =#
+        # This works on 1.8.0 only...
+        codestate.ssavalues[codestate.pc] = 
+            interprete_lower(codestate.interpstate, codestate, args[1])
+        codestate.pc += 1
+    catch exception
+        handle_error(codestate, exception)
+    end
 end 
 
 function interprete_lower(codestate, ::Val{:copyast}, args)     
     codestate.interpstate.debug && @show :interprete_lower :enter args
-    codestate.ssavalues[codestate.pc] = lookup_lower(codestate, args[1])
-    codestate.pc += 1
+    try
+        codestate.ssavalues[codestate.pc] = lookup_lower(codestate, args[1])
+        codestate.pc += 1
+    catch exception
+        handle_error(codestate, exception)
+    end
 end 
 
 function interprete_lower(codestate, node) 
