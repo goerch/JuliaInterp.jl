@@ -38,7 +38,6 @@ function code_state_from_call(codestate, fun, parms...)
     names = Base.method_argnames(meth)
     sig = Base.signature_type(fun, internal_typeof.(parms))
     (ti, lenv) = ccall(:jl_type_intersection_with_env, Any, (Any, Any), sig, meth.sig)
-    @show parms sig meth.sig ti lenv
     codestate = CodeState(codestate.interpstate, src, names, lenv, 1,
         Vector(undef, length(src.code)), 
         Vector(undef, length(src.slotnames)),
