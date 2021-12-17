@@ -8,8 +8,8 @@ Clone the repository from GitHub.
 
 ## Running
 
-Change directory to the root folder of the project, 
-start Julia (using -t n for the desired number of threads) 
+Change directory to the root folder of the project,
+start Julia (using -t n for the desired number of threads)
 and execute
 
 ```
@@ -278,7 +278,7 @@ ans = 2
 2
 ```
 
-and 
+and
 
 ```
 using JuliaInterp
