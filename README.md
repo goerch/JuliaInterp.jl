@@ -240,29 +240,3 @@ Test Summary:                       |     Pass  Fail  Error  Broken     Total   
 The global RNG seed was 0x622d644dc91c8b5631d8f1352b474a0c.
 ```
 
-# Bonus
-
-Towers of interpretation:
-
-```
-using JuliaInterp
-JuliaInterp.interprete_ast(Module(), Meta.parse("x = 1"))
-```
-
-yields
-
-```
-1
-```
-
-and 
-
-```
-JuliaInterp.interprete_ast(Module(), JuliaInterp.interprete_ast(Module(), Meta.parse("x = 1")))
-```
-
-still yields
-
-```
-1
-```
