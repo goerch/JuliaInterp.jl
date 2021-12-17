@@ -25,30 +25,36 @@ function lookup_lower(codestate, ::Val{:new}, args)
     # ccall(:jl_new_structv, Any, (Any, Ptr{Any}, UInt32), type, parms, length(parms))
     eval_ast(codestate.interpstate, Expr(:new, type, parms...))
 end
+difficult(fun) = fun isa Core.IntrinsicFunction || fun isa Core.Builtin || parentmodule(fun) in [Core, Base]
 function lookup_lower(codestate, ::Val{:call}, args) 
     # @show args
     fun = lookup_lower(codestate, args[1])
     # @show fun
     parms = [lookup_lower(codestate, arg) for arg in args[2:end]]
     # @show parms
-    if codestate.interpstate.depth < codestate.interpstate.maxdepth &&
-        !(fun isa Core.IntrinsicFunction) && !(fun isa Core.Builtin) && !(parentmodule(fun) in [Core, Base])
-        # codestate.interpstate.debug = true
-        codestate.interpstate.depth += 1
-        try
-            local childstate
+    if codestate.interpstate.depth < codestate.interpstate.maxdepth
+        if !difficult(fun)
+            # codestate.interpstate.debug = true
+            codestate.interpstate.depth += 1
             try
-                childstate = code_state_from_call(codestate, fun, parms...)
-            catch 
-                childstate = nothing
+                local childstate
+                try
+                    childstate = code_state_from_call(codestate, fun, parms...)
+                catch 
+                    childstate = nothing
+                end
+                if childstate isa CodeState
+                    return run_code_state(childstate)
+                end
+            finally
+                codestate.interpstate.depth -= 1
+                # codestate.interpstate.debug = false
             end
-            if childstate isa CodeState
-                return run_code_state(childstate)
-            end
-        finally
-            codestate.interpstate.depth -= 1
-            # codestate.interpstate.debug = false
+        else
+            # @show :difficult codestate.interpstate.depth
         end
+    elseif !difficult(fun)
+       # @show :maybe_easy codestate.interpstate.depth
     end
     # eval_ast(codestate.interpstate, Expr(:call, fun, parms...))
     try
