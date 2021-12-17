@@ -91,7 +91,7 @@ end
 function interprete_ast(interpstate, ::Val{:let}, args)
     interpstate.debug && @show :let args
     expr = Expr(:let, args...) 
-    eval_ast(interpstate, expr)
+    eval_ast_lower(interpstate, expr)
 end
 function interprete_ast(interpstate, ::Val{:block}, args)
     interpstate.debug && @show :block args
@@ -142,7 +142,7 @@ end
 function interprete_ast(interpstate, ::Val{:struct}, args)
     interpstate.debug && @show :struct args
     expr = Expr(:struct, args...)
-    eval_ast(interpstate, expr)
+    eval_ast_lower(interpstate, expr)
 end
 function interprete_ast(interpstate, ::Val{:curly}, args)
     interpstate.debug && @show :curly args
@@ -152,7 +152,7 @@ end
 function interprete_ast(interpstate, ::Val{:abstract}, args)
     interpstate.debug && @show :abstract args
     expr = Expr(:abstract, args...)
-    eval_ast(interpstate, expr)
+    eval_ast_lower(interpstate, expr)
 end
 function interprete_ast(interpstate, ::Val{:using}, args)
     interpstate.debug && @show :using args
