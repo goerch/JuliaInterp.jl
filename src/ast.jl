@@ -95,9 +95,11 @@ function interprete_ast(interpstate, ::Val{:let}, args)
 end
 function interprete_ast(interpstate, ::Val{:block}, args)
     interpstate.debug && @show :block args
+    local ans
     for arg in args
-        interprete_ast(interpstate, arg)
+        ans = interprete_ast(interpstate, arg)
     end
+    ans
 end
 function interprete_ast(interpstate, ::Val{:try}, args)
     interpstate.debug && @show :try args
@@ -172,9 +174,11 @@ end
 
 function interprete_ast(interpstate, ::Val{:toplevel}, args)
     interpstate.debug && @show :toplevel args
+    local ans
     for arg in args
-        interprete_ast(interpstate, arg)
+        ans = interprete_ast(interpstate, arg)
     end
+    ans
 end 
 function interprete_ast(interpstate, ::Val{:module}, args)
     interpstate.debug && @show :module args
@@ -190,8 +194,8 @@ function interprete_ast(interpstate, expr::Expr)
     interprete_ast(interpstate, Val(expr.head), expr.args)
 end 
 
-function interprete_ast(mod::Module, expr::Expr, maxdepth=10)
-    interpstate = InterpState(false, 1, maxdepth, [ModuleState(mod)])
+function interprete_ast(mod::Module, expr::Expr, debug=false, maxdepth=10)
+    interpstate = InterpState(debug, 1, maxdepth, [ModuleState(mod)])
     ans = interprete_ast(interpstate, expr)
     pop!(interpstate.mods)
     ans

@@ -25,7 +25,7 @@ function lookup_lower(codestate, ::Val{:new}, args)
     # ccall(:jl_new_structv, Any, (Any, Ptr{Any}, UInt32), type, parms, length(parms))
     eval_ast(codestate.interpstate, Expr(:new, type, parms...))
 end
-difficult(fun) = fun isa Core.IntrinsicFunction || fun isa Core.Builtin || parentmodule(fun) in [Core, Base]
+difficult(fun) = fun isa Core.IntrinsicFunction || fun isa Core.Builtin || Base.moduleroot(parentmodule(fun)) in [Core, Base]
 function lookup_lower(codestate, ::Val{:call}, args) 
     # @show args
     fun = lookup_lower(codestate, args[1])
@@ -44,6 +44,7 @@ function lookup_lower(codestate, ::Val{:call}, args)
                     childstate = nothing
                 end
                 if childstate isa CodeState
+                    codestate.interpstate.debug && @show childstate.src
                     return run_code_state(childstate)
                 end
             finally
@@ -75,12 +76,12 @@ function lookup_lower(codestate, ::Val{:foreigncall}, args)
     parms = [lookup_lower(codestate, arg) for arg in args[6:end]]
     # @show parms
     # eval_ast(codestate.interpstate, Expr(:foreigncall, fun, args[2:5]..., parms...))
-    eval(Expr(:foreigncall, fun, args[2:5]..., parms...))
-    #= if fun isa Symbol
+    # eval(Expr(:foreigncall, fun, args[2:5]..., parms...))
+    if fun isa Symbol
         eval(Expr(:foreigncall, (fun, "libjulia.dll"), args[2:5]..., parms...))
     else 
         eval(Expr(:foreigncall, fun, args[2:5]..., parms...))
-    end =#
+    end
 end
 function lookup_lower(codestate, ::Val{:method}, args) 
     args[1]
@@ -122,7 +123,7 @@ function assign_lower(codestate, slotnumber::Core.SlotNumber, val)
     codestate.slots[slotnumber.id] = val
 end
 function assign_lower(codestate, symbol::Symbol, val)
-    eval_ast(codestate.interpstate, Expr(:(=), symbol, val))
+    eval_ast_lower(codestate.interpstate, Expr(:(=), symbol, val))
 end
 
 function handle_error(codestate, exception)
