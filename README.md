@@ -18,7 +18,7 @@ Pkg.activate(".")
 include("test/runtests.jl")
 ```
 
-# Results
+## Results
 
 Julia 1.8.0-DEV on Windows for a maximal call stack depth of 10:
 
@@ -240,7 +240,7 @@ Test Summary:                       |     Pass  Fail  Error  Broken     Total   
 The global RNG seed was 0x6e14e053d92930e16591b76f87390af7.
 ```
 
-# Bonus
+## Bonus
 
 Towers of interpretation:
 
