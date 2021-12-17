@@ -50,7 +50,7 @@ function lookup_lower(codestate, ::Val{:call}, args)
             # codestate.interpstate.debug = false
         end
     end
-    # eval_ast_lower(codestate.interpstate, Expr(:call, fun, parms...))
+    # eval_ast(codestate.interpstate, Expr(:call, fun, parms...))
     try
         return fun(parms...)
     catch exception
@@ -195,7 +195,7 @@ function interprete_lower(codestate, ::Val{:method}, args)
         end
         if args[1] isa Symbol
             codestate.ssavalues[codestate.pc] = 
-                eval_ast(codestate.interpstate, Expr(:function, args[1]))
+                eval_lower_ast(codestate.interpstate, Expr(:function, args[1]))
         else
             codestate.ssavalues[codestate.pc] = 
                 lookup_lower(codestate, args[1])
@@ -209,7 +209,7 @@ function interprete_lower(codestate, ::Val{:const}, args)
     codestate.interpstate.debug && @show :interprete_lower :const args
     try
         codestate.ssavalues[codestate.pc] = 
-            eval_ast_lower(codestate.interpstate, Expr(:const, args...))
+            eval_lower_ast(codestate.interpstate, Expr(:const, args...))
         codestate.pc += 1
     catch exception
         handle_error(codestate, exception)
@@ -219,7 +219,7 @@ function interprete_lower(codestate, ::Val{:global}, args)
     codestate.interpstate.debug && @show :interprete_lower :global args
     try
         codestate.ssavalues[codestate.pc] = 
-            eval_ast_lower(codestate.interpstate, Expr(:global, args...))
+            eval_lower_ast(codestate.interpstate, Expr(:global, args...))
         codestate.pc += 1
     catch exception
         handle_error(codestate, exception)
@@ -229,7 +229,7 @@ function interprete_lower(codestate, ::Val{:using}, args)
     codestate.interpstate.debug && @show :interprete_lower :using args
     try
         codestate.ssavalues[codestate.pc] = 
-            eval_ast_lower(codestate.interpstate, Expr(:using, args...))
+            eval_lower_ast(codestate.interpstate, Expr(:using, args...))
         codestate.pc += 1
     catch exception
         handle_error(codestate, exception)
