@@ -4,7 +4,7 @@
 
 using Serialization, Base.StackTraces
 
-let
+#= let
     @noinline child() = stacktrace()
     @noinline parent() = child()
     @noinline grandparent() = parent()
@@ -38,7 +38,7 @@ let
     @test frame == frame2
     @test frame.linfo !== nothing
     @test frame2.linfo === nothing
-end
+end =#
 
 # Test from_c
 let (default, with_c, without_c) = (stacktrace(), stacktrace(true), stacktrace(false))
@@ -50,7 +50,7 @@ end
 
 @test StackTraces.lookup(C_NULL) == [StackTraces.UNKNOWN] == StackTraces.lookup(C_NULL + 1) == StackTraces.lookup(C_NULL - 1)
 
-let ct = current_task()
+#= let ct = current_task()
     # After a task switch, there should be nothing in catch_backtrace
     yieldto(@task yieldto(ct))
     @test catch_backtrace() == StackFrame[]
@@ -98,7 +98,7 @@ for (frame, func, inlined) in zip(trace, [g,h,f], (can_inline, can_inline, false
     @test !frame.from_c
     @test frame.inlined === inlined
 end
-end
+end =#
 
 let src = Meta.lower(Main, quote let x = 1 end end).args[1]::Core.CodeInfo,
     li = ccall(:jl_new_method_instance_uninit, Ref{Core.MethodInstance}, ()),
@@ -140,8 +140,8 @@ module StackTracesTestMod
 end
 
 # Test that `removes_frames!` can correctly remove frames from within the module
-trace = StackTracesTestMod.unfiltered_stacktrace()
-@test occursin("unfiltered_stacktrace", string(trace))
+#= trace = StackTracesTestMod.unfiltered_stacktrace()
+@test occursin("unfiltered_stacktrace", string(trace)) =#
 
 trace = StackTracesTestMod.filtered_stacktrace()
 @test !occursin("filtered_stacktrace", string(trace))

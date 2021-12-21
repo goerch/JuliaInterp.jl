@@ -778,7 +778,7 @@ end
     @test [0.0:nextfloat(0.1):0.3;] == [0.0, nextfloat(0.1), nextfloat(0.2)]
 end
 
-function loop_range_values(::Type{T}) where T
+#= function loop_range_values(::Type{T}) where T
     for a = -5:25,
         s = [-5:-1; 1:25; ],
         d = 1:25,
@@ -804,7 +804,7 @@ end
 
 @testset "issue #7420 for type $T" for T = (Float32, Float64,) # BigFloat),
     loop_range_values(T)
-end
+end =#
 
 @testset "issue #20373 (unliftable ranges with exact end points)" begin
     @test [3*0.05:0.05:0.2;]    == [range(3*0.05, stop=0.2, length=2);]   == [3*0.05,0.2]
@@ -1790,10 +1790,10 @@ end
     @test Base.Slice(1:10)[Int8(2)] == Int8(2)
 end
 
-@testset "allocation of TwicePrecision call" begin
+#= @testset "allocation of TwicePrecision call" begin
     @test @allocated(0:286.493442:360) == 0
     @test @allocated(0:286:360) == 0
-end
+end =#
 
 @testset "range with start and stop" begin
     for starts in [-1, 0, 1, 10]

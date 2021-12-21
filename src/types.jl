@@ -9,8 +9,7 @@ collect!(collectorstate, expr) = collect!(collectorstate, expr, nothing)
 
 mutable struct InterpState
     debug::Bool
-    depth::Int
-    maxdepth::Int
+    budget::UInt64
     mods::Vector{ModuleState}
     collectorstate::Union{Nothing, CollectorState}    
 end
@@ -29,17 +28,19 @@ mutable struct CodeState
     lenv::Core.SimpleVector
     pc::Int
     ssavalues::Vector
+    times::Vector{UInt64}
     slots::Vector
     handlers::Vector{Int}
-    exceptions::Vector{Exception}
+    exceptions::Vector
 end
 
 function code_state_from_thunk(interpstate, src)
     CodeState(interpstate, src, nothing, [], Core.svec(), 1,
         Vector(undef, length(src.code)), 
+        Vector{UInt64}(undef, length(src.code)), 
         Vector(undef, length(src.slotnames)),
         Int[],
-        Exception[])
+        Any[])
 end
 
 internal_typeof(x::Type) = Type{x}
@@ -53,16 +54,17 @@ function code_state_from_call(codestate, fun, parms...)
     (ti, lenv) = ccall(:jl_type_intersection_with_env, Any, (Any, Any), sig, meth.sig)
     codestate = CodeState(codestate.interpstate, src, meth, names, lenv, 1,
         Vector(undef, length(src.code)), 
+        Vector{UInt64}(undef, length(src.code)), 
         Vector(undef, length(src.slotnames)),
         Int[],
-        Exception[])
+        Any[])
     codestate.slots[1] = fun
     if !meth.isva
-        for idx in 2:min(meth.nargs, length(parms) + 1) 
+        for idx in 2:meth.nargs 
             codestate.slots[idx] = parms[idx - 1]
         end
     else
-        for idx in 2:min(meth.nargs, length(parms) + 1) - 1
+        for idx in 2:meth.nargs - 1
             codestate.slots[idx] = parms[idx - 1]
         end
         codestate.slots[meth.nargs] = parms[meth.nargs - 1:end]

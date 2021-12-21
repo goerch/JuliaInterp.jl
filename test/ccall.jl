@@ -17,7 +17,7 @@ const libccalltest = "libccalltest"
 const verbose = false
 ccall((:set_verbose, libccalltest), Cvoid, (Int32,), verbose)
 
-@eval function cvarargs()
+#= @eval function cvarargs()
     strp = Ref{Ptr{Cchar}}(0)
     fmt = "%3.1f"
     len = ccall(:asprintf, Cint, (Ptr{Ptr{Cchar}}, Cstring, Cfloat...), strp, fmt, 0.1)
@@ -25,11 +25,11 @@ ccall((:set_verbose, libccalltest), Cvoid, (Int32,), verbose)
     Libc.free(strp[])
     return str
 end
-@test cvarargs() == "0.1"
+@test cvarargs() == "0.1" =#
 
 
 # test multiple-type vararg handling (there's no syntax for this currently)
-@eval function foreign_varargs()
+#= @eval function foreign_varargs()
     strp = Ref{Ptr{Cchar}}(0)
     fmt = "hi+%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%.1f-%.1f-%.1f-%.1f-%.1f-%.1f-%.1f-%.1f-%.1f\n"
     len = $(Expr(:foreigncall, :(:asprintf), Cint,
@@ -45,7 +45,7 @@ end
     Libc.free(strp[])
     return str
 end
-@test foreign_varargs() == "hi+1-2-3-4-5-6-7-8-9-10-11-12-13-14-15-1.1-2.2-3.3-4.4-5.5-6.6-7.7-8.8-9.9\n"
+@test foreign_varargs() == "hi+1-2-3-4-5-6-7-8-9-10-11-12-13-14-15-1.1-2.2-3.3-4.4-5.5-6.6-7.7-8.8-9.9\n" =#
 
 
 # Test for proper argument register truncation
@@ -851,7 +851,7 @@ check_code_trampoline(testclosure, (typeof(identity), Any, Bool, Type), 2)
 check_code_trampoline(testclosure, (typeof(identity), Int, Bool, Type{Int}), 0)
 check_code_trampoline(testclosure, (typeof(identity), String, Bool, Type{String}), 0)
 
-function g(i)
+#= function g(i)
     x = -332210 + i
     y = "foo"
     a(z) = x
@@ -874,7 +874,7 @@ function g(i)
 end
 g(1)
 g(2)
-g(3)
+g(3) =#
 
 verbose && println("Testing cfunction roundtrip: ")
 
@@ -984,7 +984,7 @@ end
 
 
 #issue 40164
-@testset "llvm parameter attributes on cfunction closures" begin
+#= @testset "llvm parameter attributes on cfunction closures" begin
     struct Struct40164
         x::Cdouble
         y::Cdouble
@@ -1000,7 +1000,7 @@ end
     end
 
     @test test_40164() == [Struct40164(0, 1, 2)]
-end
+end =#
 
 else
 
@@ -1037,11 +1037,11 @@ end
 @test ccall_reassigned_ptr(C_NULL) == "foo"
 
 # @threadcall functionality
-threadcall_test_func(x) =
+#= threadcall_test_func(x) =
     @threadcall((:testUcharX, libccalltest), Int32, (UInt8,), x % UInt8)
 
 @test threadcall_test_func(3) == 1
-@test threadcall_test_func(259) == 1
+@test threadcall_test_func(259) == 1 =#
 
 # issue 17819
 # NOTE: can't use cfunction or reuse ccalltest Struct methods, as those call into the runtime
@@ -1188,7 +1188,7 @@ if Sys.ARCH === :x86_64
 
     foo_ams(a1, a2, a3, a4) = VecReg(ntuple(i -> VecElement(a1[i].value + a2[i].value * (a3[i].value - a4[i].value)), 4))
 
-    for s in [Float32, Int32]
+    #= for s in [Float32, Int32]
         T = NTuple{4, VecElement{s}}
         @eval function rt_sse(a1::$T, a2::$T, a3::$T, a4::$T)
             return ccall(
@@ -1206,7 +1206,7 @@ if Sys.ARCH === :x86_64
 
         # cfunction round-trip
         @test rt_sse(a1, a2, a3, a4) == r
-    end
+    end =#
 
 elseif Sys.ARCH === :aarch64
     for v1 in 1:99:1000, v2 in -100:-1999:-20000
@@ -1571,19 +1571,19 @@ mutable struct CallThisFunc27178{FCN_TYPE}
     fcn::FCN_TYPE
 end
 
-callback27178(cb::CTF) where CTF<:CallThisFunc27178 = nothing
+#= callback27178(cb::CTF) where CTF<:CallThisFunc27178 = nothing
 @inline make_cfunc27178(cbi::CI) where CI = @cfunction(callback27178, Cvoid, (Ref{CI},))
 get_c_func(fcn::FCN_TYPE) where {FCN_TYPE<:Function} = return make_cfunc27178(CallThisFunc27178(fcn))
-@test isa(get_c_func(sin), Ptr)
+@test isa(get_c_func(sin), Ptr) =#
 
 # issue #27215
-function once_removed()
+#= function once_removed()
     function mycompare(a, b)::Cint
         return (a < b) ? -1 : ((a > b) ? +1 : 0)
     end
     mycompare_c = @cfunction($mycompare, Cint, (Ref{Cdouble}, Ref{Cdouble}))
 end
-@test isa(once_removed(), Base.CFunction)
+@test isa(once_removed(), Base.CFunction) =#
 
 # issue #27478
 function ccall27478()

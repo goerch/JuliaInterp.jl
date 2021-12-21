@@ -243,7 +243,7 @@ end
     @test length(Base.current_exceptions()) == 0
 end
 
-@testset "Deep exception stacks" begin
+#= @testset "Deep exception stacks" begin
     # Generate deep exception stack with recursive handlers.
     #
     # (Note that if you let this overflow the program stack (not the exception
@@ -355,7 +355,7 @@ end
     t = @task ()->nothing
     @test_throws ErrorException("Inspecting the exception stack of a task which might "*
                                 "be running concurrently isn't allowed.") current_exceptions(t)
-end
+end 
 
 @testset "rethrow" begin
     @test try
@@ -368,7 +368,7 @@ end
     catch exc
         exc
     end == ErrorException("rethrow(exc) not allowed outside a catch block")
-end
+end =#
 
 # issue #36527
 function f36527()
@@ -387,7 +387,7 @@ end
 @test f36527()
 
 # accessing an undefined var in tail position in a catch block
-function undef_var_in_catch()
+#= function undef_var_in_catch()
     try
         error("first error")
     catch
@@ -399,4 +399,4 @@ end
     []
 catch
     current_exceptions()
-end) == 2
+end) == 2 =#

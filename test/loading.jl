@@ -43,7 +43,7 @@ include_string_test_func = include_string(@__MODULE__, "include_string_test() = 
 @test basename(@__FILE__) == "loading.jl"
 @test isabspath(@__FILE__)
 
-@test isdir(@__DIR__)
+#= @test isdir(@__DIR__)
 @test @__DIR__() == dirname(@__FILE__)
 @test !endswith(@__DIR__, Base.Filesystem.path_separator)
 let exename = `$(Base.julia_cmd()) --compiled-modules=yes --startup-file=no --color=no`,
@@ -55,7 +55,7 @@ let exename = `$(Base.julia_cmd()) --compiled-modules=yes --startup-file=no --co
     @test readchomp(`$exename -E "@__DIR__"`) == wd # non-interactive
     @test !endswith(wd, Base.Filesystem.path_separator)
     @test !endswith(s_dir, Base.Filesystem.path_separator)
-end
+end =#
 
 @test Base.in_sysimage(Base.PkgId(Base.UUID("cf7118a7-6976-5b1a-9a39-7adc72f591a4"), "UUIDs"))
 @test Base.in_sysimage(Base.PkgId(Base.UUID("3a7fdc7e-7467-41b4-9f64-ea033d046d5b"), "NotAPackage")) == false
@@ -261,7 +261,7 @@ end
 
 module NotPkgModule; end
 
-@testset "project & manifest import" begin
+#= @testset "project & manifest import" begin
     @test !@isdefined Foo
     @test !@isdefined Bar
     import Foo
@@ -315,7 +315,7 @@ module NotPkgModule; end
         @test pkgdir(NotPkgModule, "src") === nothing
     end
 
-end
+end =#
 
 ## systematic generation of test environments ##
 
@@ -698,7 +698,7 @@ module Foo; import Libdl; end
 import .Foo.Libdl; import Libdl
 @test Foo.Libdl === Libdl
 
-@testset "include with mapexpr" begin
+#= @testset "include with mapexpr" begin
     let exprs = Any[]
         @test 13 === include_string(@__MODULE__, "1+1\n3*4") do ex
             ex isa LineNumberNode || push!(exprs, ex)
@@ -718,7 +718,7 @@ import .Foo.Libdl; import Libdl
                   exprs[2].args[[1,3]] == [Symbol("@test"), :(1 == 2)]
         end
     end
-end
+end =#
 
 @testset "`Base.project_names` and friends" begin
     # Some functions in Pkg assumes that these tuples have the same length
@@ -727,7 +727,7 @@ end
     @test length(Base.preferences_names) == n
 end
 
-@testset "Manifest formats" begin
+#= @testset "Manifest formats" begin
     deps = Dict{String,Any}(
         "Serialization" => Any[Dict{String, Any}("uuid"=>"9e88b42a-f829-5b0c-bbe9-9e923198166b")],
         "Random"        => Any[Dict{String, Any}("deps"=>["Serialization"], "uuid"=>"9a3f8284-a2c9-5f02-9a11-845980a1fd5c")],
@@ -751,7 +751,7 @@ end
         @test Base.is_v1_format_manifest(raw_manifest) == false
         @test Base.get_deps(raw_manifest) == deps
     end
-end
+end =#
 
 @testset "error message loading pkg bad module name" begin
     mktempdir() do tmp

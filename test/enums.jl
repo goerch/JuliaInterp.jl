@@ -151,11 +151,11 @@ end
 @test DEBUG < CRITICAL
 
 # serialization
-let b = IOBuffer()
+#= let b = IOBuffer()
     serialize(b, apple)
     seekstart(b)
     @test deserialize(b) === apple
-end
+end =#
 
 @enum UI8::UInt8 ten=0x0A thr=0x03 sevn=0x07 fiftn=0xF0
 @test repr("text/plain", UI8)   == "Enum $(string(UI8)):\nten = 0x0a\nthr = 0x03\nsevn = 0x07\nfiftn = 0xf0"

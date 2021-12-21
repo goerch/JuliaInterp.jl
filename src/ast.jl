@@ -92,6 +92,7 @@ end
 function interpret_ast(interpstate, ::Val{:let}, args)
     interpstate.debug && @show :let args
     expr = Expr(:let, args...) 
+    # TODO: should and can we interpret?
     eval_ast(interpstate, expr)
 end
 function interpret_ast(interpstate, ::Val{:block}, args)
@@ -194,15 +195,15 @@ function interpret_ast(interpstate, expr::Expr)
     interpret_ast(interpstate, Val(expr.head), expr.args)
 end 
 
-function interpret_ast(mod::Module, expr::Expr, debug, maxdepth)
-    interpstate = InterpState(debug, 1, maxdepth, [ModuleState(mod)], nothing)
+function interpret_ast(mod::Module, expr::Expr, debug, budget)
+    interpstate = InterpState(debug, budget, [ModuleState(mod)], nothing)
     ans = interpret_ast(interpstate, expr)
     pop!(interpstate.mods)
     ans
 end 
 
-function collect_ast(collectorstate, mod::Module, expr::Expr, debug, maxdepth)
-    interpstate = InterpState(debug, 1, maxdepth, [ModuleState(mod)], collectorstate)
+function collect_ast(collectorstate, mod::Module, expr::Expr, debug, budget)
+    interpstate = InterpState(debug, budget, [ModuleState(mod)], collectorstate)
     ans = interpret_ast(interpstate, expr)
     pop!(interpstate.mods)
     ans

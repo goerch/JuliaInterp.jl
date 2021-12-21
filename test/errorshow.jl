@@ -6,7 +6,7 @@ using Random, LinearAlgebra
 include("testenv.jl")
 
 
-@testset "SystemError" begin
+#= @testset "SystemError" begin
     err = try; systemerror("reason", Cint(0)); false; catch ex; ex; end::SystemError
     errs = sprint(Base.showerror, err)
     @test startswith(errs, "SystemError: reason: ")
@@ -46,7 +46,7 @@ include("testenv.jl")
         errs = sprint(Base.showerror, err)
         @test startswith(errs, "SystemError: reason: ")
     end
-end
+end =#
 
 file = @__FILE__
 Base.stacktrace_contract_userdir() && (file = Base.contractuser(file))
@@ -506,7 +506,7 @@ macro nest2b(code)
     :(@nest1($code); @nest1($code))
 end
 
-@testset "@macroexpand1" begin
+#= @testset "@macroexpand1" begin
     M = @__MODULE__
     _macroexpand1(ex) = macroexpand(M, ex, recursive=false)
     ex = :(@nest1 42)
@@ -518,7 +518,7 @@ end
     @test _macroexpand1(ex) != macroexpand(M,ex)
     @test _macroexpand1(_macroexpand1(ex)) == macroexpand(M, ex)
     @test (@macroexpand1 @nest2b 42) == _macroexpand1(ex)
-end
+end =#
 
 foo_9965(x::Float64; w=false) = x
 foo_9965(x::Int) = 2x
@@ -654,7 +654,7 @@ end
 backtrace()
 
 # issue #28442
-@testset "Long stacktrace printing" begin
+#= @testset "Long stacktrace printing" begin
     f28442(c) = g28442(c + 1)
     g28442(c) = c > 10000 ? (return backtrace()) : f28442(c+1)
     bt = f28442(1)
@@ -667,7 +667,7 @@ backtrace()
     @test occursin("f28442", output[5])
     @test occursin("the last 2 lines are repeated 5000 more times", output[7])
     @test lstrip(output[8])[1:7] == "[10003]"
-end
+end =#
 
 @testset "Line number correction" begin
     getbt() = backtrace()
@@ -755,7 +755,7 @@ module B
     end
 end
 
-@testset "backtrace" begin
+#= @testset "backtrace" begin
     bt = try
         B.D.g()
     catch
@@ -766,7 +766,7 @@ end
     @test contains(bt_str, "f(x::Float64; y::Float64)")
     @test contains(bt_str, "@ $m.B.C")
     @test contains(bt_str, "@ $m.B.D")
-end
+end =#
 # 1d/2d error shouldn't appear in unsupported keywords arg #36325
 let err = nothing
     try

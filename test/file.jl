@@ -26,7 +26,7 @@ let err = nothing
     end
 end
 
-if !Sys.iswindows() || Sys.windows_version() >= Sys.WINDOWS_VISTA_VER
+#= if !Sys.iswindows() || Sys.windows_version() >= Sys.WINDOWS_VISTA_VER
     dirlink = joinpath(dir, "dirlink")
     symlink(subdir, dirlink)
     @test stat(dirlink) == stat(subdir)
@@ -60,7 +60,7 @@ if !Sys.iswindows() || Sys.windows_version() >= Sys.WINDOWS_VISTA_VER
     rm(foo_file)
     rm(new_dir)
     rm(nedlink)
-end
+end 
 
 if !Sys.iswindows() || Sys.windows_version() >= Sys.WINDOWS_VISTA_VER
     link = joinpath(dir, "afilesymlink.txt")
@@ -72,7 +72,7 @@ if !Sys.iswindows() || Sys.windows_version() >= Sys.WINDOWS_VISTA_VER
     relfile = joinpath("..", "afile.txt")
     symlink(relfile, rellink)
     @test stat(rellink) == stat(file)
-end
+end =#
 
 @testset "hardlink" begin
     link = joinpath(dir, "afilehardlink.txt")
@@ -469,11 +469,11 @@ if Sys.isunix()
     @test readlink(link) == file
 end
 
-if !Sys.iswindows() || Sys.windows_version() >= Sys.WINDOWS_VISTA_VER
+#= if !Sys.iswindows() || Sys.windows_version() >= Sys.WINDOWS_VISTA_VER
     @test islink(dirlink) == true
     @test isdir(dirlink) == true
     @test readlink(dirlink) == subdir * (Sys.iswindows() ? "\\" : "")
-end
+end =#
 
 # rm recursive TODO add links
 newfile = joinpath(dir, "bfile.txt")
@@ -797,7 +797,7 @@ end
 
 # issue #10506 #10434
 ## Tests for directories and links to directories
-if !Sys.iswindows() || Sys.windows_version() >= Sys.WINDOWS_VISTA_VER
+#= if !Sys.iswindows() || Sys.windows_version() >= Sys.WINDOWS_VISTA_VER
     function setup_dirs(tmpdir)
         srcdir = joinpath(tmpdir, "src")
         hidden_srcdir = joinpath(tmpdir, ".hidden_srcdir")
@@ -1005,7 +1005,7 @@ if !Sys.iswindows() || Sys.windows_version() >= Sys.WINDOWS_VISTA_VER
         # mv
         @test_throws Base._UVError("open($(repr(nonexisting_src)), $(Base.JL_O_RDONLY), 0)", Base.UV_ENOENT) mv(nonexisting_src, dst; force=true)
     end
-end
+end =#
 
 # issue #10506 #10434
 ## Tests for files and links to files as well as directories and links to directories
@@ -1250,7 +1250,7 @@ let f = open(file, "w")
 end
 
 # issue #10994: pathnames cannot contain embedded NUL chars
-for f in (mkdir, cd, Base.Filesystem.unlink, readlink, rm, touch, readdir, mkpath,
+#= for f in (mkdir, cd, Base.Filesystem.unlink, readlink, rm, touch, readdir, mkpath,
         stat, lstat, ctime, mtime, filemode, filesize, uperm, gperm, operm, touch,
         isblockdev, ischardev, isdir, isfifo, isfile, islink, ispath, issetgid,
         issetuid, issocket, issticky, realpath)
@@ -1268,13 +1268,13 @@ else
 end
 using Downloads: download
 @test_throws ArgumentError download("good", "ba\0d")
-@test_throws ArgumentError download("ba\0d", tempname())
+@test_throws ArgumentError download("ba\0d", tempname()) =#
 
 ###################
 #     walkdir     #
 ###################
 
-dirwalk = mktempdir()
+#= dirwalk = mktempdir()
 cd(dirwalk) do
     for i=1:2
         mkdir("sub_dir$i")
@@ -1404,7 +1404,7 @@ cd(dirwalk) do
         @test files == ["foo"]
     end
 end
-rm(dirwalk, recursive=true)
+rm(dirwalk, recursive=true) =#
 
 ###################
 #     readdir     #
@@ -1423,12 +1423,12 @@ end
 ############
 # Clean up #
 ############
-if !Sys.iswindows() || (Sys.windows_version() >= Sys.WINDOWS_VISTA_VER)
+#= if !Sys.iswindows() || (Sys.windows_version() >= Sys.WINDOWS_VISTA_VER)
     rm(link)
     rm(rellink)
     rm(dirlink)
     rm(relsubdirlink)
-end
+end =#
 rm(file)
 rm(subdir)
 rm(subdir2)
@@ -1710,4 +1710,4 @@ end
     dstat = diskstat(pwd())
     @test dstat.total < 32PB
     @test dstat.used + dstat.available == dstat.total
-end
+end 
