@@ -23,7 +23,7 @@ collect!(evalstate::EvalState, expr, symbol) = push!(evalstate.evaltrace, (expr,
 mutable struct CodeState
     interpstate::InterpState
     src::Core.CodeInfo
-    meth::Union{Nothing, Method}
+    meth::Union{Method, Module}
     names::Vector{Symbol}
     lenv::Core.SimpleVector
     pc::Int
@@ -35,7 +35,7 @@ mutable struct CodeState
 end
 
 function code_state_from_thunk(interpstate, src)
-    CodeState(interpstate, src, nothing, [], Core.svec(), 1,
+    CodeState(interpstate, src, last(interpstate.mods).mod, [], Core.svec(), 1,
         Vector(undef, length(src.code)), 
         Vector{UInt64}(undef, length(src.code)), 
         Vector(undef, length(src.slotnames)),
