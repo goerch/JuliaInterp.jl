@@ -1238,11 +1238,11 @@ end
 @test Meta.lower(@__MODULE__, :(f(;3))) == Expr(:error, "invalid keyword argument syntax \"3\"")
 
 # issue #25055, make sure quote makes new Exprs
-function f25055()
+#= function f25055()
     x = quote end
     return x
 end
-@test f25055() !== f25055()
+@test f25055() !== f25055() =#
 
 # issue #25391
 @test Meta.parse("0:-1, \"\"=>\"\"") == Meta.parse("(0:-1, \"\"=>\"\")") ==
@@ -2828,11 +2828,11 @@ end
 @test eval(Expr(:string, "a", Expr(:string, "b", "c"))) == "abc"
 @test eval(Expr(:string, "a", Expr(:string, "b", Expr(:string, "c")))) == "abc"
 
-macro m_nospecialize_unnamed_hygiene()
+#= macro m_nospecialize_unnamed_hygiene()
     return :(f(@nospecialize(::Any)) = Any)
 end
 
-@test @m_nospecialize_unnamed_hygiene()(1) === Any
+@test @m_nospecialize_unnamed_hygiene()(1) === Any =#
 
 # https://github.com/JuliaLang/julia/issues/40574
 @testset "no mutation while destructuring" begin

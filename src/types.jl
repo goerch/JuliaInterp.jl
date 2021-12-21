@@ -2,16 +2,29 @@ struct ModuleState
     mod::Module
 end
 
+abstract type CollectorState end
+
+collect!(collectorstate, expr, symbol) = nothing
+collect!(collectorstate, expr) = collect!(collectorstate, expr, nothing)
+
 mutable struct InterpState
     debug::Bool
     depth::Int
     maxdepth::Int
     mods::Vector{ModuleState}
+    collectorstate::Union{Nothing, CollectorState}    
 end
+
+mutable struct EvalState <: CollectorState
+    evaltrace::Vector{Tuple{Expr, Union{Nothing, Symbol}}}
+end
+
+collect!(evalstate::EvalState, expr, symbol) = push!(evalstate.evaltrace, (expr, symbol))
 
 mutable struct CodeState
     interpstate::InterpState
     src::Core.CodeInfo
+    meth::Union{Nothing, Method}
     names::Vector{Symbol}
     lenv::Core.SimpleVector
     pc::Int
@@ -22,7 +35,7 @@ mutable struct CodeState
 end
 
 function code_state_from_thunk(interpstate, src)
-    CodeState(interpstate, src, [], Core.svec(), 1,
+    CodeState(interpstate, src, nothing, [], Core.svec(), 1,
         Vector(undef, length(src.code)), 
         Vector(undef, length(src.slotnames)),
         Int[],
@@ -38,7 +51,7 @@ function code_state_from_call(codestate, fun, parms...)
     names = Base.method_argnames(meth)
     sig = Base.signature_type(fun, internal_typeof.(parms))
     (ti, lenv) = ccall(:jl_type_intersection_with_env, Any, (Any, Any), sig, meth.sig)
-    codestate = CodeState(codestate.interpstate, src, names, lenv, 1,
+    codestate = CodeState(codestate.interpstate, src, meth, names, lenv, 1,
         Vector(undef, length(src.code)), 
         Vector(undef, length(src.slotnames)),
         Int[],
@@ -60,7 +73,7 @@ end
 function run_code_state(codestate)
     while true
         codestate.interpstate.debug && @show codestate.pc codestate.src.code[codestate.pc]
-        ans = interprete_lower(codestate, codestate.src.code[codestate.pc])
+        ans = interpret_lower(codestate, codestate.src.code[codestate.pc])
         if ans isa Some
             codestate.interpstate.debug && @show ans
             return ans.value
