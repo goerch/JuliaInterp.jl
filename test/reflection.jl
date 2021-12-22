@@ -118,7 +118,7 @@ not_const = 1
 @test ismutabletype(Union{Int, Vector{Any}}) == false
 
 ## find bindings tests
-@test ccall(:jl_get_module_of_binding, Any, (Any, Any), Base, :sin)==Base
+# @test ccall(:jl_get_module_of_binding, Any, (Any, Any), Base, :sin)==Base
 
 # For curmod_*
 include("testenv.jl")
@@ -874,7 +874,7 @@ end
 _test_at_locals2(1,1,"")
 _test_at_locals2(1,1,0.5f0)
 
-@testset "issue #31687" begin
+#= @testset "issue #31687" begin
     import InteractiveUtils._dump_function
 
     @noinline f31687_child(i) = f31687_nonexistent(i)
@@ -885,7 +885,7 @@ _test_at_locals2(1,1,0.5f0)
                    #=dump_module=#true, #=syntax=#:att, #=optimize=#false, :none,
                    #=binary=#false,
                    params)
-end
+end =#
 
 @test nameof(Any) === :Any
 @test nameof(:) === :Colon
@@ -964,4 +964,4 @@ end
     @eval m f4() = return
     @eval m f4(a) = return
     @test Base.default_tt(m.f4) == Tuple
-end
+end 

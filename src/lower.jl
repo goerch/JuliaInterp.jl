@@ -167,7 +167,7 @@ function assign_lower(codestate, globalref::GlobalRef, val)
 end
 
 function handle_error(codestate, exceptions)
-    codestate.interpstate.debug && @show :handle_error exceptions
+    codestate.interpstate.debug && @show :handle_error last(exceptions)
     append!(codestate.interpstate.exceptions, exceptions)
     if isempty(codestate.handlers)
         rethrow(pop!(codestate.interpstate.exceptions).exception)

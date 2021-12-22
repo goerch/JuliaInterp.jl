@@ -26,7 +26,8 @@ Julia 1.8.0-DEV on Windows for a time budget of 1000 ns per call site:
 
 ```
 Test Summary: |     Pass  Broken     Total     Time
-  Overall     | 12793993  352557  13146550  9m16.1s
+  Overall     | 12782310  352557  13134867  8m44.1s
+    SUCCESS
 ```
 
 All failing tests are deactivated.
