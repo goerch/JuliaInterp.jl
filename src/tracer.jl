@@ -15,7 +15,7 @@ function tracer()
         # path = "$dir/bitarray.jl"
         # path = "$dir/bitset.jl"
         # path = "$dir/boundscheck.jl"
-        # path = "$dir/broadcast.jl"
+        path = "$dir/broadcast.jl"
         # path = "$dir/cartesian.jl"
         # path = "$dir/ccall.jl"
         # path = "$dir/channels.jl"
@@ -80,7 +80,7 @@ function tracer()
         # path = "$dir/read.jl"
         # path = "$dir/reduce.jl"
         # path = "$dir/reducedim.jl"
-        path = "$dir/reflection.jl"
+        # path = "$dir/reflection.jl"
         # path = "$dir/regex.jl"
         # path = "$dir/reinterpretarray.jl"
         # path = "$dir/rounding.jl"
@@ -114,7 +114,9 @@ function tracer()
         # path = "$dir/vecelement.jl"
         # path = "$dir/version.jl"
         # path = "$dir/worlds.jl"
-        JuliaInterp.include(Module(), path, false)
+        mod = @eval(Main, module IsolatedTests end)
+        @eval(mod, using Test, Random, Distributed, JuliaInterp)
+        JuliaInterp.include(mod, path, false)
     catch exception
         @show :toplevel exception
         # rethrow(exception)

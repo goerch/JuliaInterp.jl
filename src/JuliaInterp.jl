@@ -10,13 +10,7 @@ function include(mod::Module, path, debug=false, budget=UInt64(1000))
     prev = haskey(tls, :SOURCE_PATH) ? tls[:SOURCE_PATH] : nothing
     tls[:SOURCE_PATH] = path
     try
-        ast = Meta.parseall(code, filename=path)
-        expr = quote
-            using Test, Random, Distributed
-            eval(p) = Core.eval($mod, p)
-            include(x) = Base.include($mod, x)
-            $ast
-        end
+        expr = Meta.parseall(code, filename=path)
         interpret_ast(mod, expr, debug, budget)
     finally
         if prev === nothing

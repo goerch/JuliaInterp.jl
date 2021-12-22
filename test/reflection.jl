@@ -862,7 +862,7 @@ let
     @test @locals() == Dict{Symbol,Any}(:x=>("",),:y=>"")
 end
 
-function _test_at_locals1(::Any, ::Any)
+#= function _test_at_locals1(::Any, ::Any)
     x = 1
     @test @locals() == Dict{Symbol,Any}(:x=>1)
 end
@@ -872,7 +872,7 @@ function _test_at_locals2(a::Any, ::Any, c::T) where T
     @test @locals() == Dict{Symbol,Any}(:x=>2,:a=>a,:c=>c,:T=>typeof(c))
 end
 _test_at_locals2(1,1,"")
-_test_at_locals2(1,1,0.5f0)
+_test_at_locals2(1,1,0.5f0) =#
 
 #= @testset "issue #31687" begin
     import InteractiveUtils._dump_function

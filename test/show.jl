@@ -1685,9 +1685,9 @@ is_juliarepr(x) = eval(Meta.parse(repr(x))) == x
     @test is_juliarepr(Ref{A} where A>:Ref)
     @test is_juliarepr(Ref{A} where A<:Ref)
     @test is_juliarepr(Ref{A} where Ref<:A<:Ref)
-    #= @test is_juliarepr(TestTVUpper{<:Real})
+    @test is_juliarepr(TestTVUpper{<:Real})
     @test is_juliarepr(TestTVUpper{<:Integer})
-    @test is_juliarepr(TestTVUpper{<:Signed}) =#
+    @test is_juliarepr(TestTVUpper{<:Signed}) 
 
     # typearg order
     @test is_juliarepr(UnionAll(X, Pair{X,<:Any}))

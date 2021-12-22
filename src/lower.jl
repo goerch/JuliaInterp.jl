@@ -205,7 +205,7 @@ end
 
 function interpret_lower(codestate, ::Val{:method}, args)
     codestate.interpstate.debug && @show :interpret_lower :method args
-    meth = args[1] #
+    meth = args[1] 
     parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
     if length(parms) > 0
         # branching on https://github.com/JuliaLang/julia/pull/41137
