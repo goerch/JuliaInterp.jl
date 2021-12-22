@@ -196,14 +196,14 @@ function interpret_ast(interpstate, expr::Expr)
 end 
 
 function interpret_ast(mod::Module, expr::Expr, debug, budget)
-    interpstate = InterpState(debug, budget, [ModuleState(mod)], nothing)
+    interpstate = InterpState(debug, budget, [ModuleState(mod)], [], nothing)
     ans = interpret_ast(interpstate, expr)
     pop!(interpstate.mods)
     ans
 end 
 
 function collect_ast(collectorstate, mod::Module, expr::Expr, debug, budget)
-    interpstate = InterpState(debug, budget, [ModuleState(mod)], collectorstate)
+    interpstate = InterpState(debug, budget, [ModuleState(mod)], [], collectorstate)
     ans = interpret_ast(interpstate, expr)
     pop!(interpstate.mods)
     ans

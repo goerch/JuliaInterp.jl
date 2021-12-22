@@ -4,7 +4,7 @@ function tracer()
     dir = "C:/Users/Win10/Documents/GitHub/JuliaInterp.jl/test/"
     cd(dir)
     try
-        path = "$dir/abstractarray.jl"
+        # path = "$dir/abstractarray.jl"
         # path = "$dir/ambiguous.jl"
         # path = "$dir/arrayops.jl"
         # path = "$dir/asyncmap.jl"
@@ -37,7 +37,7 @@ function tracer()
         # path = "$dir/error.jl"
         # path = "$dir/errorshow.jl"
         # path = "$dir/euler.jl"
-        # path = "$dir/exceptions.jl"
+        path = "$dir/exceptions.jl"
         # path = "$dir/fastmath.jl"
         # path = "$dir/file.jl"
         # path = "$dir/filesystem.jl"

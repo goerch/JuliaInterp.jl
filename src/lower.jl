@@ -10,7 +10,7 @@ function lookup_lower(codestate, ::Val{:static_parameter}, args)
 end
 
 function lookup_lower(codestate, ::Val{:the_exception}, args)
-    last(codestate.exceptions).exception
+    last(codestate.interpstate.exceptions).exception
 end
 
 function lookup_lower(codestate, ::Val{:isdefined}, args)
@@ -36,17 +36,23 @@ function lookup_lower(codestate, ::Val{:call}, args)
     # @show fun
     parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
     if fun == Base.current_exceptions
-        return codestate.exceptions
+        return codestate.interpstate.exceptions
     elseif fun == Base.rethrow
         fun = Base.throw
-        if isempty(parms)
-            parms = [pop!(codestate.exceptions).exception]
+        if isempty(parms) 
+            if !isempty(codestate.interpstate.exceptions)
+                parms = [pop!(codestate.interpstate.exceptions).exception]
+            else
+                parms = [ErrorException("rethrow() not allowed outside a catch block")]
+            end
+        elseif !isempty(codestate.handlers)
+            parms = [ErrorException("rethrow(exc) not allowed outside a catch block")]
         end
     end
     # @show parms
     if !exclude(fun)
-        if !isassigned(codestate.times, codestate.pc) || codestate.times[codestate.pc] < UInt64(1000)
-                local childstate
+        if !isassigned(codestate.times, codestate.pc) || codestate.times[codestate.pc] < codestate.interpstate.budget
+            local childstate
             try
                 childstate = code_state_from_call(codestate, fun, parms...)
             catch
@@ -160,12 +166,12 @@ function assign_lower(codestate, globalref::GlobalRef, val)
     eval_ast(codestate.interpstate, Expr(:(=), globalref, QuoteNode(val)))
 end
 
-function handle_error(codestate, exception)
-    # codestate.interpstate.debug && @show :handle_error exception
+function handle_error(codestate, exceptions)
+    codestate.interpstate.debug && @show :handle_error exceptions
+    append!(codestate.interpstate.exceptions, exceptions)
     if isempty(codestate.handlers)
-        rethrow(exception)
+        rethrow(pop!(codestate.interpstate.exceptions).exception)
     else
-        push!(codestate.exceptions, (exception=exception,backtrace=nothing))
         codestate.pc = last(codestate.handlers)
     end
 end
@@ -175,17 +181,20 @@ function interpret_lower(codestate, ::Val{T}, args) where T
     codestate.ssavalues[codestate.pc] = lookup_lower(codestate, Expr(T, args...))
 end
 
-function interpret_lower(codestate, ::Val{:enter}, args)
+function interpret_lower(codestate, ::Val{:enter}, args)    
     codestate.interpstate.debug && @show :interpret_lower :enter args
     push!(codestate.handlers, args[1])
-end
-function interpret_lower(codestate, ::Val{:leave}, args)
-    codestate.interpstate.debug && @show :interpret_lower :leave args
-    pop!(codestate.handlers)
+    codestate.ssavalues[codestate.pc] = length(codestate.interpstate.exceptions)
 end
 function interpret_lower(codestate, ::Val{:pop_exception}, args)
     codestate.interpstate.debug && @show :interpret_lower :pop_exception args
-    assign_lower(codestate, args[1], pop!(codestate.exceptions).exception)
+    deleteat!(codestate.interpstate.exceptions, 
+        lookup_lower(codestate, args[1]) + 1:length(codestate.interpstate.exceptions))
+end
+function interpret_lower(codestate, ::Val{:leave}, args)
+    codestate.interpstate.debug && @show :interpret_lower :leave args
+    len = length(codestate.handlers)
+    deleteat!(codestate.handlers, len - args[1] + 1:len)
 end
 
 function interpret_lower(codestate, ::Val{:(=)}, args)
@@ -245,7 +254,7 @@ function interpret_lower(codestate, ::Val{:thunk}, args)
 end
 
 function interpret_lower(codestate, ::Val{:copyast}, args)
-    codestate.interpstate.debug && @show :interpret_lower :enter args
+    codestate.interpstate.debug && @show :interpret_lower :copyast args
     codestate.ssavalues[codestate.pc] = lookup_lower(codestate, args[1])
 end
 
@@ -254,8 +263,8 @@ function interpret_lower(codestate, node)
     try
         codestate.ssavalues[codestate.pc] = lookup_lower(codestate, node)
         codestate.pc += 1
-    catch exception
-        handle_error(codestate, exception)
+    catch 
+        handle_error(codestate, Base.current_exceptions())
     end
     return nothing
 end
@@ -264,8 +273,8 @@ function interpret_lower(codestate, newvarnode::Core.NewvarNode)
     codestate.interpstate.debug && @show :interpret_lower newvarnode
     try
         codestate.pc += 1
-    catch exception
-        handle_error(codestate, exception)
+    catch 
+        handle_error(codestate, Base.current_exceptions())
     end
     return nothing
 end
@@ -274,8 +283,8 @@ function interpret_lower(codestate, returnnode::Core.ReturnNode)
     codestate.interpstate.debug && @show :interpret_lower returnnode
     try
         return Some(lookup_lower(codestate, returnnode.val))
-    catch exception
-        handle_error(codestate, exception)
+    catch 
+        handle_error(codestate, Base.current_exceptions())
     end
     return nothing
 end
@@ -287,8 +296,8 @@ function interpret_lower(codestate, gotoifnot::Core.GotoIfNot)
         else
             codestate.pc = gotoifnot.dest
         end
-    catch exception
-        handle_error(codestate, exception)
+    catch 
+        handle_error(codestate, Base.current_exceptions())
     end
     return nothing
 end
@@ -296,8 +305,8 @@ function interpret_lower(codestate, gotonode::Core.GotoNode)
     codestate.interpstate.debug && @show :interpret_lower gotonode
     try
         codestate.pc = gotonode.label
-    catch exception
-        handle_error(codestate, exception)
+    catch 
+        handle_error(codestate, Base.current_exceptions())
     end
     return nothing
 end
@@ -307,8 +316,8 @@ function interpret_lower(codestate, expr::Expr)
     try
         interpret_lower(codestate, Val(expr.head), expr.args)
         codestate.pc += 1
-    catch exception
-        handle_error(codestate, exception)
+    catch 
+        handle_error(codestate, Base.current_exceptions())
     end
     return nothing
 end

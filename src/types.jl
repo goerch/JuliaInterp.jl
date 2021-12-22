@@ -11,6 +11,7 @@ mutable struct InterpState
     debug::Bool
     budget::UInt64
     mods::Vector{ModuleState}
+    exceptions::Vector
     collectorstate::Union{Nothing, CollectorState}    
 end
 
@@ -31,7 +32,6 @@ mutable struct CodeState
     times::Vector{UInt64}
     slots::Vector
     handlers::Vector{Int}
-    exceptions::Vector
 end
 
 function code_state_from_thunk(interpstate, src)
@@ -39,8 +39,7 @@ function code_state_from_thunk(interpstate, src)
         Vector(undef, length(src.code)), 
         Vector{UInt64}(undef, length(src.code)), 
         Vector(undef, length(src.slotnames)),
-        Int[],
-        Any[])
+        Int[])
 end
 
 internal_typeof(x::Type) = Type{x}
@@ -56,8 +55,7 @@ function code_state_from_call(codestate, fun, parms...)
         Vector(undef, length(src.code)), 
         Vector{UInt64}(undef, length(src.code)), 
         Vector(undef, length(src.slotnames)),
-        Int[],
-        Any[])
+        Int[])
     codestate.slots[1] = fun
     if !meth.isva
         for idx in 2:meth.nargs 
