@@ -2,7 +2,7 @@
 
 # source path in tasks
 path = Base.source_path()::String # this variable is leaked to the source script
-# @test endswith(path, joinpath("test", "test_sourcepath.jl"))
+@test endswith(path, joinpath("test", "test_sourcepath.jl"))
 @test isabspath(path)
 
 @test let ct = current_task()

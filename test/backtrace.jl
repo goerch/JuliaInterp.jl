@@ -25,7 +25,7 @@ eval(Expr(:function, Expr(:call, :test_inline_1),
                                     Expr(:meta, :pop_loc),
                                     Expr(:line, 99)))))
 
-#= @test functionloc(test_inline_1) == ("backtrace.jl", 99)
+@test functionloc(test_inline_1) == ("backtrace.jl", 99)
 try
     test_inline_1()
     error("unexpected")
@@ -38,10 +38,10 @@ catch err
     @test_broken lkup[1].func == :inlfunc
     @test endswith(string(lkup[1].file), "backtrace.jl")
     @test lkup[1].line == 37
-end =#
+end
 
 # different-file inline
-#= const absfilepath = Sys.iswindows() ? "C:\\foo\\bar\\baz.jl" : "/foo/bar/baz.jl"
+const absfilepath = Sys.iswindows() ? "C:\\foo\\bar\\baz.jl" : "/foo/bar/baz.jl"
 eval(Expr(:function, Expr(:call, :test_inline_2),
           Expr(:block, Expr(:line, 81, Symbol("backtrace.jl")),
                        Expr(:block, Expr(:meta, :push_loc, Symbol(absfilepath)),
@@ -61,7 +61,7 @@ catch err
     @test lkup[2].line == 81
     @test string(lkup[1].file) == absfilepath
     @test lkup[1].line == 111
-end =#
+end
 
 end # module
 
@@ -158,7 +158,7 @@ end
 @test hastoplevel
 
 # issue #23971
-#= let
+let
     for i = 1:1
         global bt23971 = backtrace()
     end
@@ -167,10 +167,10 @@ let st = stacktrace(bt23971)
     @test StackTraces.is_top_level_frame(st[1])
     @test string(st[1].file) == @__FILE__
     @test !occursin("missing", string(st[2].file))
-end =#
+end
 
 # issue #27959
-#= let bt, found = false
+let bt, found = false
     @testset begin
         bt = backtrace()
     end
@@ -180,10 +180,10 @@ end =#
         end
     end
     @test found
-end =#
+end
 
 # issue 28618
-#= let bt, found = false
+let bt, found = false
     @info ""
     bt = backtrace()
     for frame in map(lookup, bt)
@@ -192,7 +192,7 @@ end =#
         end
     end
     @test found
-end =#
+end
 
 # Syntax error locations appear in backtraces
 let trace = try
@@ -324,7 +324,7 @@ withframeaddress
     @noinline f(Ptr{Cvoid}(sp))
 end
 
-#= function sandwiched_backtrace()
+function sandwiched_backtrace()
     local ptr1, ptr2, bt
     withframeaddress() do p1
         ptr1 = p1
@@ -342,4 +342,4 @@ end
     @test ptr2 < sp[2]
     @test sp[1] < ptr1
     @test all(diff(Int128.(UInt.(sp))) .> 0)
-end =#
+end

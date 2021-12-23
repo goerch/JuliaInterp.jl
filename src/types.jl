@@ -2,24 +2,12 @@ struct ModuleState
     mod::Module
 end
 
-abstract type CollectorState end
-
-collect!(collectorstate, expr, symbol) = nothing
-collect!(collectorstate, expr) = collect!(collectorstate, expr, nothing)
-
 mutable struct InterpState
     debug::Bool
     budget::UInt64
     mods::Vector{ModuleState}
     exceptions::Vector
-    collectorstate::Union{Nothing, CollectorState}    
 end
-
-mutable struct EvalState <: CollectorState
-    evaltrace::Vector{Tuple{Expr, Union{Nothing, Symbol}}}
-end
-
-collect!(evalstate::EvalState, expr, symbol) = push!(evalstate.evaltrace, (expr, symbol))
 
 mutable struct CodeState
     interpstate::InterpState

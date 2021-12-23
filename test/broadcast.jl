@@ -930,14 +930,14 @@ end
 @test 1 .+ 1 .+  (1, 2) == (3, 4)
 
 # PR #35260 no allocations in simple broadcasts
-#= u = rand(100)
+u = rand(100)
 k1 = similar(u)
 k2 = similar(u)
 k3 = similar(u)
 k4 = similar(u)
 f(a,b,c,d,e) = @. a = a + 1*(b+c+d+e)
 @allocated f(u,k1,k2,k3,k4)
-@test (@allocated f(u,k1,k2,k3,k4)) == 0 =#
+@test (@allocated f(u,k1,k2,k3,k4)) == 0
 
 ret =  @macroexpand @.([Int, Number] <: Real)
 @test ret == :([Int, Number] .<: Real)
@@ -1061,7 +1061,7 @@ end
     @test String(take!(buf)) == "1\n2\n3\n"
 end
 
-#= @testset "Memory allocation inconsistency in broadcasting #41565" begin
+@testset "Memory allocation inconsistency in broadcasting #41565" begin
     function test(y)
         y .= 0 .- y ./ (y.^2) # extra allocation
         return y
@@ -1069,4 +1069,13 @@ end
     arr = rand(1000)
     @allocated test(arr)
     @test (@allocated test(arr)) == 0
-end =#
+end
+
+@testset "Fix type unstable .&& #43470" begin
+    function test(x, y)
+        return (x .> 0.0) .&& (y .> 0.0)
+    end
+    x = randn(2)
+    y = randn(2)
+    @inferred(test(x, y)) == [0, 0]
+end

@@ -22,7 +22,6 @@ function lookup_lower(codestate, ::Val{:new}, args)
     # @show type
     parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
     # @show parms
-    collect!(codestate.interpstate.collectorstate, Expr(:new, type, parms...))
     # ccall(:jl_new_structv, Any, (Any, Ptr{Any}, UInt64), type, parms, length(parms))
     eval_ast(codestate.interpstate, Expr(:new, type, parms...))
 end
@@ -79,7 +78,6 @@ function lookup_lower(codestate, ::Val{:call}, args)
     else
         # @show :exclude codestate.interpstate.depth
     end
-    collect!(codestate.interpstate.collectorstate, Expr(:call, fun, parms...))
     # eval_ast(codestate.interpstate, Expr(:call, fun, parms...))
     #= try
         return fun(parms...)
@@ -101,15 +99,14 @@ function lookup_lower(codestate, ::Val{:foreigncall}, args)
     # @show fun
     parms = [lookup_lower(codestate, arg) for arg in args[6:end]]
     # @show parms
-    collect!(codestate.interpstate.collectorstate, Expr(:foreigncall, fun, args[2:5]..., parms...))
     # eval_ast(codestate.interpstate, Expr(:foreigncall, fun, args[2:5]..., parms...))
     if fun isa Symbol
-        # eval(Expr(:foreigncall, (fun, "libjulia.dll"), args[2:5]..., parms...))
-        eval_ast(codestate.interpstate, Expr(:foreigncall, (fun, "libjulia.dll"), args[2:5]..., parms...))
+        # eval(Expr(:foreigncall, QuoteNode(fun), args[2:5]..., parms...))
+        eval_ast(codestate.interpstate, Expr(:foreigncall, QuoteNode(fun), args[2:5]..., parms...))
     else
         # eval(Expr(:foreigncall, fun, args[2:5]..., parms...))
         eval_ast(codestate.interpstate, Expr(:foreigncall, fun, args[2:5]..., parms...))
-    end
+    end 
 end
 function lookup_lower(codestate, ::Val{:method}, args)
     args[1]
@@ -123,11 +120,8 @@ function lookup_lower(codestate, ssavalue::Core.SSAValue)
     codestate.ssavalues[ssavalue.id]
 end
 function lookup_lower(codestate, slotnumber::Core.SlotNumber)
-    if isassigned(codestate.slots, slotnumber.id)
-        codestate.slots[slotnumber.id]
-    else
-        throw(UndefVarError(codestate.src.slotnames[slotnumber.id]))
-    end
+    @assert isassigned(codestate.slots, slotnumber.id)
+    codestate.slots[slotnumber.id]
 end
 function lookup_lower(codestate, newvarnode::Core.NewvarNode)
     @assert isassigned(codestate.slots, newvarnode.slot.id)

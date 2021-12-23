@@ -170,7 +170,7 @@ end
 close(proc.in)
 
 # https://github.com/JuliaLang/julia/pull/42973
-#= @testset "spawn and wait *a lot* of tasks in @profile" begin
+@testset "spawn and wait *a lot* of tasks in @profile" begin
     # Not using threads_exec.jl for better isolation, reproducibility, and a
     # tighter timeout.
     script = "profile_spawnmany_exec.jl"
@@ -213,4 +213,4 @@ close(proc.in)
             @test !timeout
         end
     end
-end =#
+end

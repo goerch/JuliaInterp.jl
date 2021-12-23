@@ -1421,14 +1421,14 @@ abstract type Foo24748{T1,T2,T3} end
 @test [[missing],[1]] isa Vector{Vector}
 
 # issue #26453
-#= @test (Tuple{A,A,Number} where A>:Number) <: Tuple{T,T,S} where T>:S where S
+@test (Tuple{A,A,Number} where A>:Number) <: Tuple{T,T,S} where T>:S where S
 @test (Tuple{T,T} where {S,T>:S}) == (Tuple{T,T} where {S,T>:S})
 f26453(x::T,y::T) where {S,T>:S} = 0
 @test f26453(1,2) == 0
 @test f26453(1,"") == 0
 g26453(x::T,y::T) where {S,T>:S} = T
 @test_throws UndefVarError(:T) g26453(1,1)
-@test issub_strict((Tuple{T,T} where T), (Tuple{T,T} where {S,T>:S})) =#
+@test issub_strict((Tuple{T,T} where T), (Tuple{T,T} where {S,T>:S}))
 
 # issue #27632
 @test !(Tuple{Array{Int,0}, Int, Vararg{Int}} <: Tuple{AbstractArray{T,N}, Vararg{Int,N}} where {T, N})

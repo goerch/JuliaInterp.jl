@@ -43,7 +43,7 @@ struct T21972
     end
 end
 
-#= @testset "@deprecate" begin
+@testset "@deprecate" begin
     using .DeprecationTests
     using .Foo1234
     @test foo1234(3) == 4
@@ -81,7 +81,7 @@ end
         T21972()
     end
     @test_deprecated "something" f21972()
-end =#
+end
 
 f24658() = depwarn24658()
 
@@ -93,7 +93,7 @@ depwarn24658() = Base.firstcaller(backtrace(), :_func_not_found_)
 end
 
 # issue #25130
-#= f25130() = Base.depwarn("f25130 message", :f25130)
+f25130() = Base.depwarn("f25130 message", :f25130)
 # The following test is for the depwarn behavior of expressions evaluated at
 # top-level, so we can't use the usual `collect_test_logs()` / `with_logger()`
 testlogger = Test.TestLogger()
@@ -107,7 +107,7 @@ testlogs = testlogger.logs
 @test testlogs[1].id != testlogs[2].id
 @test testlogs[1].kwargs[:caller].func == Symbol("top-level scope")
 @test all(l.message == "f25130 message" for l in testlogs)
-global_logger(prev_logger) =#
+global_logger(prev_logger)
 
 
 #-------------------------------------------------------------------------------

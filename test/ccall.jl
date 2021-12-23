@@ -17,7 +17,7 @@ const libccalltest = "libccalltest"
 const verbose = false
 ccall((:set_verbose, libccalltest), Cvoid, (Int32,), verbose)
 
-#= @eval function cvarargs()
+@eval function cvarargs()
     strp = Ref{Ptr{Cchar}}(0)
     fmt = "%3.1f"
     len = ccall(:asprintf, Cint, (Ptr{Ptr{Cchar}}, Cstring, Cfloat...), strp, fmt, 0.1)
@@ -25,11 +25,11 @@ ccall((:set_verbose, libccalltest), Cvoid, (Int32,), verbose)
     Libc.free(strp[])
     return str
 end
-@test cvarargs() == "0.1" =#
+@test cvarargs() == "0.1"
 
 
 # test multiple-type vararg handling (there's no syntax for this currently)
-#= @eval function foreign_varargs()
+@eval function foreign_varargs()
     strp = Ref{Ptr{Cchar}}(0)
     fmt = "hi+%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%hhd-%.1f-%.1f-%.1f-%.1f-%.1f-%.1f-%.1f-%.1f-%.1f\n"
     len = $(Expr(:foreigncall, :(:asprintf), Cint,
@@ -45,7 +45,7 @@ end
     Libc.free(strp[])
     return str
 end
-@test foreign_varargs() == "hi+1-2-3-4-5-6-7-8-9-10-11-12-13-14-15-1.1-2.2-3.3-4.4-5.5-6.6-7.7-8.8-9.9\n" =#
+@test foreign_varargs() == "hi+1-2-3-4-5-6-7-8-9-10-11-12-13-14-15-1.1-2.2-3.3-4.4-5.5-6.6-7.7-8.8-9.9\n"
 
 
 # Test for proper argument register truncation
@@ -851,7 +851,7 @@ check_code_trampoline(testclosure, (typeof(identity), Any, Bool, Type), 2)
 check_code_trampoline(testclosure, (typeof(identity), Int, Bool, Type{Int}), 0)
 check_code_trampoline(testclosure, (typeof(identity), String, Bool, Type{String}), 0)
 
-#= function g(i)
+function g(i)
     x = -332210 + i
     y = "foo"
     a(z) = x
@@ -874,7 +874,7 @@ check_code_trampoline(testclosure, (typeof(identity), String, Bool, Type{String}
 end
 g(1)
 g(2)
-g(3) =#
+g(3)
 
 verbose && println("Testing cfunction roundtrip: ")
 
@@ -984,7 +984,7 @@ end
 
 
 #issue 40164
-#= @testset "llvm parameter attributes on cfunction closures" begin
+@testset "llvm parameter attributes on cfunction closures" begin
     struct Struct40164
         x::Cdouble
         y::Cdouble
@@ -1000,7 +1000,7 @@ end
     end
 
     @test test_40164() == [Struct40164(0, 1, 2)]
-end =#
+end
 
 else
 
@@ -1009,19 +1009,19 @@ else
 end
 
 # issue 13031
-#= foo13031(x) = Cint(1)
+foo13031(x) = Cint(1)
 foo13031p = @cfunction(foo13031, Cint, (Ref{Tuple{}},))
 ccall(foo13031p, Cint, (Ref{Tuple{}},), ())
 
 foo13031(x,y,z) = z
 foo13031p = @cfunction(foo13031, Cint, (Ref{Tuple{}}, Ref{Tuple{}}, Cint))
-ccall(foo13031p, Cint, (Ref{Tuple{}},Ref{Tuple{}},Cint), (), (), 8) =#
+ccall(foo13031p, Cint, (Ref{Tuple{}},Ref{Tuple{}},Cint), (), (), 8)
 
 # issue 26078
 
-#= unstable26078(x) = x > 0 ? x : "foo"
+unstable26078(x) = x > 0 ? x : "foo"
 handle26078 = @cfunction(unstable26078, Int32, (Int32,))
-@test ccall(handle26078, Int32, (Int32,), 1) == 1 =#
+@test ccall(handle26078, Int32, (Int32,), 1) == 1
 
 # issue #39804
 let f = @cfunction(Base.last, String, (Tuple{Int,String},))
@@ -1037,15 +1037,15 @@ end
 @test ccall_reassigned_ptr(C_NULL) == "foo"
 
 # @threadcall functionality
-#= threadcall_test_func(x) =
+threadcall_test_func(x) =
     @threadcall((:testUcharX, libccalltest), Int32, (UInt8,), x % UInt8)
 
 @test threadcall_test_func(3) == 1
-@test threadcall_test_func(259) == 1 =#
+@test threadcall_test_func(259) == 1
 
 # issue 17819
 # NOTE: can't use cfunction or reuse ccalltest Struct methods, as those call into the runtime
-# @test @threadcall((:threadcall_args, libccalltest), Cint, (Cint, Cint), 1, 2) == 3
+@test @threadcall((:threadcall_args, libccalltest), Cint, (Cint, Cint), 1, 2) == 3
 
 let n=3
     tids = Culong[]
@@ -1061,10 +1061,10 @@ let n=3
     end
 end
 
-# @test ccall(:jl_getpagesize, Clong, ()) == @threadcall(:jl_getpagesize, Clong, ())
+@test ccall(:jl_getpagesize, Clong, ()) == @threadcall(:jl_getpagesize, Clong, ())
 
 # make sure our malloc/realloc/free adapters are thread-safe and repeatable
-#= for i = 1:8
+for i = 1:8
     ptr = @threadcall(:jl_malloc, Ptr{Cint}, (Csize_t,), sizeof(Cint))
     @test ptr != C_NULL
     unsafe_store!(ptr, 3)
@@ -1075,7 +1075,7 @@ end
     @test unsafe_load(ptr, 1) == 3
     @test unsafe_load(ptr, 2) == 4
     @threadcall(:jl_free, Cvoid, (Ptr{Cint},), ptr)
-end =#
+end
 
 # Pointer finalizer (issue #15408)
 let A = [1]
@@ -1188,7 +1188,7 @@ if Sys.ARCH === :x86_64
 
     foo_ams(a1, a2, a3, a4) = VecReg(ntuple(i -> VecElement(a1[i].value + a2[i].value * (a3[i].value - a4[i].value)), 4))
 
-    #= for s in [Float32, Int32]
+    for s in [Float32, Int32]
         T = NTuple{4, VecElement{s}}
         @eval function rt_sse(a1::$T, a2::$T, a3::$T, a4::$T)
             return ccall(
@@ -1206,7 +1206,7 @@ if Sys.ARCH === :x86_64
 
         # cfunction round-trip
         @test rt_sse(a1, a2, a3, a4) == r
-    end =#
+    end
 
 elseif Sys.ARCH === :aarch64
     for v1 in 1:99:1000, v2 in -100:-1999:-20000
@@ -1334,7 +1334,7 @@ elseif Sys.ARCH !== :i686 && Sys.ARCH !== :arm # TODO
 end
 
 # Special calling convention for `Array`
-#= function f17204(a)
+function f17204(a)
     b = similar(a)
     for i in eachindex(a)
         b[i] = a[i] + 10
@@ -1342,7 +1342,7 @@ end
     return b
 end
 @test ccall(@cfunction(f17204, Vector{Any}, (Vector{Any},)),
-            Vector{Any}, (Vector{Any},), Any[1:10;]) == Any[11:20;] =#
+            Vector{Any}, (Vector{Any},), Any[1:10;]) == Any[11:20;]
 
 # This used to trigger incorrect ccall callee inlining.
 # Not sure if there's a more reliable way to test this.
@@ -1502,11 +1502,11 @@ end
 @test Expr(:error, "more types than arguments for ccall") == Meta.lower(@__MODULE__, :(ccall(:fn, A, (B, C...), )))
 
 # cfunction on non-function singleton
-#= struct CallableSingleton
+struct CallableSingleton
 end
 (::CallableSingleton)(x, y) = x + y
 @test ccall(@cfunction(CallableSingleton(), Int, (Int, Int)),
-            Int, (Int, Int), 1, 2) === 3 =#
+            Int, (Int, Int), 1, 2) === 3
 
 # 19805
 mutable struct callinfos_19805{FUNC_FT<:Function}
@@ -1531,7 +1531,7 @@ evalf_callback_19805(ci::callinfos_19805{FUNC_FT}) where {FUNC_FT} = ci.f(0.5)::
              @eval @cfunction(+, Ref{Any}, (Int, Int)))
 
 # test Ref{abstract_type} calling parameter passes a heap box
-#= abstract type Abstract22734 end
+abstract type Abstract22734 end
 struct Bits22734 <: Abstract22734
     x::Int
     y::Float64
@@ -1546,7 +1546,7 @@ function caller22734(ptr)
     obj = Bits22734(12, 20)
     ccall(ptr, Float64, (Ref{Abstract22734},), obj)
 end
-@test caller22734(ptr22734) === 32.0 =#
+@test caller22734(ptr22734) === 32.0
 
 # 26297#issuecomment-371165725
 #   test that the first argument to cglobal is recognized as a tuple literal even through
@@ -1571,19 +1571,19 @@ mutable struct CallThisFunc27178{FCN_TYPE}
     fcn::FCN_TYPE
 end
 
-#= callback27178(cb::CTF) where CTF<:CallThisFunc27178 = nothing
+callback27178(cb::CTF) where CTF<:CallThisFunc27178 = nothing
 @inline make_cfunc27178(cbi::CI) where CI = @cfunction(callback27178, Cvoid, (Ref{CI},))
 get_c_func(fcn::FCN_TYPE) where {FCN_TYPE<:Function} = return make_cfunc27178(CallThisFunc27178(fcn))
-@test isa(get_c_func(sin), Ptr) =#
+@test isa(get_c_func(sin), Ptr)
 
 # issue #27215
-#= function once_removed()
+function once_removed()
     function mycompare(a, b)::Cint
         return (a < b) ? -1 : ((a > b) ? +1 : 0)
     end
     mycompare_c = @cfunction($mycompare, Cint, (Ref{Cdouble}, Ref{Cdouble}))
 end
-@test isa(once_removed(), Base.CFunction) =#
+@test isa(once_removed(), Base.CFunction)
 
 # issue #27478
 function ccall27478()
@@ -1661,7 +1661,7 @@ end
 
 
 # @ccall macro
-#= using Base: ccall_macro_parse, ccall_macro_lower
+using Base: ccall_macro_parse, ccall_macro_lower
 @testset "test basic ccall_macro_parse functionality" begin
     callexpr = :(
         libc.printf("%s = %d\n"::Cstring ; name::Cstring, value::Cint)::Cvoid
@@ -1673,9 +1673,9 @@ end
         Any["%s = %d\n", :name, :value],  # argument symbols
         1                                 # number of required arguments (for varargs)
     )
-end =#
+end
 
-#= @testset "ensure the base-case of @ccall works, including library name and pointer interpolation" begin
+@testset "ensure the base-case of @ccall works, including library name and pointer interpolation" begin
     call = ccall_macro_lower(:ccall, ccall_macro_parse( :( libstring.func(
         str::Cstring,
         num1::Cint,
@@ -1714,9 +1714,9 @@ end =#
         $(Expr(:foreigncall, :func, :($(Expr(:escape, :Cvoid))), :($(Expr(:escape, :(($(Expr(:core, :svec)))(Cstring))))), 0, :(:ccall), :arg1, :arg1root))
     end)
 
-end =#
+end
 
-#= @testset "check error paths" begin
+@testset "check error paths" begin
     # missing return type
     @test_throws ArgumentError("@ccall needs a function signature with a return type") ccall_macro_parse(:( foo(4.0::Cdouble )))
     # not a function call
@@ -1729,14 +1729,14 @@ end =#
     @test_throws ArgumentError("C ABI prohibits vararg without one required argument") ccall_macro_parse(:( foo(; x::Cint)::Cint ))
     # not a function pointer
     @test_throws ArgumentError("interpolated function `PROGRAM_FILE` was not a Ptr{Cvoid}, but String") @ccall $PROGRAM_FILE("foo"::Cstring)::Cvoid
-end =#
+end
 
 @testset "check error path for @cfunction" begin
     @test_throws ArgumentError("@cfunction argument types must be a literal tuple") @macrocall(@cfunction(identity, Cstring, Cstring))
 end
 
 # call some c functions
-#= @testset "run @ccall with C standard library functions" begin
+@testset "run @ccall with C standard library functions" begin
     @test @ccall(sqrt(4.0::Cdouble)::Cdouble) == 2.0
 
     str = "hello"
@@ -1767,10 +1767,10 @@ end
     str = unsafe_string(strp[], len)
     @ccall free(strp[]::Cstring)::Cvoid
     @test str == "hi+1-2-3-4-5-6-7-8-9-10-11-12-13-14-15-1.1-2.2-3.3-4.4-5.5-6.6-7.7-8.8-9.9\n"
-end =#
+end
 
 
-#= @testset "Cwstring" begin
+@testset "Cwstring" begin
     buffer = Array{Cwchar_t}(undef, 100)
     len = @static if Sys.iswindows()
             @ccall swprintf_s(buffer::Ptr{Cwchar_t}, length(buffer)::Csize_t, "α+%ls=%hhd"::Cwstring; "β"::Cwstring, 0xf::UInt8)::Cint
@@ -1782,7 +1782,7 @@ end =#
     @test str == "α+β=15"
     str = GC.@preserve buffer unsafe_string(Cwstring(pointer(buffer)))
     @test str == "α+β=15"
-end =#
+end 
 
 # issue #36458
 compute_lib_name() = "libcc" * "alltest"

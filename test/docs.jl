@@ -885,7 +885,7 @@ $(curmod_prefix)Undocumented.B
 $(curmod_prefix)Undocumented.C
 ```
 """)
-# @test docstrings_equal(@doc(Undocumented.A), doc"$doc_str")
+@test docstrings_equal(@doc(Undocumented.A), doc"$doc_str")
 
 doc_str = Markdown.parse("""
 No documentation found.
@@ -905,7 +905,7 @@ $(curmod_prefix)Undocumented.D
 $(curmod_prefix)Undocumented.B <: $(curmod_prefix)Undocumented.A <: Any
 ```
 """)
-# @test docstrings_equal(@doc(Undocumented.B), doc"$doc_str")
+@test docstrings_equal(@doc(Undocumented.B), doc"$doc_str")
 
 doc_str = Markdown.parse("""
 No documentation found.
@@ -962,7 +962,7 @@ $(curmod_prefix)Undocumented.st3{T<:Integer, N}
 $(curmod_prefix)Undocumented.st4{T<:Number, N}
 ```
 """)
-# @test docstrings_equal(@doc(Undocumented.at0), doc"$doc_str")
+@test docstrings_equal(@doc(Undocumented.at0), doc"$doc_str")
 
 doc_str = Markdown.parse("""
 No documentation found.
@@ -984,7 +984,7 @@ $(curmod_prefix)Undocumented.mt6{Integer, N}
 $(curmod_prefix)Undocumented.at1{T>:Integer, N} <: $(curmod_prefix)Undocumented.at0{T>:Integer, N} <: Any
 ```
 """)
-# @test docstrings_equal(@doc(Undocumented.at1), doc"$doc_str")
+@test docstrings_equal(@doc(Undocumented.at1), doc"$doc_str")
 
 doc_str = Markdown.parse("""
 No documentation found.
@@ -1003,7 +1003,7 @@ $(curmod_prefix)Undocumented.st3{Int64, N}
 $(curmod_prefix)Undocumented.st4{Int64, N}
 ```
 """)
-# @test docstrings_equal(@doc(Undocumented.at_), doc"$doc_str")
+@test docstrings_equal(@doc(Undocumented.at_), doc"$doc_str")
 
 doc_str = Markdown.parse("""
 No documentation found.

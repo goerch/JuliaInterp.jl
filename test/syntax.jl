@@ -1238,11 +1238,11 @@ end
 @test Meta.lower(@__MODULE__, :(f(;3))) == Expr(:error, "invalid keyword argument syntax \"3\"")
 
 # issue #25055, make sure quote makes new Exprs
-#= function f25055()
+function f25055()
     x = quote end
     return x
 end
-@test f25055() !== f25055() =#
+@test f25055() !== f25055()
 
 # issue #25391
 @test Meta.parse("0:-1, \"\"=>\"\"") == Meta.parse("(0:-1, \"\"=>\"\")") ==
@@ -1873,12 +1873,12 @@ elseif false
 end
 @test !isdefined(@__MODULE__, :g30926)
 
-#= @testset "closure conversion in testsets" begin
+@testset "closure conversion in testsets" begin
     p = (2, 3, 4)
     @test p == (2, 3, 4)
     allocs = (() -> @allocated identity(p))()
     @test allocs == 0
-end =#
+end
 
 @test_throws UndefVarError eval(Symbol(""))
 @test_throws UndefVarError eval(:(1+$(Symbol(""))))
@@ -2393,7 +2393,7 @@ function ncalls_in_lowered(ex, fname)
     end
 end
 
-#= @testset "standalone .op" begin
+@testset "standalone .op" begin
     @test :(.+) == Expr(:., :+)
     @test :(map(.-, a)) == Expr(:call, :map, Expr(:., :-), :a)
 
@@ -2403,7 +2403,7 @@ end
     @test ncalls_in_lowered(:((.+)(a, b .- (.^)(c, 2))), GlobalRef(Base, :broadcasted)) == 3
     @test ncalls_in_lowered(:((.+)(a, b .- (.^)(c, 2))), GlobalRef(Base, :materialize)) == 1
     @test ncalls_in_lowered(:((.+)(a, b .- (.^)(c, 2))), GlobalRef(Base, :BroadcastFunction)) == 0
-end =#
+end
 
 # issue #37656
 @test :(if true 'a' else 1 end) == Expr(:if, true, quote 'a' end, quote 1 end)
@@ -2669,13 +2669,13 @@ end
 @m38386
 @test isempty(methods(f38386))
 
-#= @testset "all-underscore varargs on the rhs" begin
+@testset "all-underscore varargs on the rhs" begin
     @test ncalls_in_lowered(quote _..., = a end, GlobalRef(Base, :rest)) == 0
     @test ncalls_in_lowered(quote ___..., = a end, GlobalRef(Base, :rest)) == 0
     @test ncalls_in_lowered(quote a, _... = b end, GlobalRef(Base, :rest)) == 0
     @test ncalls_in_lowered(quote a, _... = b, c end, GlobalRef(Base, :rest)) == 0
     @test ncalls_in_lowered(quote a, _... = (b...,) end, GlobalRef(Base, :rest)) == 0
-end =#
+end
 
 # issue #38501
 @test :"a $b $("str") c" == Expr(:string, "a ", :b, " ", Expr(:string, "str"), " c")
@@ -2763,7 +2763,7 @@ end == 4
     x25652
 end == 4
 
-#= @testset "issue #39600" begin
+@testset "issue #39600" begin
     A = 1:.5:2
     @test (!).(1 .< A .< 2) == [true, false, true]
     @test .!(1 .< A .< 2) == [true, false, true]
@@ -2772,7 +2772,7 @@ end == 4
     @test ncalls_in_lowered(:((!).(1 .< A .< 2)), GlobalRef(Base, :materialize)) == 1
     @test ncalls_in_lowered(:(.!(1 .< A .< 2)), GlobalRef(Base, :materialize)) == 1
     @test ncalls_in_lowered(:((.!)(1 .< A .< 2)), GlobalRef(Base, :materialize)) == 1
-end =#
+end
 
 # issue #39705
 @eval f39705(x) = $(Expr(:||)) && x
@@ -2828,11 +2828,11 @@ end
 @test eval(Expr(:string, "a", Expr(:string, "b", "c"))) == "abc"
 @test eval(Expr(:string, "a", Expr(:string, "b", Expr(:string, "c")))) == "abc"
 
-#= macro m_nospecialize_unnamed_hygiene()
+macro m_nospecialize_unnamed_hygiene()
     return :(f(@nospecialize(::Any)) = Any)
 end
 
-@test @m_nospecialize_unnamed_hygiene()(1) === Any =#
+@test @m_nospecialize_unnamed_hygiene()(1) === Any
 
 # https://github.com/JuliaLang/julia/issues/40574
 @testset "no mutation while destructuring" begin
@@ -2845,7 +2845,7 @@ end
     @test x == [2, 3, 1]
 end
 
-#= @testset "escaping newlines inside strings" begin
+@testset "escaping newlines inside strings" begin
     c = "c"
 
     @test "a\
@@ -2940,7 +2940,7 @@ b'` == `$("a\\\nb")`
     @test ```
           \\
           ``` == `'\'`
-end =#
+end
 
 # issue #41253
 @test (function (::Dict{}); end)(Dict()) === nothing

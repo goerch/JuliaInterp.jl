@@ -100,7 +100,7 @@ ambig(x::Union{Char, Int16}) = 's'
 @test ambig(Int16(1)) == 's'
 
 # Automatic detection of ambiguities
-#= module Ambig1
+module Ambig1
 ambig(x, y) = 1
 ambig(x::Integer, y) = 2
 ambig(x, y::Integer) = 3
@@ -145,7 +145,7 @@ ambig(x, y::Int) = 3
 end
 
 ambs = detect_ambiguities(Ambig5)
-@test length(ambs) == 2 =#
+@test length(ambs) == 2
 
 
 using LinearAlgebra, SparseArrays, SuiteSparse
@@ -283,7 +283,7 @@ for f in (Ambig8.f, Ambig8.g)
     @test_throws MethodError f(pi)
 end
 
-#= module Ambig9
+module Ambig9
 f(x::Complex{<:Integer}) = 1
 f(x::Complex{<:Rational}) = 2
 end
@@ -298,7 +298,7 @@ end
 module M25341
 _totuple(::Type{Tuple{Vararg{E}}}, itr, s...) where {E} = E
 end
-@test length(detect_unbound_args(M25341; recursive=true)) == 1 =#
+@test length(detect_unbound_args(M25341; recursive=true)) == 1
 
 # Test that Core and Base are free of UndefVarErrors
 # not using isempty so this prints more information when it fails

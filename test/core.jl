@@ -9,6 +9,90 @@ const Bottom = Union{}
 # For curmod_*
 include("testenv.jl")
 
+## tests that `const` field declarations
+
+# sanity tests that our built-in types are marked correctly for const fields
+for (T, c) in (
+        (Core.CodeInfo, []),
+        (Core.CodeInstance, [:def]),
+        (Core.Method, [#=:name, :module, :file, :line, :primary_world, :sig, :slot_syms, :external_mt, :nargs, :called, :nospecialize, :nkw, :isva, :pure, :is_for_opaque_closure, :constprop=#]),
+        (Core.MethodInstance, [#=:def, :specTypes, :sparam_vals]=#]),
+        (Core.MethodTable, [:module]),
+        (Core.TypeMapEntry, [:sig, :simplesig, :guardsigs, :min_world, :max_world, :func, :isleafsig, :issimplesig, :va]),
+        (Core.TypeMapLevel, []),
+        (Core.TypeName, [:name, :module, :names, :atomicfields, :constfields, :wrapper, :mt, :hash, :n_uninitialized, :flags]),
+        (DataType, [:name, :super, :parameters, :instance, :hash]),
+    )
+    @test Set((fieldname(T, i) for i in 1:fieldcount(T) if isconst(T, i))) == Set(c)
+end
+
+@test_throws(ErrorException("setfield!: const field .name of type DataType cannot be changed"),
+    setfield!(Int, :name, Int.name))
+@test_throws(ErrorException("setfield!: const field .name of type DataType cannot be changed"),
+    (Base.Experimental.@force_compile; setfield!(Int, :name, Int.name)))
+
+@test_throws(ErrorException("invalid field attribute const for immutable struct"),
+    @eval struct ABCDconst
+        const abcd
+    end)
+mutable struct ABCDconst
+    const a
+    const b::Int
+    c
+    const d::Union{Int,Nothing}
+end
+@test_throws(ErrorException("invalid redefinition of constant ABCDconst"),
+    mutable struct ABCDconst
+        const a
+        const b::Int
+        c
+        d::Union{Int,Nothing}
+    end)
+@test_throws(ErrorException("invalid redefinition of constant ABCDconst"),
+    mutable struct ABCDconst
+        a
+        b::Int
+        c
+        d::Union{Int,Nothing}
+    end)
+let abcd = ABCDconst(1, 2, 3, 4)
+    @test (1, 2, 3, 4) === (abcd.a, abcd.b, abcd.c, abcd.d)
+    @test_throws(ErrorException("setfield!: const field .a of type ABCDconst cannot be changed"),
+        abcd.a = 0)
+    @test_throws(ErrorException("replacefield!: const field .a of type ABCDconst cannot be changed"),
+        replacefield!(abcd, :a, 1, 0))
+    @test_throws(ErrorException("modifyfield!: const field .a of type ABCDconst cannot be changed"),
+        modifyfield!(abcd, :a, +, 1))
+    @test_throws(ErrorException("swapfield!: const field .a of type ABCDconst cannot be changed"),
+        swapfield!(abcd, :a, 0))
+    @test_throws(ErrorException("setfield!: const field .b of type ABCDconst cannot be changed"),
+        abcd.b = 0)
+    abcd.c = "not constant"
+    @test_throws(ErrorException("setfield!: const field .d of type ABCDconst cannot be changed"),
+        abcd.d = nothing)
+    @test (1, 2, "not constant", 4) === (abcd.a, abcd.b, abcd.c, abcd.d)
+end
+# repeat with the compiler
+let abcd = ABCDconst(1, 2, 3, 4)
+    Base.Experimental.@force_compile
+    @test (1, 2, 3, 4) === (abcd.a, abcd.b, abcd.c, abcd.d)
+    @test_throws(ErrorException("setfield!: const field .a of type ABCDconst cannot be changed"),
+        abcd.a = 0)
+    @test_throws(ErrorException("replacefield!: const field .a of type ABCDconst cannot be changed"),
+        replacefield!(abcd, :a, 1, 0))
+    @test_throws(ErrorException("modifyfield!: const field .a of type ABCDconst cannot be changed"),
+        modifyfield!(abcd, :a, +, 1))
+    @test_throws(ErrorException("swapfield!: const field .a of type ABCDconst cannot be changed"),
+        swapfield!(abcd, :a, 0))
+    @test_throws(ErrorException("setfield!: const field .b of type ABCDconst cannot be changed"),
+        abcd.b = 0)
+    abcd.c = "not constant"
+    @test_throws(ErrorException("setfield!: const field .d of type ABCDconst cannot be changed"),
+        abcd.d = nothing)
+    @test (1, 2, "not constant", 4) === (abcd.a, abcd.b, abcd.c, abcd.d)
+end
+
+
 f47(x::Vector{Vector{T}}) where {T} = 0
 @test_throws MethodError f47(Vector{Vector}())
 @test f47(Vector{Vector{Int}}()) == 0
@@ -502,7 +586,7 @@ end
 @test h19333() == 4
 
 # let - new variables, including undefinedness
-#= let_undef_cnt = 0
+let_undef_cnt = 0
 function let_undef()
     first = true
     for i = 1:2
@@ -518,7 +602,7 @@ function let_undef()
     end
 end
 @test_throws UndefVarError let_undef()
-@test let_undef_cnt == 25 =#
+@test let_undef_cnt == 25
 
 # const implies local in a local scope block
 function const_implies_local()
@@ -1157,7 +1241,7 @@ let
     @test mstrct.error === (:error, (:line, 8.0))
 end
 
-#= struct S29761
+struct S29761
     x
 end
 function S29761_world(i)
@@ -1168,7 +1252,7 @@ function S29761_world(i)
     # ensure world updates are handled correctly for simple x.y expressions:
     return x.x, @eval($x.x), x.x
 end
-@test S29761_world(1) == (1, :x => 1, 1) =#
+@test S29761_world(1) == (1, :x => 1, 1)
 
 
 # allow typevar in Union to match as long as the arguments contain
@@ -2177,7 +2261,7 @@ let
 end
 
 # issue #20524
-#= macro m20524(ex)
+macro m20524(ex)
     quote
         global f20524
         function f20524()
@@ -2187,7 +2271,7 @@ end
 end
 @m20524 ((a,(b20524,c)) = (8,(1,5)); (a,b20524,c))
 @test f20524() === (8,1,5)
-@test !@isdefined b20524 # should not assign to a global =#
+@test !@isdefined b20524 # should not assign to a global
 
 # issue #6387
 primitive type Date6387{C} 64 end
@@ -2611,7 +2695,7 @@ g9535() = (f9535(),f9535())
 @test g9535() == (3,4)
 
 # weak references
-#= mutable struct Obj; x; end
+mutable struct Obj; x; end
 @testset "weak references" begin
     @noinline function mk_wr(r, wr)
         x = Obj(1)
@@ -2635,7 +2719,7 @@ g9535() = (f9535(),f9535())
         @test wref[1].value === nothing
     end
     test_wr()
-end =#
+end
 
 # issue #9947
 function f9947()
@@ -3318,7 +3402,7 @@ let a = [Type11243(1,2), Type11243("a","b")]
 end
 
 # issue #11065, #1571
-#= function f11065()
+function f11065()
     for i = 1:2
         if i == 1
             z = "z is defined"
@@ -3327,10 +3411,10 @@ end
         end
     end
 end
-@test_throws UndefVarError f11065() =#
+@test_throws UndefVarError f11065()
 
 # issue #25724
-#= a25724 = Any[]
+a25724 = Any[]
 for i = 1:3
     needX = false
     try
@@ -3344,7 +3428,7 @@ for i = 1:3
     end
     push!(a25724, copy(X))
 end
-@test a25724 == [[0], [0], [0]] =#
+@test a25724 == [[0], [0], [0]]
 
 # for loop iterator expression should be evaluated in outer scope
 let
@@ -3514,13 +3598,13 @@ let
 end
 
 # 11996
-#= @test_throws ErrorException NTuple{-1, Int}
+@test_throws ErrorException NTuple{-1, Int}
 @test_throws TypeError Union{Int, 1}
 
 @test_throws ErrorException Vararg{Any,-2}
 @test_throws ErrorException Vararg{Int, N} where N<:T where T
 @test_throws ErrorException Vararg{Int, N} where N<:Integer
-@test_throws ErrorException Vararg{Int, N} where N>:Integer =#
+@test_throws ErrorException Vararg{Int, N} where N>:Integer
 
 mutable struct FooNTuple{N}
     z::Tuple{Integer, Vararg{Int, N}}
@@ -4915,7 +4999,7 @@ end
 
 # issue #18236 constant VecElement in ast triggers codegen assertion/undef
 # VecElement of scalar
-#= v18236 = VecElement(1.0)
+v18236 = VecElement(1.0)
 ptr18236 = @cfunction(identity, VecElement{Float64}, (VecElement{Float64},))
 @eval @noinline f18236(ptr) = ccall(ptr, VecElement{Float64},
                                     (VecElement{Float64},), $v18236)
@@ -4933,7 +5017,7 @@ ptr18236_2 = @cfunction(identity, VecElement{NTuple{2,Int8}},
 @eval @noinline f18236_2(ptr) = ccall(ptr, VecElement{NTuple{2,Int8}},
                                       (VecElement{NTuple{2,Int8}},),
                                       $v18236_2)
-@test f18236_2(ptr18236_2) === v18236_2 =#
+@test f18236_2(ptr18236_2) === v18236_2
 
 # issue #18385
 function f18385(g)
@@ -4948,7 +5032,7 @@ end
 
 # Another similar issue, make sure newvar nodes are created for the fields
 # variables too.
-#= function f18386(a, b, second_pass)
+function f18386(a, b, second_pass)
     s = 0
     firstpass = true
     for i in 1:2
@@ -4962,7 +5046,7 @@ end
 end
 @test f18386(1, 2, false) === 2
 # variable name in the error is tested above in `TestSSA16244`
-@test_throws UndefVarError f18386(1, 2, true) =#
+@test_throws UndefVarError f18386(1, 2, true)
 
 Base.@propagate_inbounds function f18412(a)
     @inbounds b = a[1]
@@ -5070,7 +5154,7 @@ end
 GC.enable(true)
 
 # issue #18710
-#= bad_tvars() where {T} = 1
+bad_tvars() where {T} = 1
 @test isa(which(bad_tvars, ()), Method)
 @test bad_tvars() === 1
 bad_tvars2() where {T} = T
@@ -5079,10 +5163,10 @@ missing_tvar(::T...) where {T} = T
 @test_throws UndefVarError(:T) missing_tvar()
 @test missing_tvar(1) === Int
 @test missing_tvar(1, 2, 3) === Int
-@test_throws MethodError missing_tvar(1, 2, "3") =#
+@test_throws MethodError missing_tvar(1, 2, "3")
 
 # issue #19059 - test for lowering of `let` with assignment not adding Box in simple cases
-#= contains_Box(e::GlobalRef) = (e.name === :Box)
+contains_Box(e::GlobalRef) = (e.name === :Box)
 contains_Box(@nospecialize(e)) = false
 contains_Box(e::Expr) = any(contains_Box, e.args)
 
@@ -7615,4 +7699,4 @@ end
     a, b... = x
     @test a == 1
     @test b == Core.svec(2, 3)
-end =# 
+end

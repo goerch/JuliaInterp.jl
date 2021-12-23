@@ -1427,7 +1427,7 @@ end
 @test static_shown(Int128(-1)) == "Int128(0xffffffffffffffffffffffffffffffff)"
 
 # PR #22160
-#= @test static_shown(:aa) == ":aa"
+@test static_shown(:aa) == ":aa"
 @test static_shown(:+) == ":+"
 @test static_shown(://) == "://"
 @test static_shown(://=) == "://="
@@ -1436,7 +1436,7 @@ end
 @test static_shown(Symbol("a-b")) == "Symbol(\"a-b\")"
 @test static_shown(UnionAll) == "UnionAll"
 
-@test static_shown(QuoteNode(:x)) == ":(:x)" =#
+@test static_shown(QuoteNode(:x)) == ":(:x)"
 
 # PR #38049
 @test static_shown(sum) == "Base.sum"

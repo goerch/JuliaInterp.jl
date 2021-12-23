@@ -16,7 +16,7 @@ nested_error_pattern = r"""
     Stacktrace:.*
     """s
 
-#= @testset "display_error" begin
+@testset "display_error" begin
     # Display of errors which cause more than one entry on the exception stack
     excs = try
         eval(nested_error_expr)
@@ -34,7 +34,7 @@ nested_error_pattern = r"""
         caused by: UndefVarError: __not_a_binding__ not defined
         Stacktrace:.*
         """s, sprint(show, excs))
-end =#
+end
 
 @testset "Fallback REPL" begin
     # Fallback REPL should show errors with display_error

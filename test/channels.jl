@@ -388,7 +388,7 @@ end
     end).task.exception === testerr
 end
 
-#= @testset "Timer / AsyncCondition triggering and race #12719" begin
+@testset "Timer / AsyncCondition triggering and race #12719" begin
     let tc = Ref(0)
         t = Timer(0) do t
             tc[] += 1
@@ -475,7 +475,7 @@ end
         @test tc[] == 1
         @test async.handle === C_NULL
     end
-end =#
+end
 
 @testset "check_channel_state" begin
     c = Channel(1)

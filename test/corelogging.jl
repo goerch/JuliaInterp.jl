@@ -40,7 +40,7 @@ end
     @test_logs (Warn, "X") @logmsg level "X"
 end
 
-#= @testset "Structured logging with key value pairs" begin
+@testset "Structured logging with key value pairs" begin
     foo_val = 10
     bar_val = 100
     logs,_ = collect_test_logs() do
@@ -84,7 +84,7 @@ end
     @test sort(collect(keys(kwargs))) == [:a, :b]
     @test kwargs[:a] === 1
     @test kwargs[:b] === 2.0
-end =#
+end
 
 @testset "Log message exception handling" begin
     # Exceptions in message creation are caught by default

@@ -5,7 +5,7 @@ const_int() = 1
 
 const lno = LineNumberNode(1, :none)
 
-#= let ci = @code_lowered const_int()
+let ci = @code_lowered const_int()
     @eval function oc_trivial()
         $(Expr(:new_opaque_closure, Tuple{}, false, Any, Any,
             Expr(:opaque_closure_method, nothing, 0, lno, ci)))
@@ -74,7 +74,7 @@ end
 @test isa(oc_infer_pass_clos(1), Core.OpaqueClosure{Tuple{}, typeof(1)})
 @test isa(oc_infer_pass_clos("a"), Core.OpaqueClosure{Tuple{}, typeof("a")})
 @test oc_infer_pass_clos(1)() == 1
-@test oc_infer_pass_clos("a")() == "a" =#
+@test oc_infer_pass_clos("a")() == "a"
 
 let ci = @code_lowered identity(1)
     @eval function oc_infer_pass_id()
@@ -116,7 +116,7 @@ end
 
 using Base.Experimental: @opaque
 
-#= @test @opaque(x->2x)(8) == 16
+@test @opaque(x->2x)(8) == 16
 let f = @opaque (x::Int, y::Float64)->(2x, 3y)
     @test_throws TypeError f(1, 1)
     @test f(2, 3.0) === (4, 9.0)
@@ -154,7 +154,7 @@ mk_va_opaque() = @opaque (x...)->x
 @test mk_va_opaque()(1,2) == (1,2)
 
 # OpaqueClosure show method
-@test repr(@opaque x->1) == "(::Any)::Any->◌" =#
+@test repr(@opaque x->1) == "(::Any)::Any->◌"
 
 # Opaque closure in CodeInfo returned from generated functions
 function mk_ocg(args...)
@@ -208,6 +208,6 @@ end
 @test_throws MethodError (@opaque x->x+1)(1, 2)
 
 # https://github.com/JuliaLang/julia/issues/40409
-#= const GLOBAL_OPAQUE_CLOSURE = @opaque () -> 123
+const GLOBAL_OPAQUE_CLOSURE = @opaque () -> 123
 call_global_opaque_closure() = GLOBAL_OPAQUE_CLOSURE()
-@test call_global_opaque_closure() == 123 =#
+@test call_global_opaque_closure() == 123

@@ -101,10 +101,10 @@ let
 end
 
 # Debugging tool: return the current state of the enable_finalizers counter.
-# get_finalizers_inhibited() = ccall(:jl_gc_get_finalizers_inhibited, Int32, (Ptr{Cvoid},), C_NULL)
+get_finalizers_inhibited() = ccall(:jl_gc_get_finalizers_inhibited, Int32, (Ptr{Cvoid},), C_NULL)
 
 # lock / unlock
-#= let l = ReentrantLock()
+let l = ReentrantLock()
     @test lock(l) === nothing
     @test islocked(l)
     success = Ref(false)
@@ -156,11 +156,11 @@ for l in (Threads.SpinLock(), ReentrantLock())
 
     @test lock(l) === nothing
     @test try unlock(l) finally end === nothing
-end =#
+end
 
 # task switching
 
-#= @noinline function f6597(c)
+@noinline function f6597(c)
     t = @async nothing
     finalizer(t -> c[] += 1, t)
     Base.wait(t)
@@ -178,7 +178,7 @@ let c = Ref(0),
     @test c[] == 1
     yield(t2)
     @test c[] == 100
-end =#
+end
 
 @test_throws ErrorException("deadlock detected: cannot wait on current task") wait(current_task())
 
@@ -580,7 +580,7 @@ let buf = IOBuffer()
 end
 
 # these tests are not in a test block so that they will compile separately
-#= @static if Sys.iswindows()
+@static if Sys.iswindows()
     SetLastError(code) = ccall(:SetLastError, stdcall, Cvoid, (UInt32,), code)
 else
     SetLastError(_) = nothing
@@ -601,10 +601,10 @@ end
     @test ccall(:GetLastError, stdcall, UInt32, ()) == 0xc0def00d
     @test Libc.GetLastError() == 0xc0def00d
 end
-@test Libc.errno() == 0xc0ffee =#
+@test Libc.errno() == 0xc0ffee
 
 # Test that we can VirtualProtect jitted code to writable
-#= @noinline function WeVirtualProtectThisToRWX(x, y)
+@noinline function WeVirtualProtectThisToRWX(x, y)
     return x + y
 end
 @static if Sys.iswindows()
@@ -617,7 +617,7 @@ end
             addr, 4096, PAGE_EXECUTE_READWRITE, oldPerm)
         err18083 == 0 && Base.windowserror(:VirtualProtect)
     end
-end =#
+end
 
 let buf = IOBuffer()
     printstyled(IOContext(buf, :color=>true), "foo", color=:red)
@@ -654,14 +654,14 @@ if stdout isa Base.TTY
     @test_throws KeyError stdout[:bar]
 end
 
-#= @testset "`displaysize` on closed TTY #34620" begin
+@testset "`displaysize` on closed TTY #34620" begin
     Main.FakePTYs.with_fake_pty() do rawfd, _
         tty = open(rawfd)::Base.TTY
         @test displaysize(tty) isa Tuple{Integer,Integer}
         close(tty)
         @test_throws Base.IOError displaysize(tty)
     end
-end =#
+end
 
 let
     global c_18711 = 0
@@ -899,7 +899,7 @@ end
 @test_nowarn Core.eval(Main, :(import ....Main))
 
 # issue #27239
-#= @testset "strftime tests issue #27239" begin
+@testset "strftime tests issue #27239" begin
     # change to non-Unicode Korean
     korloc = ["ko_KR.EUC-KR", "ko_KR.CP949", "ko_KR.949", "Korean_Korea.949"]
     timestrs = String[]
@@ -913,7 +913,7 @@ end
     for s in timestrs
         @test isvalid(s)
     end
-end =#
+end
 
 
 using Base: @kwdef

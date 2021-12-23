@@ -26,9 +26,9 @@ g_inlined(x) = f_inlined(2x)
 
 f() = backtrace()
 @inline g_inlined() = f()
-# @noinline g_noinlined() = f()
+@noinline g_noinlined() = f()
 h_inlined() = g_inlined()
-# h_noinlined() = g_noinlined()
+h_noinlined() = g_noinlined()
 
 function foundfunc(bt, funcname)
     for b in bt
@@ -40,8 +40,8 @@ function foundfunc(bt, funcname)
     end
     false
 end
-# @test foundfunc(h_inlined(), :g_inlined)
-# @test foundfunc(h_noinlined(), :g_noinlined)
+@test foundfunc(h_inlined(), :g_inlined)
+@test foundfunc(h_noinlined(), :g_noinlined)
 
 using Base: pushmeta!, popmeta!
 
@@ -226,13 +226,13 @@ end
 
 _lower(m::Module, ex, world::UInt) = ccall(:jl_expand_in_world, Any, (Any, Ref{Module}, Cstring, Cint, Csize_t), ex, m, "none", 0, world)
 
-#= module TestExpandInWorldModule
+module TestExpandInWorldModule
 macro m() 1 end
 wa = Base.get_world_counter()
 macro m() 2 end
 end
 
-@test _lower(TestExpandInWorldModule, :(@m), TestExpandInWorldModule.wa) == 1 =#
+@test _lower(TestExpandInWorldModule, :(@m), TestExpandInWorldModule.wa) == 1
 
 f(::T) where {T} = T
 ci = code_lowered(f, Tuple{Int})[1]

@@ -265,7 +265,7 @@ end
     @test length(current_exceptions()) == 0
 end 
 
-#= @testset "Exception stacks and Tasks" begin
+@testset "Exception stacks and Tasks" begin
     # Task switching should not affect exception state. See #12485.
     try
         error("A")
@@ -355,7 +355,7 @@ end
     t = @task ()->nothing
     @test_throws ErrorException("Inspecting the exception stack of a task which might "*
                                 "be running concurrently isn't allowed.") current_exceptions(t)
-end =#
+end
 
 @testset "rethrow" begin
     @test try
@@ -387,7 +387,7 @@ end
 @test f36527()
 
 # accessing an undefined var in tail position in a catch block
-#= function undef_var_in_catch()
+function undef_var_in_catch()
     try
         error("first error")
     catch
@@ -399,4 +399,4 @@ end
     []
 catch
     current_exceptions()
-end) == 2 =#
+end) == 2

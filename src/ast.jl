@@ -1,7 +1,6 @@
 function eval_ast(interpstate, expr)
     interpstate.debug && @show :eval_ast expr
     try
-        collect!(interpstate.collectorstate, expr, :ast)
         # ans = Core.eval(last(interpstate.mods).mod, expr)
         ans = @eval last(interpstate.mods).mod $expr
         interpstate.debug && @show ans
@@ -17,10 +16,8 @@ function eval_lower_ast(interpstate, expr)
     try
         lwr = Meta.lower(last(interpstate.mods).mod, expr)
         if lwr.head == :thunk
-            collect!(interpstate.collectorstate, expr, :lower)
             ans = interpret_lower(interpstate, nothing, lwr.args[1])
         else
-            collect!(interpstate.collectorstate, expr, :ast)
             # ans = Core.eval(last(interpstate.mods).mod, expr)
             ans = @eval last(interpstate.mods).mod $expr
         end
@@ -196,14 +193,7 @@ function interpret_ast(interpstate, expr::Expr)
 end 
 
 function interpret_ast(mod::Module, expr::Expr, debug, budget)
-    interpstate = InterpState(debug, budget, [ModuleState(mod)], [], nothing)
-    ans = interpret_ast(interpstate, expr)
-    pop!(interpstate.mods)
-    ans
-end 
-
-function collect_ast(collectorstate, mod::Module, expr::Expr, debug, budget)
-    interpstate = InterpState(debug, budget, [ModuleState(mod)], [], collectorstate)
+    interpstate = InterpState(debug, budget, [ModuleState(mod)], [])
     ans = interpret_ast(interpstate, expr)
     pop!(interpstate.mods)
     ans

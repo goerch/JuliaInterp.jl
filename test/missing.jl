@@ -600,10 +600,10 @@ mutable struct Obj; x; end
     @test ismissing(missing == wref[1])
 end
 
-#= @testset "showerror missing function" begin
+@testset "showerror missing function" begin
     me = try missing(1) catch e e end
     @test sprint(showerror, me) == "MethodError: objects of type Missing are not callable"
-end =#
+end
 
 @testset "sort and sortperm with $(eltype(X))" for (X, P, RP) in
     (([2, missing, -2, 5, missing], [3, 1, 4, 2, 5], [2, 5, 4, 1, 3]),
