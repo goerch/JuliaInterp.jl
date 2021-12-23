@@ -263,7 +263,7 @@ end
         length(current_exceptions())
     end == 100
     @test length(current_exceptions()) == 0
-end 
+end
 
 @testset "Exception stacks and Tasks" begin
     # Task switching should not affect exception state. See #12485.
@@ -327,7 +327,7 @@ end
         @test exc == ErrorException("C")
         @test bt == catch_backtrace()
     end
-    @test length(current_exceptions()) == 0
+    @test length(current_exceptions()) == 0 
     # Exception stacks on other tasks
     t = @task try
         error("A")
@@ -350,11 +350,11 @@ end
         e
     end).task.exception == ErrorException("expected")
     @test length(current_exceptions(t)) == 1
-    @test length(current_exceptions(t)[1].backtrace) > 0 # backtrace is nonempty
+    @test length(current_exceptions(t)[1].backtrace) > 0 # backtrace is nonempty 
     # Exception stacks should not be accessed on concurrently running tasks
     t = @task ()->nothing
     @test_throws ErrorException("Inspecting the exception stack of a task which might "*
-                                "be running concurrently isn't allowed.") current_exceptions(t)
+                                "be running concurrently isn't allowed.") current_exceptions(t) 
 end
 
 @testset "rethrow" begin
@@ -399,4 +399,4 @@ end
     []
 catch
     current_exceptions()
-end) == 2
+end) == 2 

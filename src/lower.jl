@@ -37,16 +37,18 @@ function lookup_lower(codestate, ::Val{:call}, args)
     # @show fun
     parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
     if fun == Base.current_exceptions
-        return codestate.interpstate.exceptions
+        if isempty(parms) || parms[1] == current_task()
+            return codestate.interpstate.exceptions
+        end 
     elseif fun == Base.rethrow
         fun = Base.throw
         if isempty(parms) 
-            if !isempty(codestate.interpstate.exceptions)
-                parms = [pop!(codestate.interpstate.exceptions).exception]
-            else
+            if isempty(codestate.interpstate.exceptions)
                 parms = [ErrorException("rethrow() not allowed outside a catch block")]
+            else
+                parms = [pop!(codestate.interpstate.exceptions).exception]
             end
-        elseif !isempty(codestate.handlers)
+        elseif isempty(codestate.interpstate.exceptions)
             parms = [ErrorException("rethrow(exc) not allowed outside a catch block")]
         end
     end
