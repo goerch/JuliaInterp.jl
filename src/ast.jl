@@ -89,8 +89,7 @@ end
 function interpret_ast(interpstate, ::Val{:let}, args)
     interpstate.debug && @show :let args
     expr = Expr(:let, args...) 
-    # TODO: should and can we interpret?
-    eval_ast(interpstate, expr)
+    eval_lower_ast(interpstate, expr)
 end
 function interpret_ast(interpstate, ::Val{:block}, args)
     interpstate.debug && @show :block args

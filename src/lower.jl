@@ -1,10 +1,8 @@
 function lookup_lower(codestate, val, args)
-    return nothing
+    # @show val args
+    return args[1]
 end
 
-function lookup_lower(codestate, ::Val{:boundscheck}, args)
-    true
-end
 function lookup_lower(codestate, ::Val{:static_parameter}, args)
     codestate.lenv[args[1]]
 end
@@ -99,9 +97,6 @@ end
 function lookup_lower(codestate, ::Val{:foreigncall}, args)
     # @show args
     fun = _quote(lookup_lower(codestate, args[1]))
-    if fun == :jl_breakpoint
-        return nothing
-    end
     # @show fun
     parms = [_quote(lookup_lower(codestate, arg)) for arg in args[6:end]]
     # @show parms
@@ -112,6 +107,7 @@ function lookup_lower(codestate, ::Val{:method}, args)
 end
 
 function lookup_lower(codestate, var)
+    # @show :lookup_lower typeof(var) var
     var
 end
 function lookup_lower(codestate, ssavalue::Core.SSAValue)
@@ -140,7 +136,7 @@ function lookup_lower(codestate, expr::Expr)
 end
 
 function assign_lower(codestate, var, val)
-    @show :assign_lower var val
+    @show :assign_lower typeof(var) val
     @assert false
 end
 function assign_lower(codestate, ssavalue::Core.SSAValue, val)
