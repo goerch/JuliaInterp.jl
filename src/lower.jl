@@ -105,14 +105,7 @@ function lookup_lower(codestate, ::Val{:foreigncall}, args)
     # @show fun
     parms = [_quote(lookup_lower(codestate, arg)) for arg in args[6:end]]
     # @show parms
-    # eval_ast(codestate.interpstate, Expr(:foreigncall, fun, args[2:5]..., parms...))
-    if fun isa Symbol
-        # eval(Expr(:foreigncall, QuoteNode(fun), args[2:5]..., parms...))
-        eval_ast(codestate.interpstate, Expr(:foreigncall, QuoteNode(fun), args[2:5]..., parms...))
-    else
-        # eval(Expr(:foreigncall, fun, args[2:5]..., parms...))
-        eval_ast(codestate.interpstate, Expr(:foreigncall, fun, args[2:5]..., parms...))
-    end 
+    eval_ast(codestate.interpstate, Expr(:foreigncall, fun, args[2:5]..., parms...))
 end
 function lookup_lower(codestate, ::Val{:method}, args)
     args[1]
