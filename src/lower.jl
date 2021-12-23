@@ -90,14 +90,20 @@ function lookup_lower(codestate, ::Val{:call}, args)
     end =#
     Base.@invokelatest fun(parms...)
 end
+function _quote(symbol::Symbol)
+    QuoteNode(symbol)
+end
+function _quote(val)
+    QuoteNode(val)
+end
 function lookup_lower(codestate, ::Val{:foreigncall}, args)
     # @show args
-    fun = lookup_lower(codestate, args[1])
+    fun = _quote(lookup_lower(codestate, args[1]))
     if fun == :jl_breakpoint
         return nothing
     end
     # @show fun
-    parms = [lookup_lower(codestate, arg) for arg in args[6:end]]
+    parms = [_quote(lookup_lower(codestate, arg)) for arg in args[6:end]]
     # @show parms
     # eval_ast(codestate.interpstate, Expr(:foreigncall, fun, args[2:5]..., parms...))
     if fun isa Symbol

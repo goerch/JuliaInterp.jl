@@ -43,7 +43,7 @@ function tracer()
         # path = "$dir/filesystem.jl"
         # path = "$dir/float16.jl"
         # path = "$dir/floatapprox.jl"
-        path = "$dir/floatfuncs.jl"
+        # path = "$dir/floatfuncs.jl"
         # path = "$dir/functional.jl"
         # path = "$dir/gmp.jl"
         # path = "$dir/goto.jl"
@@ -87,7 +87,7 @@ function tracer()
         # path = "$dir/ryu.jl"
         # path = "$dir/secretbuffer.jl"
         # path = "$dir/sets.jl"
-        # path = "$dir/show.jl"
+        path = "$dir/show.jl"
         # path = "$dir/simdloop.jl"
         # path = "$dir/smallarrayshrink.jl"
         # path = "$dir/some.jl"
@@ -114,7 +114,7 @@ function tracer()
         # path = "$dir/vecelement.jl"
         # path = "$dir/version.jl"
         # path = "$dir/worlds.jl"
-        mod = @eval(Main, module IsolatedTests end)
+        mod = @eval(Main, module IsolatedTests using Base end)
         @eval(mod, using Test, Random, Distributed, JuliaInterp)
         JuliaInterp.include(mod, path, false)
     catch exception
