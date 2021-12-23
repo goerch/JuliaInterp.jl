@@ -1,6 +1,10 @@
 function lookup_lower(codestate, val, args)
     # @show val args
-    return args[1]
+    nothing
+end
+
+function lookup_lower(codestate, ::Val{:boundscheck}, args)
+    true
 end
 
 function lookup_lower(codestate, ::Val{:static_parameter}, args)
