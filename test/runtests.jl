@@ -10,7 +10,7 @@ using Base: Experimental
 include("choosetests.jl")
 include("testenv.jl")
 
-(; tests, net_on, exit_on_error, use_revise, seed) = choosetests(["--skip", "llvmcall", "compiler", "stdlib", ARGS...])
+(; tests, net_on, exit_on_error, use_revise, seed) = choosetests(ARGS)
 tests = unique(tests)
 
 if Sys.islinux()
@@ -112,12 +112,17 @@ cd(@__DIR__) do
     # Otherwise, we use multiple worker processes if and only if `net_on` is true.
     if net_on || JULIA_TEST_USE_MULTIPLE_WORKERS
         n = min(Sys.CPU_THREADS, length(tests))
-        n > 1 && addprocs_with_testenv(n)
+        if n > 1
+            for p in addprocs_with_testenv(n)
+                remotecall_fetch(include, p, "testdefs.jl")
+            end
+        end
         LinearAlgebra.BLAS.set_num_threads(1)
     end
     skipped = 0
 
-    @everywhere include("testdefs.jl")
+    # @everywhere include("testdefs.jl")
+    include("testdefs.jl")
 
     if use_revise
         Base.invokelatest(revise_trackall)

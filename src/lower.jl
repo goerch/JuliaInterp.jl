@@ -1,23 +1,39 @@
+function isdefined_lower(codestate, val, args)
+    # @show val args
+    true
+end
 function lookup_lower(codestate, val, args)
     # @show val args
     nothing
 end
 
+function isdefined_lower(codestate, ::Val{:boundscheck}, args)
+    true
+end
 function lookup_lower(codestate, ::Val{:boundscheck}, args)
     true
 end
 
+function isdefined_lower(codestate, ::Val{:static_parameter}, args)
+    isassigned(codestate.lenv, args[1])
+end
 function lookup_lower(codestate, ::Val{:static_parameter}, args)
+    @assert isassigned(codestate.lenv, args[1])
     codestate.lenv[args[1]]
 end
 
+function isdefined_lower(codestate, ::Val{:the_exception}, args)
+    !isempty(codestate.interpstate.exceptions)
+end
 function lookup_lower(codestate, ::Val{:the_exception}, args)
+    @assert !isempty(codestate.interpstate.exceptions)
     last(codestate.interpstate.exceptions).exception
 end
 
 function lookup_lower(codestate, ::Val{:isdefined}, args)
-    isdefined(last(codestate.interpstate.mods).mod, args[1])
+    isdefined_lower(codestate, args[1])
 end
+
 function lookup_lower(codestate, ::Val{:new}, args)
     # @show args
     type = lookup_lower(codestate, args[1])
@@ -30,6 +46,7 @@ end
 exclude(fun) = !(fun isa Function) ||
     fun isa Core.IntrinsicFunction ||
     fun isa Core.Builtin ||
+    # Base.moduleroot(parentmodule(fun)) in [Core]
     Base.moduleroot(parentmodule(fun)) in [Base, Core]
 function lookup_lower(codestate, ::Val{:call}, args)
     # @show args
@@ -94,17 +111,17 @@ function lookup_lower(codestate, ::Val{:call}, args)
     end =#
     Base.@invokelatest fun(parms...)
 end
-function _quote(symbol::Symbol)
+function quote_lower(symbol::Symbol)
     QuoteNode(symbol)
 end
-function _quote(val)
+function quote_lower(val)
     QuoteNode(val)
 end
 function lookup_lower(codestate, ::Val{:foreigncall}, args)
     # @show args
-    fun = _quote(lookup_lower(codestate, args[1]))
+    fun = quote_lower(lookup_lower(codestate, args[1]))
     # @show fun
-    parms = [_quote(lookup_lower(codestate, arg)) for arg in args[6:end]]
+    parms = [quote_lower(lookup_lower(codestate, arg)) for arg in args[6:end]]
     # @show parms
     eval_ast(codestate.interpstate, Expr(:foreigncall, fun, args[2:5]..., parms...))
 end
@@ -112,30 +129,55 @@ function lookup_lower(codestate, ::Val{:method}, args)
     args[1]
 end
 
+function isdefined_lower(codestate, var)
+    # @show :isdefined_lower typeof(var) var
+    true
+end
 function lookup_lower(codestate, var)
     # @show :lookup_lower typeof(var) var
     var
+end
+function isdefined_lower(codestate, ssavalue::Core.SSAValue)
+    isassigned(codestate.ssavalues, ssavalue.id)
 end
 function lookup_lower(codestate, ssavalue::Core.SSAValue)
     @assert isassigned(codestate.ssavalues, ssavalue.id)
     codestate.ssavalues[ssavalue.id]
 end
+function isdefined_lower(codestate, slotnumber::Core.SlotNumber)
+    isassigned(codestate.slots, slotnumber.id)
+end
 function lookup_lower(codestate, slotnumber::Core.SlotNumber)
     @assert isassigned(codestate.slots, slotnumber.id)
     codestate.slots[slotnumber.id]
+end
+function isdefined_lower(codestate, newvarnode::Core.NewvarNode)
+    isassigned(codestate.slots, newvarnode.slot.id)
 end
 function lookup_lower(codestate, newvarnode::Core.NewvarNode)
     @assert isassigned(codestate.slots, newvarnode.slot.id)
     codestate.slots[newvarnode.slot.id]
 end
+function isdefined_lower(codestate, symbol::Symbol)
+    isdefined(last(codestate.interpstate.mods).mod, symbol)
+end
 function lookup_lower(codestate, symbol::Symbol)
     getfield(last(codestate.interpstate.mods).mod, symbol)
+end
+function isdefined_lower(codestate, globalref::GlobalRef)
+    isdefined(globalref.mod, globalref.name)
 end
 function lookup_lower(codestate, globalref::GlobalRef)
     getfield(globalref.mod, globalref.name)
 end
+function isdefined_lower(codestate, quotenode::QuoteNode)
+    true
+end
 function lookup_lower(codestate, quotenode::QuoteNode)
     quotenode.value
+end
+function isdefined_lower(codestate, expr::Expr)
+    isdefined_lower(codestate, Val(expr.head), expr.args)
 end
 function lookup_lower(codestate, expr::Expr)
     lookup_lower(codestate, Val(expr.head), expr.args)

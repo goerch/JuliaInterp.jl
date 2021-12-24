@@ -37,7 +37,7 @@ function tracer()
         # path = "$dir/error.jl"
         # path = "$dir/errorshow.jl"
         # path = "$dir/euler.jl"
-        path = "$dir/exceptions.jl"
+        # path = "$dir/exceptions.jl"
         # path = "$dir/fastmath.jl"
         # path = "$dir/file.jl"
         # path = "$dir/filesystem.jl"
@@ -62,7 +62,7 @@ function tracer()
         # path = "$dir/math.jl"
         # path = "$dir/meta.jl"
         # path = "$dir/misc.jl"
-        # path = "$dir/missing.jl"
+        path = "$dir/missing.jl"
         # path = "$dir/mod2pi.jl"
         # path = "$dir/mpfr.jl"
         # path = "$dir/namedtuple.jl"
@@ -114,6 +114,7 @@ function tracer()
         # path = "$dir/vecelement.jl"
         # path = "$dir/version.jl"
         # path = "$dir/worlds.jl"
+        # path = "$dir/testdefs.jl"
         mod = @eval(Main, module IsolatedTests using Base end)
         @eval(mod, using Test, Random, Distributed, JuliaInterp)
         JuliaInterp.include(mod, path, false)
