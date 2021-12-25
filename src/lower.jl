@@ -46,10 +46,9 @@ end
 exclude(fun) = !(fun isa Function) ||
     fun isa Core.IntrinsicFunction ||
     fun isa Core.Builtin ||
-    # Base.moduleroot(parentmodule(fun)) in [Core]
-    Base.moduleroot(parentmodule(fun)) in [Base, Core]
+    Base.moduleroot(parentmodule(fun)) in [Core]
 function lookup_lower(codestate, ::Val{:call}, args)
-    # @show args
+    # @show :call args
     fun = lookup_lower(codestate, args[1])
     # @show fun
     parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
@@ -118,7 +117,7 @@ function quote_lower(val)
     QuoteNode(val)
 end
 function lookup_lower(codestate, ::Val{:foreigncall}, args)
-    # @show args
+    # @show :foreigncall args
     fun = quote_lower(lookup_lower(codestate, args[1]))
     # @show fun
     parms = [quote_lower(lookup_lower(codestate, arg)) for arg in args[6:end]]
