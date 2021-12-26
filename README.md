@@ -1,7 +1,7 @@
 # JuliaInterp.jl
 
 AST/IR interpretation of Julia test suite to improve  https://github.com/JuliaDebug/JuliaInterpreter.jl/issues/13. 
-The interpreter processes IR thunks until reaching a time budget per call site or `Core` methods. 
+The interpreter processes IR thunks until reaching a time budget per call site or `Base` or `Core` methods. 
 It switches to calling compiled methods then.
 
 ## Installation

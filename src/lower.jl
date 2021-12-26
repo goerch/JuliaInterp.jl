@@ -125,9 +125,22 @@ function lookup_lower(codestate, ::Val{:foreigncall}, args)
     # @show :foreigncall args
     fun = quote_lower(lookup_lower(codestate, args[1]))
     # @show fun
+    if codestate.meth isa Method && !isempty(codestate.lenv) 
+        rt = ccall(:jl_instantiate_type_in_env, Any, (Any, Any, Ptr{Any}), 
+            args[2], codestate.meth.sig, codestate.lenv)
+        at = Core.svec((
+            ccall(:jl_instantiate_type_in_env, Any, (Any, Any, Ptr{Any}), 
+                arg, codestate.meth.sig, codestate.lenv) for arg in args[3])...)
+    else
+        rt = args[2]
+        at = args[3]
+    end
+    nreq = args[4]
+    cc = args[5]
+    # @show rt at nreq cc    
     parms = [quote_lower(lookup_lower(codestate, arg)) for arg in args[6:end]]
     # @show parms
-    eval_ast(codestate.interpstate, Expr(:foreigncall, fun, args[2:5]..., parms...))
+    eval_ast(codestate.interpstate, Expr(:foreigncall, fun, rt, at, nreq, cc, parms...))
 end
 function lookup_lower(codestate, ::Val{:method}, args)
     args[1]
