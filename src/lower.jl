@@ -43,16 +43,21 @@ function lookup_lower(codestate, ::Val{:new}, args)
     # ccall(:jl_new_structv, Any, (Any, Ptr{Any}, UInt64), type, parms, length(parms))
     eval_ast(codestate.interpstate, Expr(:new, type, parms...))
 end
+@static if !isdefined(Base, :current_exceptions)
+    current_exceptions = Base.catch_stack
+else
+    current_exceptions = Base.current_exceptions
+end
 exclude(fun) = !(fun isa Function) ||
     fun isa Core.IntrinsicFunction ||
     fun isa Core.Builtin ||
-    Base.moduleroot(parentmodule(fun)) in [Core]
+    Base.moduleroot(parentmodule(fun)) in [Core, Base]
 function lookup_lower(codestate, ::Val{:call}, args)
     # @show :call args
     fun = lookup_lower(codestate, args[1])
     # @show fun
     parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
-    if fun == Base.current_exceptions
+    if fun == current_exceptions
         if isempty(parms) || parms[1] == current_task()
             return codestate.interpstate.exceptions
         end 
@@ -252,7 +257,7 @@ function interpret_lower(codestate, ::Val{:method}, args)
         else
             codestate.ssavalues[codestate.pc] =
                 ccall(:jl_method_def, Cvoid, (Any, Any, Any),
-                    parms[1], parms2[3], last(codestate.interpstate.mods).mod)
+                    parms[1], parms[2], last(codestate.interpstate.mods).mod)
         end
     end
     if meth isa Symbol
@@ -300,7 +305,7 @@ function interpret_lower(codestate, node)
         codestate.ssavalues[codestate.pc] = lookup_lower(codestate, node)
         codestate.pc += 1
     catch 
-        handle_error(codestate, Base.current_exceptions())
+        handle_error(codestate, Compat.current_exceptions())
     end
     return nothing
 end
@@ -310,7 +315,7 @@ function interpret_lower(codestate, newvarnode::Core.NewvarNode)
     try
         codestate.pc += 1
     catch 
-        handle_error(codestate, Base.current_exceptions())
+        handle_error(codestate, Compat.current_exceptions())
     end
     return nothing
 end
@@ -320,7 +325,7 @@ function interpret_lower(codestate, returnnode::Core.ReturnNode)
     try
         return Some(lookup_lower(codestate, returnnode.val))
     catch 
-        handle_error(codestate, Base.current_exceptions())
+        handle_error(codestate, Compat.current_exceptions())
     end
     return nothing
 end
@@ -333,7 +338,7 @@ function interpret_lower(codestate, gotoifnot::Core.GotoIfNot)
             codestate.pc = gotoifnot.dest
         end
     catch 
-        handle_error(codestate, Base.current_exceptions())
+        handle_error(codestate, Compat.current_exceptions())
     end
     return nothing
 end
@@ -342,7 +347,7 @@ function interpret_lower(codestate, gotonode::Core.GotoNode)
     try
         codestate.pc = gotonode.label
     catch 
-        handle_error(codestate, Base.current_exceptions())
+        handle_error(codestate, Compat.current_exceptions())
     end
     return nothing
 end
@@ -353,7 +358,7 @@ function interpret_lower(codestate, expr::Expr)
         interpret_lower(codestate, Val(expr.head), expr.args)
         codestate.pc += 1
     catch 
-        handle_error(codestate, Base.current_exceptions())
+        handle_error(codestate, Compat.current_exceptions())
     end
     return nothing
 end

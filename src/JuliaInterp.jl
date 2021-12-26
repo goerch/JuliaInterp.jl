@@ -1,5 +1,7 @@
 module JuliaInterp
 
+using Compat
+
 include("types.jl")
 include("lower.jl")
 include("ast.jl")

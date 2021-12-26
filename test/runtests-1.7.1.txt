@@ -1,0 +1,59 @@
+ERROR: LoadError: On worker 2:
+LoadError: IOError: unlink("C:\\Users\\Win10\\.julia\\compiled\\v1.7\\JuliaInterp\\Erpch_QLg2L.ji"): resource busy or locked (EBUSY)
+Stacktrace:
+  [1] uv_error
+    @ .\libuv.jl:97 [inlined]
+  [2] unlink
+    @ .\file.jl:958
+  [3] #rm#12
+    @ .\file.jl:276
+  [4] #checkfor_mv_cp_cptree#13
+    @ .\file.jl:323
+  [5] #cp#16
+    @ .\file.jl:364
+  [6] #rename#35
+    @ .\file.jl:967
+  [7] compilecache
+    @ .\loading.jl:1457
+  [8] compilecache
+    @ .\loading.jl:1410
+  [9] _require
+    @ .\loading.jl:1120
+ [10] require
+    @ .\loading.jl:1013
+ [11] require
+    @ .\loading.jl:997
+ [12] include
+    @ .\client.jl:451
+ [13] top-level scope
+    @ none:1
+ [14] eval
+    @ .\boot.jl:373
+ [15] #103
+    @ C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Distributed\src\process_messages.jl:274
+ [16] run_work_thunk
+    @ C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Distributed\src\process_messages.jl:63
+ [17] run_work_thunk
+    @ C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Distributed\src\process_messages.jl:72
+ [18] #96
+    @ .\task.jl:423
+in expression starting at C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:3
+
+...and 6 more exceptions.
+
+Stacktrace:
+ [1] sync_end(c::Channel{Any})
+   @ Base .\task.jl:381
+ [2] macro expansion
+   @ .\task.jl:400 [inlined]
+ [3] remotecall_eval(m::Module, procs::Vector{Int64}, ex::Expr)
+   @ Distributed C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Distributed\src\macros.jl:219
+ [4] macro expansion
+   @ C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Distributed\src\macros.jl:203 [inlined]
+ [5] (::var"#35#45")()
+   @ Main C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\runtests.jl:131
+ [6] cd(f::var"#35#45", dir::String)
+   @ Base.Filesystem .\file.jl:99
+ [7] top-level scope
+   @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\runtests.jl:97
+in expression starting at C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\runtests.jl:97

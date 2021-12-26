@@ -10,7 +10,11 @@ using Base: Experimental
 include("choosetests.jl")
 include("testenv.jl")
 
-(; tests, net_on, exit_on_error, use_revise, seed) = choosetests(ARGS)
+@static if VERSION >= v"1.8.0-DEV"
+    (; tests, net_on, exit_on_error, use_revise, seed) = choosetests(ARGS)
+else
+    tests, net_on, exit_on_error, use_revise, seed = choosetests(ARGS)
+end
 tests = unique(tests)
 
 if Sys.islinux()
@@ -114,15 +118,20 @@ cd(@__DIR__) do
         n = min(Sys.CPU_THREADS, length(tests))
         if n > 1
             for p in addprocs_with_testenv(n)
-                remotecall_fetch(include, p, "testdefs.jl")
+				@static if VERSION >= v"1.8.0-DEV"
+                	remotecall_fetch(include, p, "testdefs.jl")
+                end
             end
         end
         LinearAlgebra.BLAS.set_num_threads(1)
     end
     skipped = 0
 
-    # @everywhere include("testdefs.jl")
-    include("testdefs.jl")
+	@static if VERSION < v"1.8.0-DEV"
+    	@everywhere include("testdefs.jl")
+    else
+    	include("testdefs.jl")
+    end
 
     if use_revise
         Base.invokelatest(revise_trackall)
@@ -370,21 +379,31 @@ cd(@__DIR__) do
     =#
     Test.TESTSET_PRINT_ENABLE[] = false
     o_ts = Test.DefaultTestSet("Overall")
-    o_ts.time_end = o_ts.time_start + o_ts_duration # manually populate the timing
+	@static if VERSION >= v"1.8.0-DEV"
+    	o_ts.time_end = o_ts.time_start + o_ts_duration # manually populate the timing
+    end
     Test.push_testset(o_ts)
     completed_tests = Set{String}()
     for (testname, (resp,), duration) in results
         push!(completed_tests, testname)
         if isa(resp, Test.DefaultTestSet)
-            resp.time_end = resp.time_start + duration
+			@static if VERSION >= v"1.8.0-DEV"
+            	resp.time_end = resp.time_start + duration
+            end
             Test.push_testset(resp)
             Test.record(o_ts, resp)
             Test.pop_testset()
         elseif isa(resp, Test.TestSetException)
             fake = Test.DefaultTestSet(testname)
-            fake.time_end = fake.time_start + duration
+			@static if VERSION >= v"1.8.0-DEV"
+            	fake.time_end = fake.time_start + duration
+            end
             for i in 1:resp.pass
-                Test.record(fake, Test.Pass(:test, nothing, nothing, nothing, LineNumberNode(@__LINE__, @__FILE__)))
+				@static if VERSION >= v"1.8.0-DEV"
+                	Test.record(fake, Test.Pass(:test, nothing, nothing, nothing, LineNumberNode(@__LINE__, @__FILE__)))
+                else
+                	Test.record(fake, Test.Pass(:test, nothing, nothing, nothing))
+                end
             end
             for i in 1:resp.broken
                 Test.record(fake, Test.Broken(:test, nothing))
@@ -404,7 +423,9 @@ cd(@__DIR__) do
             # the test runner itself had some problem, so we may have hit a segfault,
             # deserialization errors or something similar.  Record this testset as Errored.
             fake = Test.DefaultTestSet(testname)
-            fake.time_end = fake.time_start + duration
+			@static if VERSION >= v"1.8.0-DEV"
+	            fake.time_end = fake.time_start + duration
+	        end
             Test.record(fake, Test.Error(:nontest_error, testname, nothing, Any[(resp, [])], LineNumberNode(1)))
             Test.push_testset(fake)
             Test.record(o_ts, fake)
