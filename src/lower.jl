@@ -51,7 +51,7 @@ end
 exclude(fun) = !(fun isa Function) ||
     fun isa Core.IntrinsicFunction ||
     fun isa Core.Builtin ||
-    Base.moduleroot(parentmodule(fun)) in [Core, Base]
+    Base.moduleroot(parentmodule(fun)) in [Core]
 function lookup_lower(codestate, ::Val{:call}, args)
     # @show :call args
     fun = lookup_lower(codestate, args[1])
@@ -113,7 +113,22 @@ function lookup_lower(codestate, ::Val{:call}, args)
             rethrow()
         end
     end =#
-    Base.@invokelatest fun(parms...)
+    if fun == Base.llvmcall
+        funname = gensym("llvmcall")
+        argnames = [Symbol(:(_), i) for i = 1:length(parms) - 3]
+        ir = parms[1]
+        rt = parms[2]
+        at = parms[3]
+        impl = quote
+            function $funname($(argnames...))
+                Base.llvmcall($ir, $rt, $at, $(argnames...))
+            end
+            $funname($(parms[4:end]...))
+        end
+        eval_ast(codestate.interpstate, impl)
+    else
+        Base.@invokelatest fun(parms...)
+    end
 end
 function quote_lower(symbol::Symbol)
     QuoteNode(symbol)
