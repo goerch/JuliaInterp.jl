@@ -3,7 +3,7 @@ function eval_ast(interpstate, expr)
     try
         # ans = Core.eval(last(interpstate.mods).mod, expr)
         ans = @eval last(interpstate.mods).mod $expr
-        interpstate.debug && @show ans
+        interpstate.debug && @show :eval_ast ans
         return ans
     catch exception
         interpstate.debug && @show :eval_ast expr exception
@@ -21,7 +21,7 @@ function eval_lower_ast(interpstate, expr)
             # ans = Core.eval(last(interpstate.mods).mod, expr)
             ans = @eval last(interpstate.mods).mod $expr
         end
-        interpstate.debug && @show ans
+        interpstate.debug && @show :eval_lower_ast ans
         return ans
     catch exception
         interpstate.debug && @show :eval_lower_ast expr exception
@@ -170,6 +170,9 @@ function interpret_ast(interpstate, ::Val{:export}, args)
     eval_lower_ast(interpstate, expr)
 end
 
+function interpret_ast(interpstate, ::Val{:incomplete}, args)
+    @show :toplevel args
+end 
 function interpret_ast(interpstate, ::Val{:toplevel}, args)
     interpstate.debug && @show :toplevel args
     local ans

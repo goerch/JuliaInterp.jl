@@ -25,10 +25,10 @@ function tracer()
             "client.jl",
             "cmdlineargs.jl",
             "combinatorics.jl",
-            "complex.jl", =#
-            "copy.jl"
-            #= "core.jl",
-            "corelogging.jl",
+            "complex.jl", 
+            "copy.jl", =#
+            "core.jl",
+            #= "corelogging.jl",
             "deprecation_exec.jl",
             "dict.jl",
             "docs.jl",

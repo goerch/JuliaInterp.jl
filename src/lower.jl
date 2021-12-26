@@ -314,10 +314,6 @@ end
 
 function interpret_lower(codestate, ::Val{:thunk}, args)
     codestate.interpstate.debug && @show :interpret_lower :thunk args
-    # This works on 1.7.0
-    #= codestate.ssavalues[codestate.pc] =
-        eval_ast(codestate.interpstate, Expr(:thunk, args...)) =#
-    # This works on 1.8.0 only...
     codestate.ssavalues[codestate.pc] =
         interpret_lower(codestate.interpstate, codestate, args[1])
 end
@@ -351,7 +347,8 @@ end
 function interpret_lower(codestate, returnnode::Core.ReturnNode)
     codestate.interpstate.debug && @show :interpret_lower returnnode
     try
-        return Some(lookup_lower(codestate, returnnode.val))
+        ans = lookup_lower(codestate, returnnode.val)
+        return Some{typeof(ans)}(ans)
     catch 
         handle_error(codestate, Compat.current_exceptions())
     end
@@ -395,7 +392,7 @@ function interpret_lower(interpstate, parent::Union{Nothing, CodeState}, src::Co
     codestate = code_state_from_thunk(interpstate, src)
     # interpstate.debug = true
     try
-        codestate.interpstate.debug && @show codestate.src
+        codestate.interpstate.debug && @show :interpret_lower codestate.src
         return run_code_state(codestate)
     finally
         # interpstate.debug = false

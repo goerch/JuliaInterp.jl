@@ -35,116 +35,116 @@ with a time budget of 10 ns per call site:
 
 ```
 Test Summary:      |     Pass  Fail  Error  Broken     Total      Time
-  Overall          | 21334526    53     55  352548  21687182  12m23.2s
-    unicode/utf8   |       19                             19      7.2s
-    core           |      160     1      4               165     20.9s
-    strings/io     |    12764                          12764     25.4s
-    worlds         |       81     2      1                84     31.1s
-    strings/search |      876                            876     31.9s
-    keywordargs    |      149     2                      151     33.8s
-    triplequote    |       29                             29      2.3s
-    ambiguous      |      107                    2       109     37.1s
-    intrinsics     |      301                            301     11.2s
-    strings/util   |     1147                           1147     47.5s
-    atomics        |     3444                           3444     52.0s
-    char           |     1628                           1628     22.2s
-    staged         |       64                             64     11.8s
-    strings/basic  |    87674                          87674   1m01.9s
-    tuple          |      624            1               625     43.7s
-    hashing        |    12518     1                    12519   1m26.9s
-    subtype        |   337672     1      1      19    337693   1m44.8s
-    reduce         |     8580     2                     8582   1m37.1s
-    simdloop       |      240                            240     22.4s
-    vecelement     |      678                            678     28.1s
-    intfuncs       |   228000                         228000   1m06.3s
-    copy           |      533                            533     20.7s
-    reducedim      |      865                            865   2m27.2s
-    fastmath       |      946                            946     21.7s
-    offsetarray    |      477    10              3       490   2m55.0s
-    functional     |       98                             98     19.2s
-    rational       |    98639                    1     98640   1m17.8s
-    ordering       |       37                             37     15.0s
-    operators      |    13040                          13040     22.8s
-    path           |     1051                   12      1063     21.3s
-    dict           |   144420                         144420   3m40.3s
-    parse          |    16098                          16098     11.0s
-    gmp            |     2357                           2357     21.1s
-    strings/types  |  2302691                        2302691   4m42.6s
-    backtrace      |       26     4      8       1        39     15.6s
-    ccall          |     1805     1      1              1807   1m04.8s
-    spawn          |                     1                 1     32.6s
-    exceptions     |       69     1                       70     13.0s
-    file           |        5            1                 6     14.5s
-    math           |   148979                         148979   2m50.6s
-    version        |     2452                           2452     11.9s
-    namedtuple     |      215                            215     12.4s
-    numbers        |  1578755     1              2   1578758   5m47.1s
-    abstractarray  |    55241                24795     80036   4m58.1s
-    floatapprox    |       49                             49     22.0s
-    subarray       |   318316                         318316   6m26.5s
-    complex        |     8432                    5      8437     34.1s
-    reflection     |      202            2               204     29.5s
-    arrayops       |     2031                    2      2033   5m50.2s
-    sysinfo        |        4                              4      0.8s
-    env            |       94                             94      1.9s
-    mpfr           |     1135                    1      1136   1m01.9s
-    combinatorics  |      170                            170     17.9s
-    regex          |      130                            130     25.0s
-    mod2pi         |       80                             80      6.3s
-    client         |        2     3                        5      7.6s
-    rounding       |   112720                         112720     46.4s
-    euler          |       12                             12     40.5s
-    goto           |       19                             19      0.3s
-    llvmcall2      |        7                              7      0.5s
-    show           |                     1                 1     41.4s
-    ryu            |    31215                          31215     14.8s
-    sorting        |    16096                   10     16106   3m32.6s
-    errorshow      |      143     2      1               146     46.8s
-    some           |       72                             72     16.4s
-    stacktraces    |       38     6      4                48     10.3s
-    meta           |                     1                 1     23.9s
-    iterators      |    10164                          10164   4m43.8s
-    docs           |      237            1               238     29.4s
-    enums          |       99                             99     13.9s
-    float16        |   762093                         762093   2m03.4s
-    interpreter    |        3                              3      8.2s
-    binaryplatforms |      341                            341     35.9s
-    atexit         |                     1                 1     32.0s
-    sets           |     3594                    1      3595   1m24.4s
-    checked        |     1239                           1239     18.2s
-    bitset         |      195                            195     15.8s
-    error          |       31                             31      6.4s
-    osutils        |       57                             57      0.9s
-    floatfuncs     |      215                            215     23.4s
-    read           |     3870                           3870   3m50.1s
-    boundscheck    |                                    None     22.0s
-    iostream       |       50                             50      4.3s
-    secretbuffer   |       27                             27      6.9s
-    specificity    |      175                            175      7.1s
-    cartesian      |      343                    3       346     37.8s
-    corelogging    |      231                            231     33.9s
-    syntax         |     1521     4      8       1      1534     45.8s
-    int            |   524698                         524698   1m43.0s
-    smallarrayshrink |       36                             36      0.1s
-    reinterpretarray |      232                            232     58.9s
-    opaque_closure |       33     4      5       1        43      4.9s
+  Overall          | 21342083    43     45  352545  21694716  13m21.8s
+    unicode/utf8   |       19                             19      9.1s
+    ambiguous      |      107                    2       109     28.8s
+    worlds         |       83            1                84     29.0s
+    strings/search |      876                            876     30.3s
+    keywordargs    |      150     1                      151     30.8s
+    char           |     1628                           1628     10.6s
+    strings/io     |    12764                          12764     43.6s
+    strings/util   |     1147                           1147     49.9s
+    intrinsics     |      301                            301      9.1s
+    triplequote    |       29                             29     12.4s
+    core           |      563     1      1       1       566     52.4s
+    staged         |       64                             64      8.0s
+    atomics        |     3444                           3444     58.2s
+    strings/basic  |    87674                          87674   1m07.2s
+    tuple          |      625                            625     38.2s
+    hashing        |    12519                          12519   1m10.2s
+    subtype        |   337673     1             19    337693   1m46.0s
+    simdloop       |      240                            240     20.0s
+    reduce         |     8580     2                     8582   1m28.6s
+    intfuncs       |   227930                         227930     52.3s
+    vecelement     |      678                            678     23.7s
+    copy           |      533                            533     25.8s
+    fastmath       |      945     1                      946     26.9s
+    offsetarray    |      477    10              3       490   2m54.8s
+    reducedim      |      865                            865   2m56.6s
+    rational       |    98639                    1     98640   1m40.4s
+    ordering       |       37                             37     10.7s
+    functional     |       98                             98     47.1s
+    operators      |    13040                          13040     35.9s
+    path           |     1051                   12      1063     17.9s
+    numbers        |  1578755     1              2   1578758   4m36.7s
+    dict           |   144420                         144420   4m02.5s
+    parse          |    16098                          16098     20.2s
+    strings/types  |  2302691                        2302691   4m54.4s
+    backtrace      |                     1                 1     11.9s
+    spawn          |                     1                 1     19.2s
+    gmp            |     2357                           2357     29.9s
+    exceptions     |       69     1                       70      1.7s
+    file           |        5            1                 6     13.9s
+    ccall          |     1796            7              1803   1m12.2s
+    version        |     2452                           2452     14.1s
+    math           |   148979                         148979   3m09.1s
+    namedtuple     |      215                            215     29.3s
+    floatapprox    |       49                             49     10.2s
+    mpfr           |     1135                    1      1136     47.1s
+    reflection     |      203            1               204     21.3s
+    regex          |      130                            130     10.9s
+    complex        |     8432                    5      8437     59.6s
+    abstractarray  |    55276                24795     80071   5m47.9s
+    sysinfo        |        4                              4     12.2s
+    combinatorics  |      170                            170     23.1s
+    env            |       94                             94     19.1s
+    subarray       |   318316                         318316   7m14.3s
+    mod2pi         |       80                             80      3.1s
+    arrayops       |     2031                    2      2033   6m27.4s
+    euler          |       12                             12      6.1s
+    client         |        2     3                        5      5.9s
+    rounding       |   112720                         112720     32.2s
+    goto           |       19                             19      0.5s
+    llvmcall2      |        7                              7      0.8s
+    ryu            |    31215                          31215     14.2s
+    errorshow      |      143     2      1               146     32.7s
+    show           |                     1                 1     41.7s
+    some           |       72                             72     10.0s
+    stacktraces    |        5            1                 6      6.3s
+    meta           |       69                             69     27.3s
+    sorting        |    16096                   10     16106   3m50.2s
+    docs           |      238                            238     45.2s
+    atexit         |       40                             40     15.4s
+    binaryplatforms |      341                            341     31.4s
+    float16        |   762093                         762093   2m17.5s
+    enums          |       99                             99     12.3s
+    read           |     3870                           3870   3m46.4s
+    checked        |     1239                           1239     13.1s
+    bitset         |      195                            195     13.3s
+    interpreter    |                     1                 1     23.7s
+    iterators      |    10164                          10164   5m34.6s
+    sets           |     3594                    1      3595   1m57.0s
+    error          |       31                             31      4.7s
+    osutils        |       57                             57      0.6s
+    boundscheck    |                                    None     19.5s
+    floatfuncs     |      215                            215     28.5s
+    iostream       |       50                             50     14.3s
+    specificity    |      175                            175      2.4s
+    secretbuffer   |       27                             27      5.5s
+    corelogging    |      231                            231     27.0s
+    cartesian      |      343                    3       346     49.5s
     asyncmap       |      304                            304     22.8s
-    filesystem     |        4                              4      4.7s
-    broadcast      |      509     2                      511   4m42.3s
-    missing        |      564     1              1       566     55.4s
-    channels       |                     1                 1   1m36.4s
-    download       |                                    None     24.2s
-    bitarray       |   915122                         915122   8m19.5s
-    loading        |   161598     3     11            161612   6m42.3s
-    misc           |  1279391            1           1279392   3m23.6s
-    ranges         | 12110641     2         327682  12438325   5m22.5s
-    cmdlineargs    |      255                    3       258   3m53.4s
-    precompile     |      123                            123     27.6s
-    threads        |       10                    3        13   1m36.9s
+    smallarrayshrink |       36                             36      0.2s
+    syntax         |     1519     6      8       1      1534     51.7s
+    opaque_closure |       31     4      7       1        43      5.6s
+    broadcast      |      509     2                      511   5m04.8s
+    filesystem     |        4                              4      6.3s
+    int            |   524698                         524698   1m60.0s
+    reinterpretarray |      232                            232   1m14.8s
+    missing        |      564     1              1       566     51.8s
+    bitarray       |   914898                         914898   8m48.1s
+    channels       |      256     2                      258   1m46.9s
+    download       |                                    None     24.5s
+    loading        |   168984     3     11            168998   7m15.1s
+    misc           |  1279391            1           1279392   3m47.6s
+    ranges         | 12110626     2         327682  12438310   5m18.4s
+    cmdlineargs    |                     1                 1   4m18.5s
+    precompile     |      123                            123     31.0s
+    threads        |       10                    3        13   1m45.8s
     stress         |                                    None      0.0s
     FAILURE
 
-The global RNG seed was 0x3c7a00807bfa89feaec4fdb21e5b1e28.
+The global RNG seed was 0x3a5aeb10eb1f0ec61fbe2dd49a6864e.
 ```
 
 One long running test is deactivated.

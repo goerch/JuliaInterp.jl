@@ -111,7 +111,7 @@ f47(x::Vector{Vector{T}}) where {T} = 0
 @test_throws TypeError TypeVar(:T) >: Any
 
 # issue #28673
-@test_throws TypeError Array{2}(undef, 1, 2)
+@test_throws TypeError Array{2}(undef, 1, 2) 
 
 # issue #12939
 module Issue12939

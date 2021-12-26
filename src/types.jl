@@ -61,10 +61,10 @@ end
 
 function run_code_state(codestate)
     while true
-        codestate.interpstate.debug && @show codestate.pc codestate.src.code[codestate.pc]
+        codestate.interpstate.debug && @show :run_code_state codestate.pc codestate.src.code[codestate.pc]
         ans = interpret_lower(codestate, codestate.src.code[codestate.pc])
         if ans isa Some
-            codestate.interpstate.debug && @show ans
+            codestate.interpstate.debug && @show :run_code_state ans
             return ans.value
         end
     end
