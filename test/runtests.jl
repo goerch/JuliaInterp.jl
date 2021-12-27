@@ -131,6 +131,7 @@ cd(__DIR__) do
     skipped = 0
 
 	@static if VERSION < v"1.8.0-DEV"
+        @everywhere const __HOME__ = @__DIR__
     	@everywhere include(joinpath(__HOME__, "testdefs.jl"))
     else
     	include(joinpath(__HOME__, "testdefs.jl"))
