@@ -18,20 +18,243 @@ julia.exe -t5 runtests.jl --skip llvmcall compiler stdlib
 
 ## Results
 
-Julia 1.8.0-DEV on Windows 
+All test were run with a time budget of 10 ns per call site.
+
+### Julia 1.6.5 on Windows 
 
 ```
-Julia Version 1.8.0-DEV.1176
-Commit 00646634c6 (2021-12-24 08:23 UTC)
-Platform Info:
-  OS: Windows (x86_64-w64-mingw32)
-  CPU: Intel(R) Core(TM) i7-10710U CPU @ 1.10GHz
-  WORD_SIZE: 64
-  LIBM: libopenlibm
-  LLVM: libLLVM-12.0.1 (ORCJIT, skylake)
+Test Summary:      |     Pass  Fail  Error  Broken     Total
+  Overall          | 21920715    10      2  352564  22273291
+    unicode/utf8   |       19                             19
+    strings/io     |    12751                          12751
+    keywordargs    |      151                            151
+    triplequote    |       29                             29
+    strings/search |      692                            692
+    intrinsics     |       90                             90
+    worlds         |       82     1                       83
+    strings/util   |      461                            461
+    char           |     1529                           1529
+    iobuffer       |      204                            204
+    staged         |       64                             64
+    core           |      613            1       1       615
+    ambiguous      |      101                    2       103
+    strings/basic  |    87674                          87674
+    tuple          |      578                            578
+    hashing        |    12356                          12356
+    intfuncs       |   215864                         215864
+    simdloop       |      249                            249
+    dict           |   144409                         144409
+    reduce         |     8543     2                     8545
+    vecelement     |      678                            678
+    copy           |      532                            532
+    fastmath       |      934                            934
+    subtype        |   337653                   16    337669
+    offsetarray    |      477                    3       480
+    functional     |       95                             95
+    operators      |    12949                          12949
+    ordering       |       35                             35
+    path           |     1015                   12      1027
+    rational       |    98622                    1     98623
+    reducedim      |      817                            817
+    parse          |    16098                          16098
+    gmp            |     2315                           2315
+    numbers        |  1578565                    1   1578566
+    backtrace      |       31     4              1        36
+    spawn          |      200                    4       204
+    exceptions     |       70                             70
+    file           |        5            1                 6
+    version        |     2452                           2452
+    namedtuple     |      194                    1       195
+    abstractarray  |    54784                24795     79579
+    math           |  1520143                        1520143
+    ccall          |     5332                           5332
+    floatapprox    |       49                             49
+    reflection     |      403                            403
+    regex          |      114                            114
+    float16        |      235                            235
+    mpfr           |     1135                           1135
+    complex        |     8429                    5      8434
+    sysinfo        |        4                              4
+    env            |       96                             96
+    combinatorics  |      170                            170
+    mod2pi         |       80                             80
+    arrayops       |     1979                    2      1981
+    euler          |       12                             12
+    client         |        3                              3
+    rounding       |   112720                         112720
+    errorshow      |      217                            217
+    goto           |       19                             19
+    llvmcall       |       19                             19
+    llvmcall2      |        7                              7
+    ryu            |    31215                          31215
+    some           |       65                             65
+    meta           |       64                             64
+    stacktraces    |       48                             48
+    docs           |      227                            227
+    sets           |     3518                    1      3519
+    strings/types  |  2302691                        2302691
+    iterators      |    10071                          10071
+    enums          |       99                             99
+    binaryplatforms |      341                            341
+    atexit         |       40                             40
+    interpreter    |        3                              3
+    misc           |  1282136                        1282136
+    bitset         |      195                            195
+    read           |     3141                           3141
+    show           |     1520                    8      1528
+    int            |   524668                         524668
+    ranges         | 12109734               327693  12437427
+    osutils        |       56                             56
+    error          |       31                             31
+    iostream       |       50                             50
+    secretbuffer   |       27                             27
+    checked        |     1239                           1239
+    specificity    |      175                            175
+    boundscheck    |                                No tests
+    cartesian      |      234                    3       237
+    corelogging    |      231                            231
+    syntax         |     1407     1              1      1409
+    sorting        |    12709                   10     12719
+    smallarrayshrink |       36                             36
+    filesystem     |        3     1                        4
+    broadcast      |      480                            480
+    channels       |      237                            237
+    reinterpretarray |      226                            226
+    asyncmap       |      292                            292
+    missing        |      472                    1       473
+    bitarray       |   913122                         913122
+    subarray       |   318299                         318299
+    download       |                                No tests
+    loading        |   154919     1                   154920
+    floatfuncs     |      193                            193
+    cmdlineargs    |      238                    3       241
+    precompile     |      116                            116
+    threads        |        1                              1
+    stress         |                                No tests
+    FAILURE
+
+The global RNG seed was 0x44392a72f6287afdc132e565d35ce960.
 ```
 
-with a time budget of 10 ns per call site:
+### Julia 1.7.5 on Windows 
+
+```
+Test Summary:      |     Pass  Fail  Error  Broken     Total
+  Overall          | 21455057    13      5  352557  21807632
+    unicode/utf8   |       19                             19
+    keywordargs    |      151                            151
+    strings/search |      692                            692
+    strings/io     |    12764                          12764
+    triplequote    |       29                             29
+    worlds         |       83                             83
+    char           |     1623                           1623
+    ambiguous      |      106                    2       108
+    intrinsics     |      301                            301
+    strings/util   |      619                            619
+    iobuffer       |      205                            205
+    staged         |       64                             64
+    strings/basic  |    87674                          87674
+    tuple          |      606                            606
+    atomics        |     3444                           3444
+    hashing        |    12519                          12519
+    dict           |   144420                         144420
+    simdloop       |      240                            240
+    reduce         |     8578     2                     8580
+    intfuncs       |   215864                         215864
+    subtype        |   337674                   19    337693
+    copy           |      533                            533
+    vecelement     |      678                            678
+    core           |      611            1       1       613
+    fastmath       |      946                            946
+    offsetarray    |      485                    3       488
+    functional     |       98                             98
+    ordering       |       35                             35
+    path           |     1051                   12      1063
+    numbers        |  1578627                    1   1578628
+    rational       |    98634                    1     98635
+    operators      |    13039                          13039
+    parse          |    16098                          16098
+    gmp            |     2324                           2324
+    reducedim      |      865                            865
+    backtrace      |       34     4              1        39
+    exceptions     |       70                             70
+    file           |        5            1                 6
+    spawn          |      210     1              4       215
+    math           |   148810                         148810
+    version        |     2452                           2452
+    namedtuple     |      214                            214
+    mpfr           |     1127                    1      1128
+    arrayops       |     2013                    2      2015
+    floatapprox    |       49                             49
+    ccall          |     5351                           5351
+    regex          |      130                            130
+    reflection     |      411                            411
+    complex        |     8432                    5      8437
+    sysinfo        |        4                              4
+    abstractarray  |    55133                24795     79928
+    env            |       96                             96
+    float16        |   762091                         762091
+    mod2pi         |       80                             80
+    euler          |       12                             12
+    combinatorics  |      170                            170
+    client         |        4                              4
+    rounding       |   112720                         112720
+    errorshow      |      219     3                      222
+    strings/types  |  2302691                        2302691
+    goto           |       19                             19
+    llvmcall2      |        7                              7
+    llvmcall       |       19                             19
+    ryu            |    31215                          31215
+    some           |       71                             71
+    meta           |       69                             69
+    stacktraces    |       48                             48
+    docs           |      236                            236
+    binaryplatforms |      341                            341
+    sets           |     3529                    1      3530
+    enums          |       99                             99
+    read           |     3725                           3725
+    atexit         |       40                             40
+    interpreter    |        3                              3
+    show           |   128869                    8    128877
+    misc           |  1282166                        1282166
+    bitset         |      195                            195
+    sorting        |    12709                   10     12719
+    broadcast      |      508                            508
+    error          |       31                             31
+    ranges         | 12110574               327682  12438256
+    osutils        |       57                             57
+    iostream       |       50                             50
+    secretbuffer   |       27                             27
+    int            |   524693                         524693
+    specificity    |      175                            175
+    checked        |     1239                           1239
+    cartesian      |      238                    3       241
+    boundscheck    |                                No tests
+    corelogging    |      231                            231
+    smallarrayshrink |       36                             36
+    opaque_closure |       37     1      3       1        42
+    syntax         |     1508     1              1      1510
+    iterators      |    10080                          10080
+    filesystem     |        4                              4
+    channels       |      244                            244
+    subarray       |   318299                         318299
+    reinterpretarray |      232                            232
+    asyncmap       |      304                            304
+    missing        |      565                    1       566
+    bitarray       |   916366                         916366
+    download       |                                No tests
+    loading        |   161391     1                   161392
+    floatfuncs     |      221                            221
+    cmdlineargs    |      242                    3       245
+    precompile     |      117                            117
+    threads        |        1                              1
+    stress         |                                No tests
+    FAILURE
+
+The global RNG seed was 0x806710cff2ab20fbba9977deb6ac6d4c.
+```
+
+### Julia 1.8.0-DEV on Windows 
 
 ```
 Test Summary:      |     Pass  Fail  Error  Broken     Total     Time

@@ -17,9 +17,9 @@ function tracer()
             "bitset.jl",
             "boundscheck.jl",
             "broadcast.jl",
-            "cartesian.jl", =#
-            "ccall.jl"
-            #= "channels.jl",
+            "cartesian.jl",
+            "ccall.jl",
+            "channels.jl",
             "char.jl",
             "checked.jl",
             "client.jl",
@@ -58,7 +58,7 @@ function tracer()
             "iterators.jl",
             "keywordargs.jl",
             "llvmcall.jl",
-            "llvmcall2.jl",
+            "llvmcall2.jl", 
             "loading.jl",
             "math.jl",
             "meta.jl",
@@ -66,9 +66,9 @@ function tracer()
             "missing.jl",
             "mod2pi.jl",
             "mpfr.jl",
-            "namedtuple.jl",
-            "numbers.jl",
-            "offsetarray.jl",
+            "namedtuple.jl", =#
+            "numbers.jl"
+            #= "offsetarray.jl", 
             "opaque_closure.jl",
             "operators.jl",
             "ordering.jl",

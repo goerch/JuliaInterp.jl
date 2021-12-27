@@ -121,7 +121,7 @@ function lookup_lower(codestate, ::Val{:call}, args)
     end =#
     if fun == Base.llvmcall
         funname = gensym("llvmcall")
-        argnames = [Symbol(:(_), i) for i = 1:length(parms) - 3]
+        argnames = (Symbol(:(_), i) for i = 1:length(parms) - 3)
         ir = parms[1]
         rt = parms[2]
         at = parms[3]
@@ -329,10 +329,12 @@ function interpret_lower(codestate, ::Val{:thunk}, args)
         interpret_lower(codestate.interpstate, codestate, args[1])
 end
 
+copy_lower(expr::Expr) = copy(expr)
+copy_lower(val) = val
 function interpret_lower(codestate, ::Val{:copyast}, args)
     codestate.interpstate.debug && @show :interpret_lower :copyast args
-    ans = lookup_lower(codestate, args[1])
-    codestate.ssavalues[codestate.pc] = ans isa Expr ? copy(ans) : ans
+    codestate.ssavalues[codestate.pc] = 
+        copy_lower(lookup_lower(codestate, args[1]))
 end
 
 function interpret_lower(codestate, node)

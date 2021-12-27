@@ -30,15 +30,14 @@ function code_state_from_thunk(interpstate, src)
         Int[])
 end
 
-internal_typeof(x::Type) = Type{x}
-internal_typeof(x) = typeof(x)
-
+typeof_lower(type::Type) = Type{type}
+typeof_lower(val) = typeof(val)
 function code_state_from_call(codestate, fun, parms...)
-    meth = which(fun, internal_typeof.(parms))
+    meth = which(fun, typeof_lower.(parms))
     src = Base.uncompressed_ast(meth)
     # src = Base.uncompressed_ir(meth)
     names = Base.method_argnames(meth)
-    sig = Base.signature_type(fun, internal_typeof.(parms))
+    sig = Base.signature_type(fun, typeof_lower.(parms))
     (ti, lenv) = ccall(:jl_type_intersection_with_env, Any, (Any, Any), sig, meth.sig)
     codestate = CodeState(codestate.interpstate, src, meth, names, lenv, 1,
         Vector(undef, length(src.code)), 

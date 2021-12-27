@@ -7,6 +7,8 @@ import REPL
 using Printf: @sprintf
 using Base: Experimental
 
+const __DIR__ = joinpath(dirname(Sys.BINDIR), "share/julia/test")
+
 include("choosetests.jl")
 include("testenv.jl")
 
@@ -54,7 +56,7 @@ function test_path(test)
             return joinpath(STDLIB_DIR, t[1], "test", "runtests")
         end
     else
-        return joinpath(@__DIR__, test)
+        return joinpath(__DIR__, test)
     end
 end
 
@@ -94,7 +96,7 @@ deleteat!(tests, linalg_test_ids)
 prepend!(tests, linalg_tests)
 
 import LinearAlgebra
-cd(@__DIR__) do
+cd(__DIR__) do
     # `net_on` implies that we have access to the loopback interface which is
     # necessary for Distributed multi-processing. There are some test
     # environments that do not allow access to loopback, so we must disable
