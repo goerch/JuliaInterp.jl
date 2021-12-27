@@ -331,7 +331,8 @@ end
 
 function interpret_lower(codestate, ::Val{:copyast}, args)
     codestate.interpstate.debug && @show :interpret_lower :copyast args
-    codestate.ssavalues[codestate.pc] = lookup_lower(codestate, args[1])
+    ans = lookup_lower(codestate, args[1])
+    codestate.ssavalues[codestate.pc] = ans isa Expr ? copy(ans) : ans
 end
 
 function interpret_lower(codestate, node)

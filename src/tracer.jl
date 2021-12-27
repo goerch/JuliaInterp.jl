@@ -17,9 +17,9 @@ function tracer()
             "bitset.jl",
             "boundscheck.jl",
             "broadcast.jl",
-            "cartesian.jl",
-            "ccall.jl",
-            "channels.jl",
+            "cartesian.jl", =#
+            "ccall.jl"
+            #= "channels.jl",
             "char.jl",
             "checked.jl",
             "client.jl",
@@ -105,9 +105,9 @@ function tracer()
             "strings/types.jl",
             "strings/util.jl",
             "subarray.jl",
-            "subtype.jl", =#
-            "syntax.jl"
-            #= "sysinfo.jl",
+            "subtype.jl", 
+            "syntax.jl",
+            "sysinfo.jl",
             "test_sourcepath.jl", 
             "threads.jl",
             "triplequote.jl",
