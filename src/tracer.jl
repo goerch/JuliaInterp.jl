@@ -26,9 +26,9 @@ function tracer()
             "cmdlineargs.jl",
             "combinatorics.jl",
             "complex.jl", 
-            "copy.jl", =#
+            "copy.jl",
             "core.jl",
-            #= "corelogging.jl",
+            "corelogging.jl",
             "deprecation_exec.jl",
             "dict.jl",
             "docs.jl",
@@ -49,9 +49,9 @@ function tracer()
             "gmp.jl",
             "goto.jl",
             "hashing.jl",
-            "int.jl",
-            "interpreter.jl",
-            "intfuncs.jl",
+            "int.jl", =#
+            "interpreter.jl"
+            #= "intfuncs.jl",
             "intrinsics.jl",
             "iobuffer.jl",
             "iostream.jl",
@@ -108,7 +108,7 @@ function tracer()
             "subtype.jl",
             "syntax.jl",
             "sysinfo.jl",
-            "test_sourcepath.jl",
+            "test_sourcepath.jl", 
             "threads.jl",
             "triplequote.jl",
             "tuple.jl",

@@ -63,7 +63,7 @@ catch err
     @test lkup[1].line == 111
 end
 
-end # module
+end # module 
 
 #issue 12977: line numbers for kwarg methods.
 linenum = @__LINE__; f12977(; args...) = ()

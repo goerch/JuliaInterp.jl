@@ -51,7 +51,7 @@ end
 exclude(fun) = !(fun isa Function) ||
     fun isa Core.IntrinsicFunction ||
     fun isa Core.Builtin ||
-    Base.moduleroot(parentmodule(fun)) in [Core]
+    Base.moduleroot(parentmodule(fun)) in [Core, Base]
 function lookup_lower(codestate, ::Val{:call}, args)
     # @show :call args
     fun = lookup_lower(codestate, args[1])
@@ -61,6 +61,12 @@ function lookup_lower(codestate, ::Val{:call}, args)
         if isempty(parms) || parms[1] == current_task()
             return codestate.interpstate.exceptions
         end 
+    elseif fun == Base.catch_backtrace
+        if isempty(codestate.interpstate.exceptions)
+            return []
+        else
+            return last(codestate.interpstate.exceptions).backtrace
+        end
     elseif fun == Base.rethrow
         fun = Base.throw
         if isempty(parms) 
@@ -296,6 +302,11 @@ function interpret_lower(codestate, ::Val{:method}, args)
             lookup_lower(codestate, meth)
     end
 end
+function interpret_lower(codestate, ::Val{:cfunction}, args)
+    codestate.interpstate.debug && @show :interpret_lower :cfunction args
+    codestate.ssavalues[codestate.pc] =
+        eval_ast(codestate.interpstate, Expr(:cfunction, args...))
+end
 function interpret_lower(codestate, ::Val{:const}, args)
     codestate.interpstate.debug && @show :interpret_lower :const args
     codestate.ssavalues[codestate.pc] =
@@ -398,3 +409,4 @@ function interpret_lower(interpstate, parent::Union{Nothing, CodeState}, src::Co
         # interpstate.debug = false
     end
 end
+
