@@ -40,8 +40,8 @@ function lookup_lower(codestate, ::Val{:new}, args)
     # @show type
     parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
     # @show parms
-    # ccall(:jl_new_structv, Any, (Any, Ptr{Any}, UInt64), type, parms, length(parms))
-    eval_ast(codestate.interpstate, Expr(:new, type, parms...))
+    # eval_ast(codestate.interpstate, Expr(:new, type, parms...))
+    ccall(:jl_new_structv, Any, (Any, Ptr{Any}, UInt64), type, parms, length(parms))
 end
 @static if !isdefined(Base, :current_exceptions)
     current_exceptions = Base.catch_stack

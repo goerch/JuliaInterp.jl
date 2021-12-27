@@ -59,7 +59,8 @@ end
 function interpret_ast(interpstate, ::Val{:macrocall}, args)
     interpstate.debug && @show :macrocall args
     expr = Expr(:macrocall, args...) 
-    eval_lower_ast(interpstate, expr)
+    # Macros be better handled by the compiler
+    eval_ast(interpstate, expr)
 end
 function interpret_ast(interpstate, ::Val{:(.=)}, args)
     interpstate.debug && @show :(.=) args
@@ -137,7 +138,8 @@ end
 function interpret_ast(interpstate, ::Val{:macro}, args)
     interpstate.debug && @show :macro args
     expr = Expr(:macro, args...)
-    eval_lower_ast(interpstate, expr)
+    # Macros be better handled by the compiler
+    eval_ast(interpstate, expr)
 end
 function interpret_ast(interpstate, ::Val{:struct}, args)
     interpstate.debug && @show :struct args
@@ -170,8 +172,11 @@ function interpret_ast(interpstate, ::Val{:export}, args)
     eval_lower_ast(interpstate, expr)
 end
 
+function interpret_ast(interpstate, ::Val{:error}, args)
+    @show :error args
+end 
 function interpret_ast(interpstate, ::Val{:incomplete}, args)
-    @show :toplevel args
+    @show :incomplete args
 end 
 function interpret_ast(interpstate, ::Val{:toplevel}, args)
     interpstate.debug && @show :toplevel args

@@ -49,9 +49,9 @@ function tracer()
             "gmp.jl",
             "goto.jl",
             "hashing.jl",
-            "int.jl", =#
-            "interpreter.jl"
-            #= "intfuncs.jl",
+            "int.jl",
+            "interpreter.jl",
+            "intfuncs.jl",
             "intrinsics.jl",
             "iobuffer.jl",
             "iostream.jl",
@@ -105,9 +105,9 @@ function tracer()
             "strings/types.jl",
             "strings/util.jl",
             "subarray.jl",
-            "subtype.jl",
-            "syntax.jl",
-            "sysinfo.jl",
+            "subtype.jl", =#
+            "syntax.jl"
+            #= "sysinfo.jl",
             "test_sourcepath.jl", 
             "threads.jl",
             "triplequote.jl",
