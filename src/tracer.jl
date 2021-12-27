@@ -1,7 +1,8 @@
 using Test, Random, Distributed, Compat, JuliaInterp
 
 function tracer()
-    dir = "C:/Users/Win10/Documents/GitHub/JuliaInterp.jl/test/"
+    dir = "C:/Users/Win10/AppData/Local/Programs/Julia-1.8.0-DEV/share/julia/test"
+    home = pwd()
     cd(dir)
     try
         for path in [
@@ -127,7 +128,7 @@ function tracer()
             end
         end
     finally
-        cd("..")
+        cd(home)
     end
 end
 

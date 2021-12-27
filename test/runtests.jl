@@ -7,6 +7,7 @@ import REPL
 using Printf: @sprintf
 using Base: Experimental
 
+const __HOME__ = @__DIR__
 const __DIR__ = joinpath(dirname(Sys.BINDIR), "share/julia/test")
 
 include("choosetests.jl")
@@ -121,7 +122,7 @@ cd(__DIR__) do
         if n > 1
             for p in addprocs_with_testenv(n)
 				@static if VERSION >= v"1.8.0-DEV"
-                	remotecall_fetch(include, p, "testdefs.jl")
+                	remotecall_fetch(include, p, joinpath(__HOME__, "testdefs.jl"))
                 end
             end
         end
@@ -130,9 +131,9 @@ cd(__DIR__) do
     skipped = 0
 
 	@static if VERSION < v"1.8.0-DEV"
-    	@everywhere include("testdefs.jl")
+    	@everywhere include(joinpath(__HOME__, "testdefs.jl"))
     else
-    	include("testdefs.jl")
+    	include(joinpath(__HOME__, "testdefs.jl"))
     end
 
     if use_revise
@@ -282,7 +283,7 @@ cd(__DIR__) do
                                 # so future tests get a fresh environment
                                 rmprocs(wrkr, waitfor=30)
                                 p = addprocs_with_testenv(1)[1]
-                                remotecall_fetch(include, p, "testdefs.jl")
+                                remotecall_fetch(include, p, joinpath(__HOME__, "testdefs.jl"))
                                 if use_revise
                                     Distributed.remotecall_eval(Main, p, revise_init_expr)
                                 end
@@ -295,7 +296,7 @@ cd(__DIR__) do
                                 if n > 1
                                     rmprocs(wrkr, waitfor=30)
                                     p = addprocs_with_testenv(1)[1]
-                                    remotecall_fetch(include, p, "testdefs.jl")
+                                    remotecall_fetch(include, p, joinpath(__HOME__, "testdefs.jl"))
                                     if use_revise
                                         Distributed.remotecall_eval(Main, p, revise_init_expr)
                                     end

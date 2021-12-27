@@ -56,7 +56,7 @@ function lookup_lower(codestate, ::Val{:call}, args)
     # @show :call args
     fun = lookup_lower(codestate, args[1])
     # @show fun
-    parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
+    parms = (lookup_lower(codestate, arg) for arg in @view args[2:end])
     if fun == current_exceptions
         if isempty(parms) || parms[1] == current_task()
             return codestate.interpstate.exceptions
@@ -71,12 +71,12 @@ function lookup_lower(codestate, ::Val{:call}, args)
         fun = Base.throw
         if isempty(parms) 
             if isempty(codestate.interpstate.exceptions)
-                parms = [ErrorException("rethrow() not allowed outside a catch block")]
+                parms = (ErrorException("rethrow() not allowed outside a catch block"),)
             else
-                parms = [pop!(codestate.interpstate.exceptions).exception]
+                parms = (pop!(codestate.interpstate.exceptions).exception,)
             end
         elseif isempty(codestate.interpstate.exceptions)
-            parms = [ErrorException("rethrow(exc) not allowed outside a catch block")]
+            parms = (ErrorException("rethrow(exc) not allowed outside a catch block"),)
         end
     end
     # @show parms
@@ -159,7 +159,7 @@ function lookup_lower(codestate, ::Val{:foreigncall}, args)
     nreq = args[4]
     cc = args[5]
     # @show rt at nreq cc    
-    parms = [quote_lower(lookup_lower(codestate, arg)) for arg in args[6:end]]
+    parms = (quote_lower(lookup_lower(codestate, arg)) for arg in args[6:end])
     # @show parms
     eval_ast(codestate.interpstate, Expr(:foreigncall, fun, rt, at, nreq, cc, parms...))
 end
@@ -281,17 +281,18 @@ end
 function interpret_lower(codestate, ::Val{:method}, args)
     codestate.interpstate.debug && @show :interpret_lower :method args
     meth = args[1] 
-    parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
-    if length(parms) > 0
+    parms = (lookup_lower(codestate, arg) for arg in @view args[2:end])
+    if length(parms) >= 2
+        parm1, parm2 = parms
         # branching on https://github.com/JuliaLang/julia/pull/41137
         @static if isdefined(Core.Compiler, :OverlayMethodTable)
             codestate.ssavalues[codestate.pc] =
                 ccall(:jl_method_def, Cvoid, (Any, Ptr{Cvoid}, Any, Any),
-                    parms[1], C_NULL, parms[2], last(codestate.interpstate.mods).mod)
+                    parm1, C_NULL, parm2, last(codestate.interpstate.mods).mod)
         else
             codestate.ssavalues[codestate.pc] =
                 ccall(:jl_method_def, Cvoid, (Any, Any, Any),
-                    parms[1], parms[2], last(codestate.interpstate.mods).mod)
+                    parm1, parm2, last(codestate.interpstate.mods).mod)
         end
     end
     if meth isa Symbol

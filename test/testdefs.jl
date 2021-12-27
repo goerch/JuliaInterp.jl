@@ -22,6 +22,7 @@ function runtests(name, path, isolate=true; seed=nothing)
             # Random.seed!(nothing) will fail
             seed != nothing && Random.seed!(seed)
             # Base.include(m, "$path.jl")
+            println("Interpreting $path.jl")
             JuliaInterp.include(m, "$path.jl")
         end
         rss = Sys.maxrss()
