@@ -38,8 +38,8 @@ function lookup_lower(codestate, ::Val{:new}, args)
     # @show args
     type = lookup_lower(codestate, args[1])
     # @show type
-    parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
     # @show parms
+    parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
     # eval_ast(codestate.interpstate, Expr(:new, type, parms...))
     ccall(:jl_new_structv, Any, (Any, Ptr{Any}, UInt64), type, parms, length(parms))
 end
@@ -67,12 +67,12 @@ function intercept(codestate, fun, parms)
         fun = Base.throw
         if isempty(parms) 
             if isempty(codestate.interpstate.exceptions)
-                parms = (ErrorException("rethrow() not allowed outside a catch block"),)
+                parms = Any[ErrorException("rethrow() not allowed outside a catch block")]
             else
-                parms = (pop!(codestate.interpstate.exceptions).exception,)
+                parms = Any[pop!(codestate.interpstate.exceptions).exception]
             end
         elseif isempty(codestate.interpstate.exceptions)
-            parms = (ErrorException("rethrow(exc) not allowed outside a catch block"),)
+            parms = Any[ErrorException("rethrow(exc) not allowed outside a catch block")]
         end
         return Some{Any}(Base.throw(parms...))
     # https://github.com/JuliaLang/julia/issues/43556
@@ -80,19 +80,17 @@ function intercept(codestate, fun, parms)
         return Some{Any}(Base.iolock_begin(parms...))
     elseif fun == Base.iolock_end
         return Some{Any}(Base.iolock_end(parms...))
+    elseif fun == Base.sigatomic_begin
+        return Some{Any}(Base.sigatomic_begin(parms...))
+    elseif fun == Base.sigatomic_end
+        return Some{Any}(Base.sigatomic_end(parms...))
     end
     return nothing
 end
 function recurse(codestate, fun, parms)
     if !isassigned(codestate.times, codestate.pc) || codestate.times[codestate.pc] < codestate.interpstate.budget
-        local childstate
-        try
-            childstate = code_state_from_call(codestate, fun, parms)
-        catch exception
-            # @show exception
-            childstate = nothing
-        end
-        if childstate isa CodeState
+        childstate = code_state_from_call(codestate, fun, parms)
+        if childstate !== nothing
             # codestate.interpstate.debug = true
             time = time_ns()
             try
@@ -114,7 +112,7 @@ function lookup_lower(codestate, ::Val{:call}, args)
     # @show :call args
     fun = lookup_lower(codestate, args[1])
     # @show fun
-    parms = (lookup_lower(codestate, arg) for arg in @view args[2:end])
+    parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
     # @show parms
     ans = intercept(codestate, fun, parms) 
     if ans isa Some
@@ -179,7 +177,7 @@ function lookup_lower(codestate, ::Val{:foreigncall}, args)
     nreq = args[4]
     cc = args[5]
     # @show rt at nreq cc    
-    parms = (quote_lower(lookup_lower(codestate, arg)) for arg in args[6:end])
+    parms = Any[quote_lower(lookup_lower(codestate, arg)) for arg in args[6:end]]
     # @show parms
     eval_ast(codestate.interpstate, Expr(:foreigncall, fun, rt, at, nreq, cc, parms...))
 end
@@ -301,18 +299,17 @@ end
 function interpret_lower(codestate, ::Val{:method}, args)
     codestate.interpstate.debug && @show :interpret_lower :method args
     meth = args[1] 
-    parms = (lookup_lower(codestate, arg) for arg in @view args[2:end])
+    parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
     if length(parms) >= 2
-        parm1, parm2 = parms
         # branching on https://github.com/JuliaLang/julia/pull/41137
         @static if isdefined(Core.Compiler, :OverlayMethodTable)
             codestate.ssavalues[codestate.pc] =
                 ccall(:jl_method_def, Cvoid, (Any, Ptr{Cvoid}, Any, Any),
-                    parm1, C_NULL, parm2, last(codestate.interpstate.mods).mod)
+                    parms[1], C_NULL, parms[2], last(codestate.interpstate.mods).mod)
         else
             codestate.ssavalues[codestate.pc] =
                 ccall(:jl_method_def, Cvoid, (Any, Any, Any),
-                    parm1, parm2, last(codestate.interpstate.mods).mod)
+                    parms[1], parms[2], last(codestate.interpstate.mods).mod)
         end
     end
     if meth isa Symbol

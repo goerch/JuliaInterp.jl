@@ -27,7 +27,7 @@ function tracer()
             "cmdlineargs.jl",
             "combinatorics.jl",
             "complex.jl", 
-            "copy.jl",
+            "copy.jl", 
             "core.jl",
             "corelogging.jl",
             "deprecation_exec.jl",
@@ -79,9 +79,9 @@ function tracer()
             "precompile.jl",
             "ranges.jl",
             "rational.jl",
-            "read.jl",
+            "read.jl", =#
             "reduce.jl",
-            "reducedim.jl",
+            #= "reducedim.jl",
             "reflection.jl",
             "regex.jl",
             "reinterpretarray.jl",
@@ -93,9 +93,9 @@ function tracer()
             "simdloop.jl",
             "smallarrayshrink.jl",
             "some.jl",
-            "sorting.jl", =#
-            "spawn.jl"
-            #= "specificity.jl",
+            "sorting.jl",
+            "spawn.jl",
+            "specificity.jl",
             "stacktraces.jl",
             "stack_overflow.jl",
             "staged.jl",

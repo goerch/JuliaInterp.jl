@@ -11,10 +11,10 @@ end
 
 mutable struct CodeState
     interpstate::InterpState
-    src::Core.CodeInfo
     meth::Union{Method, Module}
     names::Vector{Symbol}
     lenv::Core.SimpleVector
+    src::Core.CodeInfo
     pc::Int
     ssavalues::Vector
     times::Vector{UInt64}
@@ -23,7 +23,7 @@ mutable struct CodeState
 end
 
 function code_state_from_thunk(interpstate, src)
-    CodeState(interpstate, src, last(interpstate.mods).mod, [], Core.svec(), 1,
+    CodeState(interpstate, last(interpstate.mods).mod, [], Core.svec(), src, 1,
         Vector(undef, length(src.code)), 
         Vector{UInt64}(undef, length(src.code)), 
         Vector(undef, length(src.slotnames)),
@@ -32,14 +32,35 @@ end
 
 typeof_lower(type::Type) = Type{type}
 typeof_lower(val) = typeof(val)
+generate_lower(codestate, expr::Expr) = eval_ast(codestate.interpstate, expr)
+generate_lower(codestate, val) = val
 function code_state_from_call(codestate, fun, parms)
-    meth = which(fun, typeof_lower.(parms))
-    src = Base.uncompressed_ast(meth)
-    # src = Base.uncompressed_ir(meth)
+    @assert !(fun isa Core.IntrinsicFunction) && !(fun isa Core.Builtin) 
+    #= try
+        meth = which(fun, typeof_lower.(parms...))
+    catch exception
+        if exception isa MethodError
+            return nothing
+        end
+        rethrow(exception)
+    end =#
+    wc = ccall(:jl_get_world_counter, UInt, ())
+    meth = ccall(:jl_gf_invoke_lookup, Any, (Any, UInt), typeof_lower.((fun, parms...)), wc)
+    if meth === nothing
+        return nothing
+    end
     names = Base.method_argnames(meth)
-    sig = Base.signature_type(fun, typeof_lower.(parms))
+    sig = Base.signature_type(fun, typeof_lower.(parms...))
     (ti, lenv) = ccall(:jl_type_intersection_with_env, Any, (Any, Any), sig, meth.sig)
-    codestate = CodeState(codestate.interpstate, src, meth, names, lenv, 1,
+    if !isdefined(meth, :generator)
+        src = Base.uncompressed_ast(meth)
+        # src = Base.uncompressed_ir(meth)
+    else
+        # expr = Base.@invokelatest meth.generator(lenv..., meth.generator.argnames...)
+        # src = Meta.lower(last(codestate.interpstate.mods).mod, expr)
+        return nothing
+    end
+    codestate = CodeState(codestate.interpstate, meth, names, lenv, src, 1,
         Vector(undef, length(src.code)), 
         Vector{UInt64}(undef, length(src.code)), 
         Vector(undef, length(src.slotnames)),
@@ -55,7 +76,7 @@ function code_state_from_call(codestate, fun, parms)
         end
         codestate.slots[meth.nargs] = parms[meth.nargs - 1:end]
     end
-    codestate
+    return codestate
 end
 
 function run_code_state(codestate)
