@@ -32,7 +32,7 @@ end
 
 typeof_lower(type::Type) = Type{type}
 typeof_lower(val) = typeof(val)
-function code_state_from_call(codestate, fun, parms...)
+function code_state_from_call(codestate, fun, parms)
     meth = which(fun, typeof_lower.(parms))
     src = Base.uncompressed_ast(meth)
     # src = Base.uncompressed_ir(meth)

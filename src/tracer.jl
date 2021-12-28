@@ -67,9 +67,9 @@ function tracer()
             "missing.jl",
             "mod2pi.jl",
             "mpfr.jl",
-            "namedtuple.jl", =#
-            "numbers.jl"
-            #= "offsetarray.jl", 
+            "namedtuple.jl", 
+            "numbers.jl",
+            "offsetarray.jl", 
             "opaque_closure.jl",
             "operators.jl",
             "ordering.jl",
@@ -93,9 +93,9 @@ function tracer()
             "simdloop.jl",
             "smallarrayshrink.jl",
             "some.jl",
-            "sorting.jl",
-            "spawn.jl",
-            "specificity.jl",
+            "sorting.jl", =#
+            "spawn.jl"
+            #= "specificity.jl",
             "stacktraces.jl",
             "stack_overflow.jl",
             "staged.jl",

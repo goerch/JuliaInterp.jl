@@ -43,29 +43,25 @@ function lookup_lower(codestate, ::Val{:new}, args)
     # eval_ast(codestate.interpstate, Expr(:new, type, parms...))
     ccall(:jl_new_structv, Any, (Any, Ptr{Any}, UInt64), type, parms, length(parms))
 end
+exclude(fun) = !(fun isa Function) ||
+    fun isa Core.IntrinsicFunction ||
+    fun isa Core.Builtin ||
+    Base.moduleroot(parentmodule(fun)) in [Core]
 @static if !isdefined(Base, :current_exceptions)
     current_exceptions = Base.catch_stack
 else
     current_exceptions = Base.current_exceptions
 end
-exclude(fun) = !(fun isa Function) ||
-    fun isa Core.IntrinsicFunction ||
-    fun isa Core.Builtin ||
-    Base.moduleroot(parentmodule(fun)) in [Core, Base]
-function lookup_lower(codestate, ::Val{:call}, args)
-    # @show :call args
-    fun = lookup_lower(codestate, args[1])
-    # @show fun
-    parms = (lookup_lower(codestate, arg) for arg in @view args[2:end])
+function intercept(codestate, fun, parms)
     if fun == current_exceptions
         if isempty(parms) || parms[1] == current_task()
-            return codestate.interpstate.exceptions
+            return Some{Any}(codestate.interpstate.exceptions)
         end 
     elseif fun == Base.catch_backtrace
         if isempty(codestate.interpstate.exceptions)
-            return []
+            return Some{Any}([])
         else
-            return last(codestate.interpstate.exceptions).backtrace
+            return Some{Any}(last(codestate.interpstate.exceptions).backtrace)
         end
     elseif fun == Base.rethrow
         fun = Base.throw
@@ -78,36 +74,60 @@ function lookup_lower(codestate, ::Val{:call}, args)
         elseif isempty(codestate.interpstate.exceptions)
             parms = (ErrorException("rethrow(exc) not allowed outside a catch block"),)
         end
+        return Some{Any}(Base.throw(parms...))
+    # https://github.com/JuliaLang/julia/issues/43556
+    elseif fun == Base.iolock_begin
+        return Some{Any}(Base.iolock_begin(parms...))
+    elseif fun == Base.iolock_end
+        return Some{Any}(Base.iolock_end(parms...))
     end
-    # @show parms
-    if !exclude(fun)
-        if !isassigned(codestate.times, codestate.pc) || codestate.times[codestate.pc] < codestate.interpstate.budget
-            local childstate
+    return nothing
+end
+function recurse(codestate, fun, parms)
+    if !isassigned(codestate.times, codestate.pc) || codestate.times[codestate.pc] < codestate.interpstate.budget
+        local childstate
+        try
+            childstate = code_state_from_call(codestate, fun, parms)
+        catch exception
+            # @show exception
+            childstate = nothing
+        end
+        if childstate isa CodeState
+            # codestate.interpstate.debug = true
+            time = time_ns()
             try
-                childstate = code_state_from_call(codestate, fun, parms...)
-            catch
-                childstate = nothing
+                childstate.interpstate.debug && @show childstate.src
+                return Some{Any}(run_code_state(childstate))
+            finally
+                if !isassigned(codestate.times, codestate.pc)
+                    codestate.times[codestate.pc] = time_ns() - time
+                else
+                    codestate.times[codestate.pc] += time_ns() - time
+                end 
+                # codestate.interpstate.debug = false
             end
-            if childstate isa CodeState
-                # codestate.interpstate.debug = true
-                time = time_ns()
-                try
-                    childstate.interpstate.debug && @show childstate.src
-                    return run_code_state(childstate)
-                finally
-                    if !isassigned(codestate.times, codestate.pc)
-                        codestate.times[codestate.pc] = time_ns() - time
-                    else
-                        codestate.times[codestate.pc] += time_ns() - time
-                    end
-                    # codestate.interpstate.debug = false
-                end
-            end
-        elseif !exclude(fun)
-            # @show :maybe_include codestate.interpstate.depth codestate.times[codestate.pc]
+        end
+    end
+    return nothing
+end
+function lookup_lower(codestate, ::Val{:call}, args)
+    # @show :call args
+    fun = lookup_lower(codestate, args[1])
+    # @show fun
+    parms = (lookup_lower(codestate, arg) for arg in @view args[2:end])
+    # @show parms
+    ans = intercept(codestate, fun, parms) 
+    if ans isa Some
+        return something(ans)
+    elseif !exclude(fun)
+        ans = recurse(codestate, fun, parms)
+        if ans isa Some
+            return something(ans)
+        elseif exclude(fun)
+            # @show :maybe_include codestate.times[codestate.pc]
         end
     else
-        # @show :exclude codestate.interpstate.depth
+        # @show :exclude 
     end
     # eval_ast(codestate.interpstate, Expr(:call, fun, parms...))
     #= try
