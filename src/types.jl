@@ -56,9 +56,8 @@ function code_state_from_call(codestate, fun, parms)
         src = Base.uncompressed_ast(meth)
         # src = Base.uncompressed_ir(meth)
     else
-        # expr = Base.@invokelatest meth.generator(lenv..., meth.generator.argnames...)
-        # src = Meta.lower(last(codestate.interpstate.mods).mod, expr)
-        return nothing
+        expr = Base.@invokelatest meth.generator(lenv..., meth.generator.argnames...)
+        src = Meta.lower(last(codestate.interpstate.mods).mod, expr)
     end
     codestate = CodeState(codestate.interpstate, meth, names, lenv, src, 1,
         Vector(undef, length(src.code)), 
