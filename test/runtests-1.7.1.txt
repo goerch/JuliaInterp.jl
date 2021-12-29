@@ -1,0 +1,1238 @@
+Test          (Worker) | Time (s) | GC (s) | GC % | Alloc (MB) | RSS (MB)
+strings/search     (5) |        started at 2021-12-29T22:09:04.237
+atomics           (12) |        started at 2021-12-29T22:09:04.316
+strings/util       (6) |        started at 2021-12-29T22:09:04.398
+subarray           (3) |        started at 2021-12-29T22:09:04.401
+strings/types      (8) |        started at 2021-12-29T22:09:04.404
+worlds            (11) |        started at 2021-12-29T22:09:04.410
+strings/io         (7) |        started at 2021-12-29T22:09:04.415
+ambiguous          (2) |        started at 2021-12-29T22:09:04.420
+strings/basic      (4) |        started at 2021-12-29T22:09:04.425
+core              (10) |        started at 2021-12-29T22:09:04.432
+keywordargs       (13) |        started at 2021-12-29T22:09:04.437
+unicode/utf8       (9) |        started at 2021-12-29T22:09:04.444
+      From worker 12:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\atomics.jl
+      From worker 6:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\strings/util.jl
+      From worker 3:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\subarray.jl
+      From worker 8:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\strings/types.jl
+      From worker 11:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\worlds.jl
+      From worker 7:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\strings/io.jl
+      From worker 2:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\ambiguous.jl
+      From worker 5:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\strings/search.jl
+      From worker 4:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\strings/basic.jl
+      From worker 10:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\core.jl
+      From worker 13:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\keywordargs.jl
+      From worker 9:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\unicode/utf8.jl
+unicode/utf8       (9) |     1.28 |   0.04 |  2.9 |      92.51 |   289.71
+numbers            (9) |        started at 2021-12-29T22:09:06.175
+      From worker 9:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\numbers.jl
+      From worker 2:	:code_state_from_call = :code_state_from_call
+      From worker 2:	fun = Main.Test18Main_ambiguous.ambig_with_bounds
+keywordargs       (13) |     5.48 |   0.14 |  2.5 |     431.84 |   289.64
+subtype           (13) |        started at 2021-12-29T22:09:10.264
+      From worker 13:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\subtype.jl
+strings/io         (7) |     8.21 |   0.44 |  5.4 |     583.03 |   331.36
+char               (7) |        started at 2021-12-29T22:09:12.958
+      From worker 7:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\char.jl
+worlds            (11) |     8.84 |   0.22 |  2.4 |     691.99 |   317.81
+triplequote       (11) |        started at 2021-12-29T22:09:13.494
+      From worker 11:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\triplequote.jl
+triplequote       (11) |     0.15 |   0.00 |  0.0 |       9.18 |   317.90
+intrinsics        (11) |        started at 2021-12-29T22:09:13.657
+      From worker 11:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\intrinsics.jl
+strings/search     (5) |     9.04 |   0.21 |  2.4 |     578.16 |   286.24
+dict               (5) |        started at 2021-12-29T22:09:13.789
+      From worker 5:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\dict.jl
+      From worker 2:	Skipping Base.active_repl
+      From worker 2:	Skipping Base.active_repl_backend
+      From worker 2:	Skipping Base.Filesystem.JL_O_NOCTTY
+      From worker 2:	Skipping Base.Filesystem.JL_O_SHORT_LIVED
+      From worker 2:	Skipping Base.BinaryPlatforms.compiler_abi
+      From worker 10:	:code_state_from_call = :code_state_from_call
+      From worker 10:	fun = Main.Test36Main_core.var"#foo2#51"()
+      From worker 2:	Skipping Base.active_repl
+      From worker 2:	Skipping Base.active_repl_backend
+      From worker 2:	Skipping Base.Filesystem.JL_O_NOCTTY
+      From worker 2:	Skipping Base.Filesystem.JL_O_SHORT_LIVED
+      From worker 2:	Skipping Base.BinaryPlatforms.compiler_abi
+      From worker 10:	:code_state_from_call = :code_state_from_call
+      From worker 10:	fun = Main.Test36Main_core.var"#fooN#52"()
+      From worker 2:	Skipping Pkg.Types.find_registered!
+      From worker 2:	Skipping Pkg.BinaryPlatforms.compiler_abi
+char               (7) |     4.70 |   0.20 |  4.3 |     231.51 |   331.36
+hashing            (7) |        started at 2021-12-29T22:09:17.669
+      From worker 7:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\hashing.jl
+      From worker 2:	:code_state_from_call = :code_state_from_call
+      From worker 2:	fun = Main.Test18Main_ambiguous.Ambig8.f
+      From worker 2:	:code_state_from_call = :code_state_from_call
+      From worker 2:	fun = Main.Test18Main_ambiguous.Ambig8.f
+intrinsics        (11) |     7.66 |   0.12 |  1.5 |     367.99 |   332.35
+iobuffer          (11) |        started at 2021-12-29T22:09:21.331
+      From worker 11:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\iobuffer.jl
+      From worker 2:	Skipping Base.active_repl
+      From worker 2:	Skipping Base.active_repl_backend
+      From worker 2:	Skipping Base.Filesystem.JL_O_NOCTTY
+      From worker 2:	Skipping Base.Filesystem.JL_O_SHORT_LIVED
+      From worker 2:	Skipping Base.BinaryPlatforms.compiler_abi
+      From worker 2:	Skipping Base.active_repl
+      From worker 2:	Skipping Base.active_repl_backend
+      From worker 2:	Skipping Base.Filesystem.JL_O_NOCTTY
+      From worker 2:	Skipping Base.Filesystem.JL_O_SHORT_LIVED
+      From worker 2:	Skipping Base.BinaryPlatforms.compiler_abi
+ambiguous          (2) |    18.52 |   0.39 |  2.1 |    1329.69 |   321.93
+staged             (2) |        started at 2021-12-29T22:09:23.166
+      From worker 2:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\staged.jl
+strings/util       (6) |    18.61 |   0.82 |  4.4 |     986.88 |   339.83
+offsetarray        (6) |        started at 2021-12-29T22:09:23.364
+      From worker 6:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\offsetarray.jl
+iobuffer          (11) |     3.17 |   0.07 |  2.1 |     122.43 |   344.86
+arrayops          (11) |        started at 2021-12-29T22:09:24.507
+      From worker 11:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\arrayops.jl
+staged             (2) |         failed at 2021-12-29T22:09:29.990
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\staged.jl:37
+  Expression: String(take!(stagediobuf)) == "($(intstr),)"
+   Evaluated: "a" == "(Int64,)"
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\staged.jl:70
+  Expression: String(take!(stagediobuf)) == "(UnitRange{$(intstr)}, $(intstr), UnitRange{$(intstr)})"
+   Evaluated: "indx" == "(UnitRange{Int64}, Int64, UnitRange{Int64})"
+
+strings/basic      (4) |    31.43 |   0.71 |  2.3 |    1756.53 |   323.67
+tuple              (4) |        started at 2021-12-29T22:09:36.257
+      From worker 4:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\tuple.jl
+reduce            (14) |        started at 2021-12-29T22:09:40.023
+      From worker 14:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\reduce.jl
+atomics           (12) |    40.62 |   1.10 |  2.7 |    2251.91 |   335.23
+reducedim         (12) |        started at 2021-12-29T22:09:45.473
+      From worker 12:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\reducedim.jl
+tuple              (4) |    11.12 |   0.26 |  2.4 |     686.95 |   340.97
+abstractarray      (4) |        started at 2021-12-29T22:09:47.662
+      From worker 4:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\abstractarray.jl
+hashing            (7) |    41.16 |   1.15 |  2.8 |    2416.99 |   367.79
+intfuncs           (7) |        started at 2021-12-29T22:09:59.131
+      From worker 7:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\intfuncs.jl
+subtype           (13) |    49.98 |   1.31 |  2.6 |    2489.15 |  1258.39
+simdloop          (13) |        started at 2021-12-29T22:10:00.278
+      From worker 13:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\simdloop.jl
+dict               (5) |    48.52 |   1.78 |  3.7 |    2397.97 |   390.83
+vecelement         (5) |        started at 2021-12-29T22:10:02.347
+      From worker 5:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\vecelement.jl
+simdloop          (13) |     5.03 |   0.26 |  5.1 |     289.48 |  1258.39
+rational          (13) |        started at 2021-12-29T22:10:05.319
+      From worker 13:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\rational.jl
+intfuncs           (7) |    17.32 |   0.61 |  3.6 |     728.58 |   415.09
+bitarray           (7) |        started at 2021-12-29T22:10:16.461
+      From worker 7:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\bitarray.jl
+vecelement         (5) |    20.56 |   0.49 |  2.4 |    1606.94 |   390.83
+copy               (5) |        started at 2021-12-29T22:10:22.914
+      From worker 5:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\copy.jl
+reduce            (14) |         failed at 2021-12-29T22:10:25.076
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\reduce.jl:41
+  Expression: 0 == #= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\reduce.jl:41 =# @allocated(sum(Iterators.reverse(x)))
+   Evaluated: 0 == 6565828
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\reduce.jl:42
+  Expression: 0 == #= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\reduce.jl:42 =# @allocated(foldr(-, x))
+   Evaluated: 0 == 4958814
+
+copy               (5) |     5.56 |   0.12 |  2.2 |     296.28 |   390.83
+math               (5) |        started at 2021-12-29T22:10:28.482
+      From worker 5:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\math.jl
+fastmath          (15) |        started at 2021-12-29T22:10:35.316
+      From worker 15:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\fastmath.jl
+fastmath          (15) |    22.20 |   0.39 |  1.8 |    1124.41 |   299.89
+functional        (15) |        started at 2021-12-29T22:10:58.120
+      From worker 15:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\functional.jl
+rational          (13) |    58.63 |   1.49 |  2.5 |    2250.26 |  1258.39
+iterators         (13) |        started at 2021-12-29T22:11:03.960
+      From worker 13:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\iterators.jl
+offsetarray        (6) |   109.40 |   3.56 |  3.3 |    5804.75 |   468.96
+operators          (6) |        started at 2021-12-29T22:11:13.116
+      From worker 6:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\operators.jl
+numbers            (9) |   127.19 |   2.80 |  2.2 |    6112.70 |   719.79
+ordering           (9) |        started at 2021-12-29T22:11:13.400
+      From worker 9:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\ordering.jl
+functional        (15) |    16.96 |   0.61 |  3.6 |    1055.19 |   338.22
+path              (15) |        started at 2021-12-29T22:11:15.093
+      From worker 15:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\path.jl
+path              (15) |     2.92 |   0.05 |  1.6 |     145.38 |   364.25
+ccall             (15) |        started at 2021-12-29T22:11:18.020
+      From worker 15:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\ccall.jl
+ordering           (9) |     4.99 |   0.06 |  1.2 |     146.03 |   719.79
+parse              (9) |        started at 2021-12-29T22:11:18.400
+      From worker 9:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\parse.jl
+parse              (9) |     8.81 |   0.19 |  2.2 |     326.69 |   719.79
+loading            (9) |        started at 2021-12-29T22:11:27.218
+      From worker 9:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\loading.jl
+reducedim         (12) |   102.32 |   2.51 |  2.5 |    5304.31 |   477.07
+gmp               (12) |        started at 2021-12-29T22:11:27.807
+      From worker 12:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\gmp.jl
+operators          (6) |    15.84 |   0.51 |  3.2 |     931.81 |   482.25
+sorting            (6) |        started at 2021-12-29T22:11:28.971
+      From worker 6:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\sorting.jl
+gmp               (12) |    11.22 |   0.26 |  2.4 |     499.86 |   477.07
+spawn             (12) |        started at 2021-12-29T22:11:39.040
+      From worker 12:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\spawn.jl
+      From worker 12:	       [34m[stdio passthrough ok][0m
+math               (5) |   102.21 |   4.83 |  4.7 |    4904.58 |   622.69
+backtrace          (5) |        started at 2021-12-29T22:12:10.706
+      From worker 5:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\backtrace.jl
+      From worker 5:	[ Info: 
+backtrace          (5) |         failed at 2021-12-29T22:12:17.224
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\backtrace.jl:167
+  Expression: StackTraces.is_top_level_frame(st[1])
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\backtrace.jl:168
+  Expression: string((st[1]).file) == #= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\backtrace.jl:168 =# @__FILE__()
+   Evaluated: ".\\essentials.jl" == "C:\\Users\\Win10\\AppData\\Local\\Programs\\Julia-1.7.1\\share/julia/test\\backtrace.jl"
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\backtrace.jl:182
+  Expression: found
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\backtrace.jl:194
+  Expression: found
+
+spawn             (12) |         failed at 2021-12-29T22:12:19.774
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\spawn.jl:59
+  Expression: run(pipeline(yescmd, `head`, devnull))
+    Expected: ProcessFailedException
+      Thrown: Base.IOError
+
+exceptions        (16) |        started at 2021-12-29T22:12:27.143
+      From worker 16:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\exceptions.jl
+exceptions        (16) |     4.04 |   0.21 |  5.2 |     255.99 |   314.27
+file              (16) |        started at 2021-12-29T22:12:31.634
+      From worker 16:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\file.jl
+read              (17) |        started at 2021-12-29T22:12:34.217
+      From worker 17:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\read.jl
+file              (16) |         failed at 2021-12-29T22:12:37.046
+Error During Test at C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:21
+  Got exception outside of a @test
+  IOError: On Windows, creating symlinks requires Administrator privileges.
+  symlink("..\\adir2", "C:\\Users\\Win10\\AppData\\Local\\Temp\\jl_jVDHOi\\adir\\rel_subdirlink"): operation not permitted (EPERM)
+  Stacktrace:
+    [1] uv_error
+      @ .\libuv.jl:97 [inlined]
+    [2] symlink(target::String, link::String; dir_target::Bool)
+      @ Base.Filesystem .\file.jl:1070
+    [3] symlink(target::String, link::String)
+      @ Base.Filesystem .\file.jl:1034
+    [4] invokelatest(::Any, ::Any, ::Vararg{Any}; kwargs::Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}})
+      @ Base .\essentials.jl:716
+    [5] invokelatest(::Any, ::Any, ::Vararg{Any})
+      @ Base .\essentials.jl:714
+    [6] lookup_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any})
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\lower.jl:84
+    [7] lookup_lower(codestate::JuliaInterp.CodeState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\lower.jl:168
+    [8] interpret_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any})
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\lower.jl:211
+    [9] interpret_lower(codestate::JuliaInterp.CodeState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\lower.jl:364
+   [10] run_code_state(codestate::JuliaInterp.CodeState)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\types.jl:197
+   [11] interpret_lower(interpstate::JuliaInterp.InterpState, parent::Nothing, src::Core.CodeInfo)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\lower.jl:382
+   [12] eval_lower_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:19
+   [13] interpret_ast(interpstate::JuliaInterp.InterpState, #unused#::Val{:if}, args::Vector{Any})
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:116
+   [14] interpret_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:199
+   [15] interpret_ast(interpstate::JuliaInterp.InterpState, #unused#::Val{:toplevel}, args::Vector{Any})
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:185
+   [16] interpret_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:199
+   [17] interpret_ast
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:204 [inlined]
+   [18] include(mod::Module, path::String, debug::Bool, budget::UInt64)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\JuliaInterp.jl:16
+   [19] include(mod::Module, path::String)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\JuliaInterp.jl:10
+   [20] macro expansion
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:26 [inlined]
+   [21] macro expansion
+      @ C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Test\src\Test.jl:1283 [inlined]
+   [22] macro expansion
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:23 [inlined]
+   [23] macro expansion
+      @ .\timing.jl:380 [inlined]
+   [24] runtests(name::String, path::String, isolate::Bool; seed::UInt128)
+      @ Main C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:21
+   [25] (::Distributed.var"#106#108"{Distributed.CallMsg{:call_fetch}})()
+      @ Distributed C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Distributed\src\process_messages.jl:278
+   [26] run_work_thunk(thunk::Distributed.var"#106#108"{Distributed.CallMsg{:call_fetch}}, print_error::Bool)
+      @ Distributed C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Distributed\src\process_messages.jl:63
+   [27] macro expansion
+      @ C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Distributed\src\process_messages.jl:278 [inlined]
+   [28] (::Distributed.var"#105#107"{Distributed.CallMsg{:call_fetch}, Distributed.MsgHeader, Sockets.TCPSocket})()
+      @ Distributed .\task.jl:423
+
+version           (18) |        started at 2021-12-29T22:12:47.217
+      From worker 18:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\version.jl
+arrayops          (11) |   203.79 |   8.08 |  4.0 |   11536.76 |   657.88
+namedtuple        (11) |        started at 2021-12-29T22:12:48.704
+      From worker 11:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\namedtuple.jl
+version           (18) |     5.72 |   0.12 |  2.0 |     380.31 |   273.01
+mpfr              (18) |        started at 2021-12-29T22:12:53.504
+      From worker 18:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\mpfr.jl
+namedtuple        (11) |     6.89 |   0.17 |  2.5 |     280.32 |   657.88
+broadcast         (11) |        started at 2021-12-29T22:12:55.601
+      From worker 11:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\broadcast.jl
+ccall             (15) |         failed at 2021-12-29T22:13:00.554
+Error During Test at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\ccall.jl:1002
+  Test threw exception
+  Expression: test_40164() == [Struct40164(0, 1, 2)]
+  
+
+complex           (19) |        started at 2021-12-29T22:13:10.503
+      From worker 19:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\complex.jl
+abstractarray      (4) |   205.91 |   8.03 |  3.9 |    9939.78 |   572.79
+floatapprox        (4) |        started at 2021-12-29T22:13:27.228
+      From worker 4:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\floatapprox.jl
+mpfr              (18) |    36.90 |   0.77 |  2.1 |     948.23 |   553.71
+reflection        (18) |        started at 2021-12-29T22:13:30.446
+      From worker 18:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\reflection.jl
+floatapprox        (4) |     4.81 |   0.19 |  4.0 |     263.41 |   590.50
+regex              (4) |        started at 2021-12-29T22:13:32.419
+      From worker 4:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\regex.jl
+regex              (4) |     5.15 |   0.15 |  2.9 |     226.52 |   593.58
+float16            (4) |        started at 2021-12-29T22:13:37.583
+      From worker 4:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\float16.jl
+complex           (19) |    35.17 |   1.13 |  3.2 |    1813.23 |   347.65
+combinatorics     (19) |        started at 2021-12-29T22:13:46.260
+      From worker 19:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\combinatorics.jl
+reflection        (18) |    17.92 |   0.34 |  1.9 |     940.56 |   553.71
+sysinfo           (18) |        started at 2021-12-29T22:13:48.374
+      From worker 18:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\sysinfo.jl
+sysinfo           (18) |     0.41 |   0.02 |  5.4 |      28.45 |   553.71
+env               (18) |        started at 2021-12-29T22:13:48.799
+      From worker 18:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\env.jl
+env               (18) |     1.72 |   0.04 |  2.2 |      72.90 |   553.71
+rounding          (18) |        started at 2021-12-29T22:13:50.529
+      From worker 18:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\rounding.jl
+float16            (4) |    13.08 |   0.73 |  5.6 |    1468.68 |   624.29
+ranges             (4) |        started at 2021-12-29T22:13:50.679
+      From worker 4:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\ranges.jl
+rounding          (18) |     9.55 |   0.20 |  2.0 |     565.86 |   553.71
+mod2pi            (18) |        started at 2021-12-29T22:14:00.093
+      From worker 18:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\mod2pi.jl
+core              (10) |         failed at 2021-12-29T22:14:00.731
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\core.jl:395
+  Expression: f(0)
+    Expected: UndefVarError(:i)
+      Thrown: AssertionError("isassigned(codestate.slots, slotnumber.id)")
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\core.jl:902
+  Expression: caught == 42
+   Evaluated: (exception = 42, backtrace = Union{Ptr{Nothing}, Base.InterpreterIP}[Ptr{Nothing} @0x0000000001e8d15b, Ptr{Nothing} @0x0000000001e8d1b6, Ptr{Nothing} @0x0000000001e8ec8d, Ptr{Nothing} @0x000000001020bf2d, Ptr{Nothing} @0x0000000001e8ec8d, Ptr{Nothing} @0x00000000108a1ec3, Ptr{Nothing} @0x0000000001e8ec8d, Ptr{Nothing} @0x000000002ed2141b, Ptr{Nothing} @0x000000002ed20695, Ptr{Nothing} @0x000000002ed208cc  …  Ptr{Nothing} @0x000000002ed1b7a7, Ptr{Nothing} @0x000000002ed11537, Ptr{Nothing} @0x000000002ed12019, Ptr{Nothing} @0x000000002ed12078, Ptr{Nothing} @0x0000000001e8ec8d, Ptr{Nothing} @0x000000002ed0647a, Ptr{Nothing} @0x000000002ed066ab, Ptr{Nothing} @0x000000002ed06800, Ptr{Nothing} @0x000000002ed06a23, Ptr{Nothing} @0x0000000001ea0c9f]) == 42
+Error During Test at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\core.jl:2398
+  Test threw exception
+  Expression: x(3) == 26
+  
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\core.jl:3345
+  Expression: a25724 == [[0], [0], [0]]
+   Evaluated: Any[[0], [1], [2]] == [[0], [0], [0]]
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\core.jl:3967
+  Expression: foo(nothing, nothing)
+    Expected: UndefVarError(:T)
+  No exception thrown
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\core.jl:5693
+  Expression: a == [false, false]
+   Evaluated: Any[false, true] == Bool[0, 0]
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\core.jl:5703
+  Expression: a == [false, false]
+   Evaluated: Any[false, true] == Bool[0, 0]
+
+mod2pi            (18) |     1.45 |   0.17 | 11.9 |      46.90 |   553.71
+euler             (18) |        started at 2021-12-29T22:14:01.556
+      From worker 18:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\euler.jl
+euler             (18) |     2.57 |   0.16 |  6.2 |     166.17 |   553.71
+show              (18) |        started at 2021-12-29T22:14:04.141
+      From worker 18:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\show.jl
+combinatorics     (19) |    18.23 |   0.81 |  4.4 |    1509.21 |   349.12
+client            (19) |        started at 2021-12-29T22:14:04.530
+      From worker 19:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\client.jl
+client            (19) |     3.26 |   0.05 |  1.5 |     151.02 |   364.73
+errorshow         (19) |        started at 2021-12-29T22:14:07.796
+      From worker 19:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl
+sets              (20) |        started at 2021-12-29T22:14:10.949
+      From worker 20:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\sets.jl
+      From worker 19:	:code_state_from_call = :code_state_from_call
+      From worker 19:	fun = Main.Test61Main_errorshow.var"#no_kwsorter_match#11##kw"()
+      From worker 19:	:code_state_from_call = :code_state_from_call
+      From worker 19:	fun = Main.Test61Main_errorshow.var"#g11007#15"()
+errorshow         (19) |         failed at 2021-12-29T22:14:24.638
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:196
+  Expression: typeof(err) === $(Expr(:escape, :UndefVarError))
+   Evaluated: AssertionError === UndefVarError
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:329
+  Expression: err_str == "UndefVarError: undefvar not defined"
+   Evaluated: "AssertionError: isassigned(codestate.slots, slotnumber.id)" == "UndefVarError: undefvar not defined"
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:196
+  Expression: typeof(err) === $(Expr(:escape, :MethodError))
+   Evaluated: AssertionError === MethodError
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:362
+  Expression: occursin("MethodError: objects of type Symbol are not callable", err_str)
+   Evaluated: occursin("MethodError: objects of type Symbol are not callable", "AssertionError: fun isa Base.Callable")
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:196
+  Expression: typeof(err) === $(Expr(:escape, :MethodError))
+   Evaluated: AssertionError === MethodError
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:366
+  Expression: occursin("MethodError: objects of type $(curmod_prefix)EightBitType are not callable", err_str)
+   Evaluated: occursin("MethodError: objects of type Main.Test61Main_errorshow.EightBitType are not callable", "AssertionError: fun isa Base.Callable")
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:196
+  Expression: typeof(err) === $(Expr(:escape, :MethodError))
+   Evaluated: AssertionError === MethodError
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:372
+  Expression: occursin("MethodError: objects of type $(curmod_prefix)EightBitTypeT{Int32} are not callable", err_str)
+   Evaluated: occursin("MethodError: objects of type Main.Test61Main_errorshow.EightBitTypeT{Int32} are not callable", "AssertionError: fun isa Base.Callable")
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:196
+  Expression: typeof(err) === $(Expr(:escape, :MethodError))
+   Evaluated: AssertionError === MethodError
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:376
+  Expression: occursin("MethodError: objects of type Vector{$(Int)} are not callable\nUse square brackets [] for indexing an Array.", err_str)
+   Evaluated: occursin("MethodError: objects of type Vector{Int64} are not callable\nUse square brackets [] for indexing an Array.", "AssertionError: fun isa Base.Callable")
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:196
+  Expression: typeof(err) === $(Expr(:escape, :MethodError))
+   Evaluated: AssertionError === MethodError
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:379
+  Expression: occursin("MethodError: objects of type Vector{Float64} are not callable", err_str)
+   Evaluated: occursin("MethodError: objects of type Vector{Float64} are not callable", "AssertionError: fun isa Base.Callable")
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:231
+  Expression: typeof(err) === $(Expr(:escape, :ErrorException))
+   Evaluated: AssertionError === ErrorException
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:443
+  Expression: err_str == "(::String)() at $(sn):$(method_defs_lineno + 1)"
+   Evaluated: "lookup_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any}) at lower.jl:51" == "(::String)() at errorshow.jl:397"
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:231
+  Expression: typeof(err) === $(Expr(:escape, :ErrorException))
+   Evaluated: AssertionError === ErrorException
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:447
+  Expression: err_str == "(::$(curmod_prefix)EightBitType)() at $(sn):$(method_defs_lineno + 3)"
+   Evaluated: "lookup_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any}) at lower.jl:51" == "(::Main.Test61Main_errorshow.EightBitType)() at errorshow.jl:399"
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:449
+  Expression: err_str == "$(curmod_prefix)EightBitTypeT() at $(sn):$(method_defs_lineno + 4)"
+   Evaluated: "invokelatest(::Any, ::Any, ::Vararg{Any}; kwargs::Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}) at essentials.jl:716" == "Main.Test61Main_errorshow.EightBitTypeT() at errorshow.jl:400"
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:451
+  Expression: Test Summary:                     | Pass  Total
+Threads.Conditions must be locked |    5      5
+Test Summary:      | Pass  Total
+InvasiveLinkedList |   72     72
+Test Summary:        | Pass  Total
+@spawn interpolation |   10     10
+Test Summary:        | Pass  Total
+@async interpolation |    8      8
+Test Summary:                   | Pass  Total
+spawn interpolation: macrocalls |    2      2
+Test Summary: | Pass  Total
+Co-schedule   |    1      1
+Test Summary:                 | Pass  Total
+Threads.foreach(f, ::Channel) |    7      7
+Test Summary:     | Pass  Total
+Task-local random |    4      4
+Warning: threaded loop executed in order
+Warning: threaded loop executed in order
+Test Summary:                     | Pass  Total
+Threads.Conditions must be locked |    5      5
+Test Summary:      | Pass  Total
+InvasiveLinkedList |   72     72
+Test Summary:        | Pass  Total
+@spawn interpolation |   10     10
+Test Summary:        | Pass  Total
+@async interpolation |    8      8
+Test Summary:                   | Pass  Total
+spawn interpolation: macrocalls |    2      2
+Test Summary: | Pass  Total
+Co-schedule   |    1      1
+Test Summary:                 | Pass  Total
+Threads.foreach(f, ::Channel) |    7      7
+Test Summary:     | Pass  Total
+Task-local random |    4      4
+Test Summary:                     | Pass  Total
+Threads.Conditions must be locked |    5      5
+Test Summary:      | Pass  Total
+InvasiveLinkedList |   72     72
+Test Summary:        | Pass  Total
+@spawn interpolation |   10     10
+Test Summary:        | Pass  Total
+@async interpolation |    8      8
+Test Summary:                   | Pass  Total
+spawn interpolation: macrocalls |    2      2
+Test Summary: | Pass  Total
+Co-schedule   |    1      1
+Test Summary:                 | Pass  Total
+Threads.foreach(f, ::Channel) |    7      7
+Test Summary:     | Pass  Total
+Task-local random |    4      4
+Test Summary:                     | Pass  Total
+Threads.Conditions must be locked |    5      5
+Test Summary:      | Pass  Total
+InvasiveLinkedList |   72     72
+Test Summary:        | Pass  Total
+@spawn interpolation |   10     10
+Test Summary:        | Pass  Total
+@async interpolation |    8      8
+Test Summary:                   | Pass  Total
+spawn interpolation: macrocalls |    2      2
+Test Summary: | Pass  Total
+Co-schedule   |    1      1
+Test Summary:                 | Pass  Total
+Threads.foreach(f, ::Channel) |    7      7
+Test Summary:     | Pass  Total
+Task-local random |    4      4
+err_str == "$(curmod_prefix)EightBitTypeT{Int32}() at $(sn):$(method_defs_lineno + 5)"
+   Evaluated: "invokelatest(::Any, ::Any, ::Vararg{Any}; kwargs::Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}) at essentials.jl:716" == "Main.Test61Main_errorshow.EightBitTypeT{Int32}() at errorshow.jl:401"
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:231
+  Expression: typeof(err) === $(Expr(:escape, :ErrorException))
+   Evaluated: AssertionError === ErrorException
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:453
+  Expression: err_str == "(::$(curmod_prefix)EightBitTypeT{Int32})() at $(sn):$(method_defs_lineno + 6)"
+   Evaluated: "lookup_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any}) at lower.jl:51" == "(::Main.Test61Main_errorshow.EightBitTypeT{Int32})() at errorshow.jl:402"
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:196
+  Expression: typeof(err) === $(Expr(:escape, :MethodError))
+   Evaluated: AssertionError === MethodError
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:635
+  Expression: occursin("objects of type $(curmod_prefix)ANumber are not callable", err_str)
+   Evaluated: occursin("objects of type Main.Test61Main_errorshow.ANumber are not callable", "AssertionError: fun isa Base.Callable")
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:636
+  Expression: count((==)("Maybe you forgot to use an operator such as *, ^, %, / etc. ?"), split(err_str, '\n')) == 1
+   Evaluated: 0 == 1
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:196
+  Expression: typeof(err) === $(Expr(:escape, :MethodError))
+   Evaluated: AssertionError === MethodError
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:639
+  Expression: count((==)("Maybe you forgot to use an operator such as *, ^, %, / etc. ?"), split(err_str, '\n')) == 1
+   Evaluated: 0 == 1
+
+goto              (21) |        started at 2021-12-29T22:14:34.360
+      From worker 21:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\goto.jl
+goto              (21) |     4.10 |   0.09 |  2.2 |     341.80 |   305.31
+llvmcall          (21) |        started at 2021-12-29T22:14:39.041
+      From worker 21:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\llvmcall.jl
+llvmcall          (21) |     1.41 |   0.02 |  1.8 |      89.15 |   316.34
+llvmcall2         (21) |        started at 2021-12-29T22:14:40.456
+      From worker 21:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\llvmcall2.jl
+llvmcall2         (21) |     0.16 |   0.00 |  0.0 |       8.43 |   316.35
+ryu               (21) |        started at 2021-12-29T22:14:40.628
+      From worker 21:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\ryu.jl
+ryu               (21) |     3.43 |   0.05 |  1.6 |     118.79 |   353.71
+some              (21) |        started at 2021-12-29T22:14:44.066
+      From worker 21:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\some.jl
+some              (21) |     1.87 |   0.05 |  2.6 |      99.37 |   353.71
+meta              (21) |        started at 2021-12-29T22:14:45.947
+      From worker 21:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\meta.jl
+sorting            (6) |   199.81 |   3.84 |  1.9 |    6491.79 |   696.72
+stacktraces        (6) |        started at 2021-12-29T22:14:48.798
+      From worker 6:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl
+meta              (21) |     4.96 |   0.24 |  4.8 |     206.53 |   353.71
+docs              (21) |        started at 2021-12-29T22:14:50.922
+      From worker 21:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\docs.jl
+sets              (20) |    44.86 |   0.80 |  1.8 |    1818.83 |   397.41
+misc              (20) |        started at 2021-12-29T22:14:56.796
+      From worker 20:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\misc.jl
+stacktraces        (6) |         failed at 2021-12-29T22:14:57.271
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:17
+  Expression: [:child, :parent, :grandparent] == [f.func for f = stack[1:3]]
+   Evaluated: [:child, :parent, :grandparent] == [:child, :parent, Symbol("#invokelatest#2")]
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:19
+  Expression: [Symbol(#= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:19 =# @__FILE__()), line] == [frame.file, frame.line]
+   Evaluated: Any[Symbol("C:\\Users\\Win10\\AppData\\Local\\Programs\\Julia-1.7.1\\share/julia/test\\stacktraces.jl"), 10] == Any[Symbol(".\\essentials.jl"), 716]
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:25
+  Expression: stack[1] == StackFrame(:grandparent, #= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:25 =# @__FILE__(), line_numbers[3])
+   Evaluated: #invokelatest#2 at essentials.jl:716 [inlined] == grandparent at stacktraces.jl:10
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:28
+  Expression: stack[1:2] == [StackFrame(:parent, #= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:29 =# @__FILE__(), line_numbers[2]), StackFrame(:grandparent, #= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:30 =# @__FILE__(), line_numbers[3])]
+   Evaluated: Base.StackTraces.StackFrame[(::Main.Test41Main_stacktraces.var"#parent#4"{Main.Test41Main_stacktraces.var"#child#3"})() at stacktraces.jl:9, #invokelatest#2 at essentials.jl:716 [inlined]] == Base.StackTraces.StackFrame[parent at stacktraces.jl:9, grandparent at stacktraces.jl:10]
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:45
+  Expression: default == without_c
+   Evaluated: Base.StackTraces.StackFrame[#invokelatest#2 at essentials.jl:716 [inlined], invokelatest(::Any) at essentials.jl:714, lookup_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any}) at lower.jl:84, lookup_lower(codestate::JuliaInterp.CodeState, expr::Expr) at lower.jl:168, interpret_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any}) at lower.jl:211, interpret_lower(codestate::JuliaInterp.CodeState, expr::Expr) at lower.jl:364, run_code_state(codestate::JuliaInterp.CodeState) at types.jl:197, interpret_lower(interpstate::JuliaInterp.InterpState, parent::Nothing, src::Core.CodeInfo) at lower.jl:382, eval_lower_ast(interpstate::JuliaInterp.InterpState, expr::Expr) at ast.jl:19, interpret_ast(interpstate::JuliaInterp.InterpState, #unused#::Val{:let}, args::Vector{Any}) at ast.jl:93  …  macro expansion at Test.jl:1283 [inlined], macro expansion at testdefs.jl:23 [inlined], macro expansion at timing.jl:380 [inlined], runtests(name::String, path::String, isolate::Bool; seed::UInt128) at testdefs.jl:21, runtests at testdefs.jl:6 [inlined], (::var"#runtests##kw")(::NamedTuple{(:seed,), Tuple{UInt128}}, ::typeof(runtests), name::String, path::String) at testdefs.jl:6, (::Distributed.var"#106#108"{Distributed.CallMsg{:call_fetch}})() at process_messages.jl:278, run_work_thunk(thunk::Distributed.var"#106#108"{Distributed.CallMsg{:call_fetch}}, print_error::Bool) at process_messages.jl:63, macro expansion at process_messages.jl:278 [inlined], (::Distributed.var"#105#107"{Distributed.CallMsg{:call_fetch}, Distributed.MsgHeader, Sockets.TCPSocket})() at task.jl:423] == Base.StackTraces.StackFrame[invokelatest(::Any, ::Any, ::Vararg{Any}; kwargs::Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}) at essentials.jl:716, invokelatest(::Any, ::Any, ::Vararg{Any}) at essentials.jl:714, lookup_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any}) at lower.jl:84, lookup_lower(codestate::JuliaInterp.CodeState, expr::Expr) at lower.jl:168, interpret_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any}) at lower.jl:211, interpret_lower(codestate::JuliaInterp.CodeState, expr::Expr) at lower.jl:364, run_code_state(codestate::JuliaInterp.CodeState) at types.jl:197, interpret_lower(interpstate::JuliaInterp.InterpState, parent::Nothing, src::Core.CodeInfo) at lower.jl:382, eval_lower_ast(interpstate::JuliaInterp.InterpState, expr::Expr) at ast.jl:19, interpret_ast(interpstate::JuliaInterp.InterpState, #unused#::Val{:let}, args::Vector{Any}) at ast.jl:93  …  macro expansion at Test.jl:1283 [inlined], macro expansion at testdefs.jl:23 [inlined], macro expansion at timing.jl:380 [inlined], runtests(name::String, path::String, isolate::Bool; seed::UInt128) at testdefs.jl:21, runtests at testdefs.jl:6 [inlined], (::var"#runtests##kw")(::NamedTuple{(:seed,), Tuple{UInt128}}, ::typeof(runtests), name::String, path::String) at testdefs.jl:6, (::Distributed.var"#106#108"{Distributed.CallMsg{:call_fetch}})() at process_messages.jl:278, run_work_thunk(thunk::Distributed.var"#106#108"{Distributed.CallMsg{:call_fetch}}, print_error::Bool) at process_messages.jl:63, macro expansion at process_messages.jl:278 [inlined], (::Distributed.var"#105#107"{Distributed.CallMsg{:call_fetch}, Distributed.MsgHeader, Sockets.TCPSocket})() at task.jl:423]
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:158
+  Expression: (bt[1]).line == topline + 4
+   Evaluated: 136 == 153
+
+docs              (21) |    12.37 |   0.52 |  4.2 |     672.60 |   353.91
+binaryplatforms   (21) |        started at 2021-12-29T22:15:03.306
+      From worker 21:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\binaryplatforms.jl
+atexit            (22) |        started at 2021-12-29T22:15:06.892
+      From worker 22:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\atexit.jl
+subarray           (3) |   366.64 |  11.26 |  3.1 |   21043.19 |   960.11
+enums              (3) |        started at 2021-12-29T22:15:11.391
+      From worker 3:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\enums.jl
+binaryplatforms   (21) |    10.76 |   0.19 |  1.8 |     468.35 |   367.15
+cmdlineargs       (21) |        started at 2021-12-29T22:15:14.069
+      From worker 21:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\cmdlineargs.jl
+strings/types      (8) |   372.20 |   4.95 |  1.3 |   21543.97 |   330.46
+int                (8) |        started at 2021-12-29T22:15:16.968
+      From worker 8:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\int.jl
+broadcast         (11) |   142.09 |   4.32 |  3.0 |    6792.59 |   797.58
+interpreter       (11) |        started at 2021-12-29T22:15:17.698
+      From worker 11:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\interpreter.jl
+enums              (3) |     7.61 |   0.19 |  2.5 |     378.50 |   960.46
+checked            (3) |        started at 2021-12-29T22:15:19.033
+      From worker 3:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\checked.jl
+read              (17) |   164.72 |   2.45 |  1.5 |    3855.52 |   550.65
+bitset            (17) |        started at 2021-12-29T22:15:19.415
+      From worker 17:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\bitset.jl
+iterators         (13) |   255.77 |   8.74 |  3.4 |   14801.62 |  1258.39
+floatfuncs        (13) |        started at 2021-12-29T22:15:19.741
+      From worker 13:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\floatfuncs.jl
+interpreter       (11) |     2.77 |   0.00 |  0.0 |       8.43 |   797.58
+boundscheck       (11) |        started at 2021-12-29T22:15:20.479
+      From worker 11:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\boundscheck.jl
+show              (18) |    77.49 |   1.61 |  2.1 |    3872.68 |   553.71
+error             (18) |        started at 2021-12-29T22:15:21.632
+      From worker 18:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\error.jl
+atexit            (22) |    14.67 |   0.05 |  0.3 |     176.23 |   269.54
+cartesian         (22) |        started at 2021-12-29T22:15:22.016
+      From worker 22:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\cartesian.jl
+bitset            (17) |     3.91 |   0.05 |  1.2 |     145.87 |   550.65
+osutils           (17) |        started at 2021-12-29T22:15:23.339
+      From worker 17:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\osutils.jl
+error             (18) |     2.34 |   0.02 |  1.0 |      61.63 |   553.71
+channels          (18) |        started at 2021-12-29T22:15:23.988
+      From worker 18:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\channels.jl
+osutils           (17) |     1.38 |   0.03 |  2.2 |      80.82 |   550.65
+iostream          (17) |        started at 2021-12-29T22:15:24.726
+      From worker 17:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\iostream.jl
+ranges             (4) |    95.56 |   5.00 |  5.2 |    9980.76 |   775.11
+secretbuffer       (4) |        started at 2021-12-29T22:15:26.273
+      From worker 4:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\secretbuffer.jl
+      From worker 11:	Test Summary:                                               | Pass  Total
+      From worker 11:	pass inbounds meta to getindex on CartesianIndices (#42115) |    2      2
+iostream          (17) |     2.95 |   0.07 |  2.3 |     183.60 |   550.65
+specificity       (17) |        started at 2021-12-29T22:15:27.688
+      From worker 17:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\specificity.jl
+      From worker 4:	testing position
+secretbuffer       (4) |     1.73 |   0.58 | 33.7 |      45.23 |   775.11
+reinterpretarray   (4) |        started at 2021-12-29T22:15:28.011
+      From worker 4:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\reinterpretarray.jl
+specificity       (17) |     2.26 |   0.06 |  2.7 |     128.27 |   550.65
+syntax            (17) |        started at 2021-12-29T22:15:29.961
+      From worker 17:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\syntax.jl
+      From worker 11:	Test Summary:                                               | Pass  Total
+      From worker 11:	pass inbounds meta to getindex on CartesianIndices (#42115) |    2      2
+checked            (3) |    15.94 |   0.16 |  1.0 |     306.37 |  1079.10
+corelogging        (3) |        started at 2021-12-29T22:15:34.987
+      From worker 3:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\corelogging.jl
+cartesian         (22) |    13.20 |   0.47 |  3.5 |     798.43 |   292.42
+missing           (22) |        started at 2021-12-29T22:15:35.474
+      From worker 22:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\missing.jl
+int                (8) |    19.16 |   0.46 |  2.4 |     857.32 |   340.42
+asyncmap           (8) |        started at 2021-12-29T22:15:36.134
+      From worker 8:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\asyncmap.jl
+      From worker 11:	Test Summary:                                               | Pass  Total
+      From worker 11:	pass inbounds meta to getindex on CartesianIndices (#42115) |    2      2
+boundscheck       (11) |    17.55 |   0.00 |  0.0 |       8.87 |   797.58
+smallarrayshrink  (11) |        started at 2021-12-29T22:15:38.051
+      From worker 11:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\smallarrayshrink.jl
+smallarrayshrink  (11) |     0.83 |   0.00 |  0.0 |      23.40 |   797.58
+opaque_closure    (11) |        started at 2021-12-29T22:15:38.885
+      From worker 11:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\opaque_closure.jl
+corelogging        (3) |     7.64 |   0.19 |  2.4 |     394.31 |  1079.10
+filesystem         (3) |        started at 2021-12-29T22:15:42.635
+      From worker 3:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\filesystem.jl
+filesystem         (3) |     0.37 |   0.00 |  0.0 |      34.10 |  1079.10
+download           (3) |        started at 2021-12-29T22:15:43.016
+      From worker 3:	Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\download.jl
+bitarray           (7) |   327.36 |   9.91 |  3.0 |   18706.12 |   830.65
+opaque_closure    (11) |         failed at 2021-12-29T22:15:44.691
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\opaque_closure.jl:121
+  Expression: f(1, 1)
+    Expected: TypeError
+      Thrown: AssertionError
+Error During Test at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\opaque_closure.jl:122
+  Test threw exception
+  Expression: f(2, 3.0) === (4, 9.0)
+  
+Error During Test at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\opaque_closure.jl:140
+  Test threw exception
+  Expression: g_world_age() == 1
+  MethodError: objects of type Nothing are not callable
+  Stacktrace:
+    [1] top-level scope
+      @ C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Test\src\Test.jl:445
+    [2] eval
+      @ .\boot.jl:373 [inlined]
+    [3] eval_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:5
+    [4] interpret_ast(interpstate::JuliaInterp.InterpState, #unused#::Val{:macrocall}, args::Vector{Any})
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:63
+    [5] interpret_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:199
+    [6] interpret_ast(interpstate::JuliaInterp.InterpState, #unused#::Val{:toplevel}, args::Vector{Any})
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:185
+    [7] interpret_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:199
+    [8] interpret_ast
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:204 [inlined]
+    [9] include(mod::Module, path::String, debug::Bool, budget::UInt64)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\JuliaInterp.jl:16
+   [10] include
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\JuliaInterp.jl:10 [inlined]
+   [11] macro expansion
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:26 [inlined]
+   [12] macro expansion
+      @ C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Test\src\Test.jl:1283 [inlined]
+   [13] macro expansion
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:23 [inlined]
+   [14] macro expansion
+      @ .\timing.jl:380 [inlined]
+   [15] runtests(name::String, path::String, isolate::Bool; seed::UInt128)
+      @ Main C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:21
+Error During Test at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\opaque_closure.jl:213
+  Test threw exception
+  Expression: call_global_opaque_closure() == 123
+  MethodError: objects of type Nothing are not callable
+  Stacktrace:
+    [1] call_global_opaque_closure()
+      @ Main.Test27Main_opaque_closure C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\test\opaque_closure.jl:212
+    [2] top-level scope
+      @ C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Test\src\Test.jl:445
+    [3] eval
+      @ .\boot.jl:373 [inlined]
+    [4] eval_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:5
+    [5] interpret_ast(interpstate::JuliaInterp.InterpState, #unused#::Val{:macrocall}, args::Vector{Any})
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:63
+    [6] interpret_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:199
+    [7] interpret_ast(interpstate::JuliaInterp.InterpState, #unused#::Val{:toplevel}, args::Vector{Any})
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:185
+    [8] interpret_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:199
+    [9] interpret_ast
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:204 [inlined]
+   [10] include(mod::Module, path::String, debug::Bool, budget::UInt64)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\JuliaInterp.jl:16
+   [11] include
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\JuliaInterp.jl:10 [inlined]
+   [12] macro expansion
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:26 [inlined]
+   [13] macro expansion
+      @ C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Test\src\Test.jl:1283 [inlined]
+   [14] macro expansion
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:23 [inlined]
+   [15] macro expansion
+      @ .\timing.jl:380 [inlined]
+   [16] runtests(name::String, path::String, isolate::Bool; seed::UInt128)
+      @ Main C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:21
+
+      From worker 17:	WARNING: Method definition (::Test34Main_syntax.var"#f#148"{var"#s6670"})() in module Test34Main_syntax overwritten.
+syntax            (17) |    15.61 |   0.34 |  2.1 |     848.22 |   550.65
+channels          (18) |    25.41 |   3.91 | 15.4 |     620.27 |   561.08
+reinterpretarray   (4) |    23.87 |   0.91 |  3.8 |    1519.40 |   775.11
+      From worker 4:	┌ Warning: a SecretBuffer was `shred!`ed by the GC; use `shred!` manually after use to minimize exposure.
+      From worker 4:	└ @ Base secretbuffer.jl:169
+      From worker 4:	┌ Warning: a SecretBuffer was `shred!`ed by the GC; use `shred!` manually after use to minimize exposure.
+      From worker 4:	└ @ Base secretbuffer.jl:169
+      From worker 4:	┌ Warning: a SecretBuffer was `shred!`ed by the GC; use `shred!` manually after use to minimize exposure.
+      From worker 4:	└ @ Base secretbuffer.jl:169
+asyncmap           (8) |    17.79 |   0.57 |  3.2 |     990.18 |   362.03
+missing           (22) |    26.45 |   0.52 |  2.0 |    1597.88 |   339.63
+download           (3) |    23.55 |   0.00 |  0.0 |       3.19 |  1079.10
+      From worker 9:	WARNING: replacing module Foo.
+loading            (9) |         failed at 2021-12-29T22:16:56.648
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\loading.jl:47
+  Expression: #= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\loading.jl:47 =# @__DIR__() == dirname(#= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\loading.jl:47 =# @__FILE__())
+   Evaluated: "C:\\Users\\Win10\\AppData\\Local\\Programs\\Julia-1.7.1\\share\\julia\\test" == "C:\\Users\\Win10\\AppData\\Local\\Programs\\Julia-1.7.1\\share/julia/test"
+
+floatfuncs        (13) |   133.74 |   8.60 |  6.4 |   55618.90 |  1258.39
+      From worker 20:	  0.000000 seconds
+      From worker 20:	  2.015208 seconds (2.38 M allocations: 132.104 MiB, 1.57% gc time, 48.72% compilation time)
+      From worker 20:	Test Summary: | Pass  Total
+      From worker 20:	@deprecate    |    6      6
+      From worker 20:	Test Summary: | Pass  Total
+      From worker 20:	firstcaller   |    1      1
+      From worker 20:	Test Summary:              | Broken  Total
+      From worker 20:	parser syntax deprecations |      1      1
+      From worker 20:	┌ Warning: use `@constprop :aggressive ex` instead of `@aggressive_constprop ex`
+      From worker 20:	│   caller = eval at boot.jl:373 [inlined]
+      From worker 20:	└ @ Core .\boot.jl:373
+misc              (20) |         failed at 2021-12-29T22:17:48.175
+Error During Test at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\misc.jl:134
+  Test threw exception
+  Expression: lock(get_finalizers_inhibited, l) == 1
+  
+Error During Test at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\misc.jl:134
+  Test threw exception
+  Expression: lock(get_finalizers_inhibited, l) == 1
+  
+
+cmdlineargs       (21) |   183.13 |   0.19 |  0.1 |     652.00 |   382.90
+
+Executing tests that run on node 1 only:
+precompile         (1) |        started at 2021-12-29T22:18:17.705
+Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\precompile.jl
+precompile         (1) |    28.76 |   0.15 |  0.5 |     858.08 |   324.48
+threads            (1) |        started at 2021-12-29T22:18:46.471
+Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\threads.jl
+threads            (1) |    96.74 |   0.01 |  0.0 |      89.04 |   324.48
+stress             (1) |        started at 2021-12-29T22:20:23.213
+Interpreting C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stress.jl
+stress             (1) |     0.01 |   0.00 |  0.0 |       0.15 |   324.48
+
+Test Summary:      |     Pass  Fail  Error  Broken     Total
+  Overall          | 29890656    48      8  352559  30243271
+    unicode/utf8   |       19                             19
+    keywordargs    |      151                            151
+    strings/io     |    12764                          12764
+    worlds         |       83                             83
+    triplequote    |       29                             29
+    strings/search |      692                            692
+    char           |     1623                           1623
+    intrinsics     |      301                            301
+    ambiguous      |      106                    2       108
+    strings/util   |      619                            619
+    iobuffer       |      205                            205
+    staged         |       62     2                       64
+    strings/basic  |    87674                          87674
+    atomics        |     3444                           3444
+    tuple          |      606                            606
+    hashing        |    12519                          12519
+    subtype        |   337674                   19    337693
+    dict           |   144420                         144420
+    simdloop       |      240                            240
+    intfuncs       |   215864                         215864
+    vecelement     |      678                            678
+    reduce         |     8578     2                     8580
+    copy           |      533                            533
+    fastmath       |      946                            946
+    rational       |    98634                    1     98635
+    offsetarray    |      485                    3       488
+    numbers        |  1578627                    1   1578628
+    functional     |       98                             98
+    path           |     1051                   12      1063
+    ordering       |       35                             35
+    parse          |    16098                          16098
+    reducedim      |      865                            865
+    operators      |    13039                          13039
+    gmp            |     2324                           2324
+    math           |   148810                         148810
+    backtrace      |       34     4              1        39
+    spawn          |      210     1              4       215
+    exceptions     |       70                             70
+    file           |        5            1                 6
+    arrayops       |     2013                    2      2015
+    version        |     2452                           2452
+    namedtuple     |      214                            214
+    ccall          |     5350            1              5351
+    abstractarray  |    55512                24795     80307
+    mpfr           |     1127                    1      1128
+    floatapprox    |       49                             49
+    regex          |      130                            130
+    complex        |     8432                    5      8437
+    reflection     |      411                            411
+    sysinfo        |        4                              4
+    env            |       96                             96
+    float16        |   762091                         762091
+    rounding       |   112720                         112720
+    core           |  8445875     6      1       3   8445885
+    mod2pi         |       80                             80
+    euler          |       12                             12
+    combinatorics  |      170                            170
+    client         |        4                              4
+    errorshow      |      197    25                      222
+    goto           |       19                             19
+    llvmcall       |       19                             19
+    llvmcall2      |        7                              7
+    ryu            |    31215                          31215
+    some           |       71                             71
+    sorting        |    12709                   10     12719
+    meta           |       69                             69
+    sets           |     3529                    1      3530
+    stacktraces    |       42     6                       48
+    docs           |      236                            236
+    subarray       |   318299                         318299
+    binaryplatforms |      341                            341
+    strings/types  |  2302691                        2302691
+    broadcast      |      508                            508
+    enums          |       99                             99
+    read           |     3725                           3725
+    iterators      |    10080                          10080
+    interpreter    |        3                              3
+    show           |   128869                    8    128877
+    atexit         |       40                             40
+    bitset         |      195                            195
+    error          |       31                             31
+    osutils        |       57                             57
+    ranges         | 12110540               327682  12438222
+    iostream       |       50                             50
+    secretbuffer   |       27                             27
+    specificity    |      175                            175
+    checked        |     1239                           1239
+    cartesian      |      238                    3       241
+    int            |   524693                         524693
+    boundscheck    |                                No tests
+    smallarrayshrink |       36                             36
+    corelogging    |      231                            231
+    filesystem     |        4                              4
+    bitarray       |   914982                         914982
+    opaque_closure |       37     1      3       1        42
+    syntax         |     1509                    1      1510
+    channels       |      244                            244
+    reinterpretarray |      232                            232
+    asyncmap       |      304                            304
+    missing        |      565                    1       566
+    download       |                                No tests
+    loading        |   152793     1                   152794
+    floatfuncs     |      221                            221
+    misc           |  1282168            2           1282170
+    cmdlineargs    |      242                    3       245
+    precompile     |      117                            117
+    threads        |        1                              1
+    stress         |                                No tests
+    [31;1mFAILURE[0m
+
+The global RNG seed was 0x842bd3c49edf69f5cf9154aeaa3b8180.
+
+Error in testset staged:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\staged.jl:37
+ERROR: LoadError: Test run finished with errors
+in expression starting at C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\runtests.jl:100
+  Expression: String(take!(stagediobuf)) == "($(intstr),)"
+   Evaluated: "a" == "(Int64,)"
+Error in testset staged:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\staged.jl:70
+  Expression: String(take!(stagediobuf)) == "(UnitRange{$(intstr)}, $(intstr), UnitRange{$(intstr)})"
+   Evaluated: "indx" == "(UnitRange{Int64}, Int64, UnitRange{Int64})"
+Error in testset reduce:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\reduce.jl:41
+  Expression: 0 == #= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\reduce.jl:41 =# @allocated(sum(Iterators.reverse(x)))
+   Evaluated: 0 == 6565828
+Error in testset reduce:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\reduce.jl:42
+  Expression: 0 == #= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\reduce.jl:42 =# @allocated(foldr(-, x))
+   Evaluated: 0 == 4958814
+Error in testset backtrace:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\backtrace.jl:167
+  Expression: StackTraces.is_top_level_frame(st[1])
+Error in testset backtrace:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\backtrace.jl:168
+  Expression: string((st[1]).file) == #= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\backtrace.jl:168 =# @__FILE__()
+   Evaluated: ".\\essentials.jl" == "C:\\Users\\Win10\\AppData\\Local\\Programs\\Julia-1.7.1\\share/julia/test\\backtrace.jl"
+Error in testset backtrace:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\backtrace.jl:182
+  Expression: found
+Error in testset backtrace:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\backtrace.jl:194
+  Expression: found
+Error in testset spawn:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\spawn.jl:59
+  Expression: run(pipeline(yescmd, `head`, devnull))
+    Expected: ProcessFailedException
+      Thrown: Base.IOError
+Error in testset file:
+Error During Test at C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:21
+  Got exception outside of a @test
+  IOError: On Windows, creating symlinks requires Administrator privileges.
+  symlink("..\\adir2", "C:\\Users\\Win10\\AppData\\Local\\Temp\\jl_jVDHOi\\adir\\rel_subdirlink"): operation not permitted (EPERM)
+  Stacktrace:
+    [1] uv_error
+      @ .\libuv.jl:97 [inlined]
+    [2] symlink(target::String, link::String; dir_target::Bool)
+      @ Base.Filesystem .\file.jl:1070
+    [3] symlink(target::String, link::String)
+      @ Base.Filesystem .\file.jl:1034
+    [4] invokelatest(::Any, ::Any, ::Vararg{Any}; kwargs::Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}})
+      @ Base .\essentials.jl:716
+    [5] invokelatest(::Any, ::Any, ::Vararg{Any})
+      @ Base .\essentials.jl:714
+    [6] lookup_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any})
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\lower.jl:84
+    [7] lookup_lower(codestate::JuliaInterp.CodeState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\lower.jl:168
+    [8] interpret_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any})
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\lower.jl:211
+    [9] interpret_lower(codestate::JuliaInterp.CodeState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\lower.jl:364
+   [10] run_code_state(codestate::JuliaInterp.CodeState)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\types.jl:197
+   [11] interpret_lower(interpstate::JuliaInterp.InterpState, parent::Nothing, src::Core.CodeInfo)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\lower.jl:382
+   [12] eval_lower_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:19
+   [13] interpret_ast(interpstate::JuliaInterp.InterpState, #unused#::Val{:if}, args::Vector{Any})
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:116
+   [14] interpret_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:199
+   [15] interpret_ast(interpstate::JuliaInterp.InterpState, #unused#::Val{:toplevel}, args::Vector{Any})
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:185
+   [16] interpret_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:199
+   [17] interpret_ast
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:204 [inlined]
+   [18] include(mod::Module, path::String, debug::Bool, budget::UInt64)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\JuliaInterp.jl:16
+   [19] include(mod::Module, path::String)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\JuliaInterp.jl:10
+   [20] macro expansion
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:26 [inlined]
+   [21] macro expansion
+      @ C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Test\src\Test.jl:1283 [inlined]
+   [22] macro expansion
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:23 [inlined]
+   [23] macro expansion
+      @ .\timing.jl:380 [inlined]
+   [24] runtests(name::String, path::String, isolate::Bool; seed::UInt128)
+      @ Main C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:21
+   [25] (::Distributed.var"#106#108"{Distributed.CallMsg{:call_fetch}})()
+      @ Distributed C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Distributed\src\process_messages.jl:278
+   [26] run_work_thunk(thunk::Distributed.var"#106#108"{Distributed.CallMsg{:call_fetch}}, print_error::Bool)
+      @ Distributed C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Distributed\src\process_messages.jl:63
+   [27] macro expansion
+      @ C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Distributed\src\process_messages.jl:278 [inlined]
+   [28] (::Distributed.var"#105#107"{Distributed.CallMsg{:call_fetch}, Distributed.MsgHeader, Sockets.TCPSocket})()
+      @ Distributed .\task.jl:423
+Error in testset ccall:
+Error During Test at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\ccall.jl:1002
+  Test threw exception
+  Expression: test_40164() == [Struct40164(0, 1, 2)]
+  
+Error in testset core:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\core.jl:395
+  Expression: f(0)
+    Expected: UndefVarError(:i)
+      Thrown: AssertionError("isassigned(codestate.slots, slotnumber.id)")
+Error in testset core:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\core.jl:902
+  Expression: caught == 42
+   Evaluated: (exception = 42, backtrace = Union{Ptr{Nothing}, Base.InterpreterIP}[Ptr{Nothing} @0x0000000001e8d15b, Ptr{Nothing} @0x0000000001e8d1b6, Ptr{Nothing} @0x0000000001e8ec8d, Ptr{Nothing} @0x000000001020bf2d, Ptr{Nothing} @0x0000000001e8ec8d, Ptr{Nothing} @0x00000000108a1ec3, Ptr{Nothing} @0x0000000001e8ec8d, Ptr{Nothing} @0x000000002ed2141b, Ptr{Nothing} @0x000000002ed20695, Ptr{Nothing} @0x000000002ed208cc  …  Ptr{Nothing} @0x000000002ed1b7a7, Ptr{Nothing} @0x000000002ed11537, Ptr{Nothing} @0x000000002ed12019, Ptr{Nothing} @0x000000002ed12078, Ptr{Nothing} @0x0000000001e8ec8d, Ptr{Nothing} @0x000000002ed0647a, Ptr{Nothing} @0x000000002ed066ab, Ptr{Nothing} @0x000000002ed06800, Ptr{Nothing} @0x000000002ed06a23, Ptr{Nothing} @0x0000000001ea0c9f]) == 42
+Error in testset core:
+Error During Test at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\core.jl:2398
+  Test threw exception
+  Expression: x(3) == 26
+  
+Error in testset core:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\core.jl:3345
+  Expression: a25724 == [[0], [0], [0]]
+   Evaluated: Any[[0], [1], [2]] == [[0], [0], [0]]
+Error in testset core:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\core.jl:3967
+  Expression: foo(nothing, nothing)
+    Expected: UndefVarError(:T)
+  No exception thrown
+Error in testset core:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\core.jl:5693
+  Expression: a == [false, false]
+   Evaluated: Any[false, true] == Bool[0, 0]
+Error in testset core:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\core.jl:5703
+  Expression: a == [false, false]
+   Evaluated: Any[false, true] == Bool[0, 0]
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:196
+  Expression: typeof(err) === $(Expr(:escape, :UndefVarError))
+   Evaluated: AssertionError === UndefVarError
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:329
+  Expression: err_str == "UndefVarError: undefvar not defined"
+   Evaluated: "AssertionError: isassigned(codestate.slots, slotnumber.id)" == "UndefVarError: undefvar not defined"
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:196
+  Expression: typeof(err) === $(Expr(:escape, :MethodError))
+   Evaluated: AssertionError === MethodError
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:362
+  Expression: occursin("MethodError: objects of type Symbol are not callable", err_str)
+   Evaluated: occursin("MethodError: objects of type Symbol are not callable", "AssertionError: fun isa Base.Callable")
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:196
+  Expression: typeof(err) === $(Expr(:escape, :MethodError))
+   Evaluated: AssertionError === MethodError
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:366
+  Expression: occursin("MethodError: objects of type $(curmod_prefix)EightBitType are not callable", err_str)
+   Evaluated: occursin("MethodError: objects of type Main.Test61Main_errorshow.EightBitType are not callable", "AssertionError: fun isa Base.Callable")
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:196
+  Expression: typeof(err) === $(Expr(:escape, :MethodError))
+   Evaluated: AssertionError === MethodError
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:372
+  Expression: occursin("MethodError: objects of type $(curmod_prefix)EightBitTypeT{Int32} are not callable", err_str)
+   Evaluated: occursin("MethodError: objects of type Main.Test61Main_errorshow.EightBitTypeT{Int32} are not callable", "AssertionError: fun isa Base.Callable")
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:196
+  Expression: typeof(err) === $(Expr(:escape, :MethodError))
+   Evaluated: AssertionError === MethodError
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:376
+  Expression: occursin("MethodError: objects of type Vector{$(Int)} are not callable\nUse square brackets [] for indexing an Array.", err_str)
+   Evaluated: occursin("MethodError: objects of type Vector{Int64} are not callable\nUse square brackets [] for indexing an Array.", "AssertionError: fun isa Base.Callable")
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:196
+  Expression: typeof(err) === $(Expr(:escape, :MethodError))
+   Evaluated: AssertionError === MethodError
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:379
+  Expression: occursin("MethodError: objects of type Vector{Float64} are not callable", err_str)
+   Evaluated: occursin("MethodError: objects of type Vector{Float64} are not callable", "AssertionError: fun isa Base.Callable")
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:231
+  Expression: typeof(err) === $(Expr(:escape, :ErrorException))
+   Evaluated: AssertionError === ErrorException
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:443
+  Expression: err_str == "(::String)() at $(sn):$(method_defs_lineno + 1)"
+   Evaluated: "lookup_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any}) at lower.jl:51" == "(::String)() at errorshow.jl:397"
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:231
+  Expression: typeof(err) === $(Expr(:escape, :ErrorException))
+   Evaluated: AssertionError === ErrorException
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:447
+  Expression: err_str == "(::$(curmod_prefix)EightBitType)() at $(sn):$(method_defs_lineno + 3)"
+   Evaluated: "lookup_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any}) at lower.jl:51" == "(::Main.Test61Main_errorshow.EightBitType)() at errorshow.jl:399"
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:449
+  Expression: err_str == "$(curmod_prefix)EightBitTypeT() at $(sn):$(method_defs_lineno + 4)"
+   Evaluated: "invokelatest(::Any, ::Any, ::Vararg{Any}; kwargs::Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}) at essentials.jl:716" == "Main.Test61Main_errorshow.EightBitTypeT() at errorshow.jl:400"
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:451
+  Expression: err_str == "$(curmod_prefix)EightBitTypeT{Int32}() at $(sn):$(method_defs_lineno + 5)"
+   Evaluated: "invokelatest(::Any, ::Any, ::Vararg{Any}; kwargs::Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}) at essentials.jl:716" == "Main.Test61Main_errorshow.EightBitTypeT{Int32}() at errorshow.jl:401"
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:231
+  Expression: typeof(err) === $(Expr(:escape, :ErrorException))
+   Evaluated: AssertionError === ErrorException
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:453
+  Expression: err_str == "(::$(curmod_prefix)EightBitTypeT{Int32})() at $(sn):$(method_defs_lineno + 6)"
+   Evaluated: "lookup_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any}) at lower.jl:51" == "(::Main.Test61Main_errorshow.EightBitTypeT{Int32})() at errorshow.jl:402"
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:196
+  Expression: typeof(err) === $(Expr(:escape, :MethodError))
+   Evaluated: AssertionError === MethodError
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:635
+  Expression: occursin("objects of type $(curmod_prefix)ANumber are not callable", err_str)
+   Evaluated: occursin("objects of type Main.Test61Main_errorshow.ANumber are not callable", "AssertionError: fun isa Base.Callable")
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:636
+  Expression: count((==)("Maybe you forgot to use an operator such as *, ^, %, / etc. ?"), split(err_str, '\n')) == 1
+   Evaluated: 0 == 1
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:196
+  Expression: typeof(err) === $(Expr(:escape, :MethodError))
+   Evaluated: AssertionError === MethodError
+Error in testset errorshow:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\errorshow.jl:639
+  Expression: count((==)("Maybe you forgot to use an operator such as *, ^, %, / etc. ?"), split(err_str, '\n')) == 1
+   Evaluated: 0 == 1
+Error in testset stacktraces:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:17
+  Expression: [:child, :parent, :grandparent] == [f.func for f = stack[1:3]]
+   Evaluated: [:child, :parent, :grandparent] == [:child, :parent, Symbol("#invokelatest#2")]
+Error in testset stacktraces:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:19
+  Expression: [Symbol(#= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:19 =# @__FILE__()), line] == [frame.file, frame.line]
+   Evaluated: Any[Symbol("C:\\Users\\Win10\\AppData\\Local\\Programs\\Julia-1.7.1\\share/julia/test\\stacktraces.jl"), 10] == Any[Symbol(".\\essentials.jl"), 716]
+Error in testset stacktraces:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:25
+  Expression: stack[1] == StackFrame(:grandparent, #= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:25 =# @__FILE__(), line_numbers[3])
+   Evaluated: #invokelatest#2 at essentials.jl:716 [inlined] == grandparent at stacktraces.jl:10
+Error in testset stacktraces:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:28
+  Expression: stack[1:2] == [StackFrame(:parent, #= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:29 =# @__FILE__(), line_numbers[2]), StackFrame(:grandparent, #= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:30 =# @__FILE__(), line_numbers[3])]
+   Evaluated: Base.StackTraces.StackFrame[(::Main.Test41Main_stacktraces.var"#parent#4"{Main.Test41Main_stacktraces.var"#child#3"})() at stacktraces.jl:9, #invokelatest#2 at essentials.jl:716 [inlined]] == Base.StackTraces.StackFrame[parent at stacktraces.jl:9, grandparent at stacktraces.jl:10]
+Error in testset stacktraces:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:45
+  Expression: default == without_c
+   Evaluated: Base.StackTraces.StackFrame[#invokelatest#2 at essentials.jl:716 [inlined], invokelatest(::Any) at essentials.jl:714, lookup_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any}) at lower.jl:84, lookup_lower(codestate::JuliaInterp.CodeState, expr::Expr) at lower.jl:168, interpret_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any}) at lower.jl:211, interpret_lower(codestate::JuliaInterp.CodeState, expr::Expr) at lower.jl:364, run_code_state(codestate::JuliaInterp.CodeState) at types.jl:197, interpret_lower(interpstate::JuliaInterp.InterpState, parent::Nothing, src::Core.CodeInfo) at lower.jl:382, eval_lower_ast(interpstate::JuliaInterp.InterpState, expr::Expr) at ast.jl:19, interpret_ast(interpstate::JuliaInterp.InterpState, #unused#::Val{:let}, args::Vector{Any}) at ast.jl:93  …  macro expansion at Test.jl:1283 [inlined], macro expansion at testdefs.jl:23 [inlined], macro expansion at timing.jl:380 [inlined], runtests(name::String, path::String, isolate::Bool; seed::UInt128) at testdefs.jl:21, runtests at testdefs.jl:6 [inlined], (::var"#runtests##kw")(::NamedTuple{(:seed,), Tuple{UInt128}}, ::typeof(runtests), name::String, path::String) at testdefs.jl:6, (::Distributed.var"#106#108"{Distributed.CallMsg{:call_fetch}})() at process_messages.jl:278, run_work_thunk(thunk::Distributed.var"#106#108"{Distributed.CallMsg{:call_fetch}}, print_error::Bool) at process_messages.jl:63, macro expansion at process_messages.jl:278 [inlined], (::Distributed.var"#105#107"{Distributed.CallMsg{:call_fetch}, Distributed.MsgHeader, Sockets.TCPSocket})() at task.jl:423] == Base.StackTraces.StackFrame[invokelatest(::Any, ::Any, ::Vararg{Any}; kwargs::Base.Pairs{Symbol, Union{}, Tuple{}, NamedTuple{(), Tuple{}}}) at essentials.jl:716, invokelatest(::Any, ::Any, ::Vararg{Any}) at essentials.jl:714, lookup_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any}) at lower.jl:84, lookup_lower(codestate::JuliaInterp.CodeState, expr::Expr) at lower.jl:168, interpret_lower(codestate::JuliaInterp.CodeState, #unused#::Val{:call}, args::Vector{Any}) at lower.jl:211, interpret_lower(codestate::JuliaInterp.CodeState, expr::Expr) at lower.jl:364, run_code_state(codestate::JuliaInterp.CodeState) at types.jl:197, interpret_lower(interpstate::JuliaInterp.InterpState, parent::Nothing, src::Core.CodeInfo) at lower.jl:382, eval_lower_ast(interpstate::JuliaInterp.InterpState, expr::Expr) at ast.jl:19, interpret_ast(interpstate::JuliaInterp.InterpState, #unused#::Val{:let}, args::Vector{Any}) at ast.jl:93  …  macro expansion at Test.jl:1283 [inlined], macro expansion at testdefs.jl:23 [inlined], macro expansion at timing.jl:380 [inlined], runtests(name::String, path::String, isolate::Bool; seed::UInt128) at testdefs.jl:21, runtests at testdefs.jl:6 [inlined], (::var"#runtests##kw")(::NamedTuple{(:seed,), Tuple{UInt128}}, ::typeof(runtests), name::String, path::String) at testdefs.jl:6, (::Distributed.var"#106#108"{Distributed.CallMsg{:call_fetch}})() at process_messages.jl:278, run_work_thunk(thunk::Distributed.var"#106#108"{Distributed.CallMsg{:call_fetch}}, print_error::Bool) at process_messages.jl:63, macro expansion at process_messages.jl:278 [inlined], (::Distributed.var"#105#107"{Distributed.CallMsg{:call_fetch}, Distributed.MsgHeader, Sockets.TCPSocket})() at task.jl:423]
+Error in testset stacktraces:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\stacktraces.jl:158
+  Expression: (bt[1]).line == topline + 4
+   Evaluated: 136 == 153
+Error in testset opaque_closure:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\opaque_closure.jl:121
+  Expression: f(1, 1)
+    Expected: TypeError
+      Thrown: AssertionError
+Error in testset opaque_closure:
+Error During Test at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\opaque_closure.jl:122
+  Test threw exception
+  Expression: f(2, 3.0) === (4, 9.0)
+  
+Error in testset opaque_closure:
+Error During Test at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\opaque_closure.jl:140
+  Test threw exception
+  Expression: g_world_age() == 1
+  MethodError: objects of type Nothing are not callable
+  Stacktrace:
+    [1] top-level scope
+      @ C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Test\src\Test.jl:445
+    [2] eval
+      @ .\boot.jl:373 [inlined]
+    [3] eval_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:5
+    [4] interpret_ast(interpstate::JuliaInterp.InterpState, #unused#::Val{:macrocall}, args::Vector{Any})
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:63
+    [5] interpret_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:199
+    [6] interpret_ast(interpstate::JuliaInterp.InterpState, #unused#::Val{:toplevel}, args::Vector{Any})
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:185
+    [7] interpret_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:199
+    [8] interpret_ast
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:204 [inlined]
+    [9] include(mod::Module, path::String, debug::Bool, budget::UInt64)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\JuliaInterp.jl:16
+   [10] include
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\JuliaInterp.jl:10 [inlined]
+   [11] macro expansion
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:26 [inlined]
+   [12] macro expansion
+      @ C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Test\src\Test.jl:1283 [inlined]
+   [13] macro expansion
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:23 [inlined]
+   [14] macro expansion
+      @ .\timing.jl:380 [inlined]
+   [15] runtests(name::String, path::String, isolate::Bool; seed::UInt128)
+      @ Main C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:21
+Error in testset opaque_closure:
+Error During Test at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\opaque_closure.jl:213
+  Test threw exception
+  Expression: call_global_opaque_closure() == 123
+  MethodError: objects of type Nothing are not callable
+  Stacktrace:
+    [1] call_global_opaque_closure()
+      @ Main.Test27Main_opaque_closure C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\test\opaque_closure.jl:212
+    [2] top-level scope
+      @ C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Test\src\Test.jl:445
+    [3] eval
+      @ .\boot.jl:373 [inlined]
+    [4] eval_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:5
+    [5] interpret_ast(interpstate::JuliaInterp.InterpState, #unused#::Val{:macrocall}, args::Vector{Any})
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:63
+    [6] interpret_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:199
+    [7] interpret_ast(interpstate::JuliaInterp.InterpState, #unused#::Val{:toplevel}, args::Vector{Any})
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:185
+    [8] interpret_ast(interpstate::JuliaInterp.InterpState, expr::Expr)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:199
+    [9] interpret_ast
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\ast.jl:204 [inlined]
+   [10] include(mod::Module, path::String, debug::Bool, budget::UInt64)
+      @ JuliaInterp C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\JuliaInterp.jl:16
+   [11] include
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\src\JuliaInterp.jl:10 [inlined]
+   [12] macro expansion
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:26 [inlined]
+   [13] macro expansion
+      @ C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share\julia\stdlib\v1.7\Test\src\Test.jl:1283 [inlined]
+   [14] macro expansion
+      @ C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:23 [inlined]
+   [15] macro expansion
+      @ .\timing.jl:380 [inlined]
+   [16] runtests(name::String, path::String, isolate::Bool; seed::UInt128)
+      @ Main C:\Users\Win10\Documents\GitHub\JuliaInterp.jl\test\testdefs.jl:21
+Error in testset loading:
+Test Failed at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\loading.jl:47
+  Expression: #= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\loading.jl:47 =# @__DIR__() == dirname(#= C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\loading.jl:47 =# @__FILE__())
+   Evaluated: "C:\\Users\\Win10\\AppData\\Local\\Programs\\Julia-1.7.1\\share\\julia\\test" == "C:\\Users\\Win10\\AppData\\Local\\Programs\\Julia-1.7.1\\share/julia/test"
+Error in testset misc:
+Error During Test at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\misc.jl:134
+  Test threw exception
+  Expression: lock(get_finalizers_inhibited, l) == 1
+  
+Error in testset misc:
+Error During Test at C:\Users\Win10\AppData\Local\Programs\Julia-1.7.1\share/julia/test\misc.jl:134
+  Test threw exception
+  Expression: lock(get_finalizers_inhibited, l) == 1
+  

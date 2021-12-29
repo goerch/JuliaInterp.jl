@@ -200,7 +200,7 @@ function interpret_ast(interpstate, expr::Expr)
 end 
 
 function interpret_ast(mod::Module, expr::Expr, debug, budget)
-    interpstate = InterpState(debug, budget, [ModuleState(mod)], [])
+    interpstate = interp_state(debug, budget, mod)
     ans = interpret_ast(interpstate, expr)
     pop!(interpstate.mods)
     ans

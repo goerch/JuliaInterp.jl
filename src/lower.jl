@@ -43,89 +43,33 @@ function lookup_lower(codestate, ::Val{:new}, args)
     # eval_ast(codestate.interpstate, Expr(:new, type, parms...))
     ccall(:jl_new_structv, Any, (Any, Ptr{Any}, UInt64), type, parms, length(parms))
 end
-exclude(fun) = !(fun isa Function) ||
-    fun isa Core.IntrinsicFunction ||
-    fun isa Core.Builtin ||
-    Base.moduleroot(parentmodule(fun)) in [Core]
-@static if !isdefined(Base, :current_exceptions)
-    current_exceptions = Base.catch_stack
-else
-    current_exceptions = Base.current_exceptions
-end
-function intercept(codestate, fun, parms)
-    if fun == current_exceptions
-        if isempty(parms) || parms[1] == current_task()
-            return Some{Any}(codestate.interpstate.exceptions)
-        end 
-    elseif fun == Base.catch_backtrace
-        if isempty(codestate.interpstate.exceptions)
-            return Some{Any}([])
-        else
-            return Some{Any}(last(codestate.interpstate.exceptions).backtrace)
-        end
-    elseif fun == Base.rethrow
-        fun = Base.throw
-        if isempty(parms) 
-            if isempty(codestate.interpstate.exceptions)
-                parms = Any[ErrorException("rethrow() not allowed outside a catch block")]
-            else
-                parms = Any[pop!(codestate.interpstate.exceptions).exception]
-            end
-        elseif isempty(codestate.interpstate.exceptions)
-            parms = Any[ErrorException("rethrow(exc) not allowed outside a catch block")]
-        end
-        return Some{Any}(Base.throw(parms...))
-    # https://github.com/JuliaLang/julia/issues/43556
-    elseif fun == Base.iolock_begin
-        return Some{Any}(Base.iolock_begin(parms...))
-    elseif fun == Base.iolock_end
-        return Some{Any}(Base.iolock_end(parms...))
-    elseif fun == Base.sigatomic_begin
-        return Some{Any}(Base.sigatomic_begin(parms...))
-    elseif fun == Base.sigatomic_end
-        return Some{Any}(Base.sigatomic_end(parms...))
-    end
-    return nothing
-end
-function recurse(codestate, fun, parms)
-    if !isassigned(codestate.times, codestate.pc) || codestate.times[codestate.pc] < codestate.interpstate.budget
-        childstate = code_state_from_call(codestate, fun, parms)
-        if childstate !== nothing
-            # codestate.interpstate.debug = true
-            time = time_ns()
-            try
-                childstate.interpstate.debug && @show childstate.src
-                return Some{Any}(run_code_state(childstate))
-            finally
-                if !isassigned(codestate.times, codestate.pc)
-                    codestate.times[codestate.pc] = time_ns() - time
-                else
-                    codestate.times[codestate.pc] += time_ns() - time
-                end 
-                # codestate.interpstate.debug = false
-            end
-        end
-    end
-    return nothing
-end
+interpretable(fun) = !(fun isa Core.Builtin) && !(fun isa Core.IntrinsicFunction) &&
+    !(Base.moduleroot(parentmodule(fun)) in [Base, Core])
 function lookup_lower(codestate, ::Val{:call}, args)
     # @show :call args
     fun = lookup_lower(codestate, args[1])
+    @assert fun isa Base.Callable
     # @show fun
-    parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
+    parms = ((lookup_lower(codestate, arg) for arg in @view args[2:end])...,)
     # @show parms
-    ans = intercept(codestate, fun, parms) 
-    if ans isa Some
-        return something(ans)
-    elseif !exclude(fun)
-        ans = recurse(codestate, fun, parms)
-        if ans isa Some
-            return something(ans)
-        elseif exclude(fun)
-            # @show :maybe_include codestate.times[codestate.pc]
+    intercept = get(codestate.interpstate.intercepts, fun, fun)
+    if intercept != fun
+        return intercept(codestate, parms)
+    elseif interpretable(fun)
+        if !isassigned(codestate.times, codestate.pc) || codestate.times[codestate.pc] < codestate.interpstate.budget
+            childstate = code_state_from_call(codestate, fun, parms)
+            if childstate !== nothing
+                # codestate.interpstate.debug = true
+                try
+                    childstate.interpstate.debug && @show childstate.src
+                    return run_code_state(childstate)
+                finally
+                    # codestate.interpstate.debug = false
+                end
+            else
+                codestate.times[codestate.pc] = codestate.interpstate.budget
+            end
         end
-    else
-        # @show :exclude 
     end
     # eval_ast(codestate.interpstate, Expr(:call, fun, parms...))
     #= try
@@ -137,22 +81,7 @@ function lookup_lower(codestate, ::Val{:call}, args)
             rethrow()
         end
     end =#
-    if fun == Base.llvmcall
-        funname = gensym("llvmcall")
-        argnames = (Symbol(:(_), i) for i = 1:length(parms) - 3)
-        ir = parms[1]
-        rt = parms[2]
-        at = parms[3]
-        impl = quote
-            function $funname($(argnames...))
-                Base.llvmcall($ir, $rt, $at, $(argnames...))
-            end
-            $funname($(parms[4:end]...))
-        end
-        eval_ast(codestate.interpstate, impl)
-    else
-        Base.@invokelatest fun(parms...)
-    end
+    Base.@invokelatest fun(parms...)
 end
 function quote_lower(symbol::Symbol)
     QuoteNode(symbol)
@@ -177,7 +106,7 @@ function lookup_lower(codestate, ::Val{:foreigncall}, args)
     nreq = args[4]
     cc = args[5]
     # @show rt at nreq cc    
-    parms = Any[quote_lower(lookup_lower(codestate, arg)) for arg in args[6:end]]
+    parms = ((quote_lower(lookup_lower(codestate, arg)) for arg in args[6:end])...,)
     # @show parms
     eval_ast(codestate.interpstate, Expr(:foreigncall, fun, rt, at, nreq, cc, parms...))
 end
@@ -259,6 +188,14 @@ function assign_lower(codestate, globalref::GlobalRef, val)
     eval_ast(codestate.interpstate, Expr(:(=), globalref, QuoteNode(val)))
 end
 
+function handle_times(codestate, start, stop)
+    if !isassigned(codestate.times, codestate.pc)
+        codestate.times[codestate.pc] = stop - start
+    else
+        codestate.times[codestate.pc] += stop - start
+    end 
+end
+
 function handle_error(codestate, exceptions)
     codestate.interpstate.debug && @show :handle_error last(exceptions)
     append!(codestate.interpstate.exceptions, exceptions)
@@ -299,7 +236,7 @@ end
 function interpret_lower(codestate, ::Val{:method}, args)
     codestate.interpstate.debug && @show :interpret_lower :method args
     meth = args[1] 
-    parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
+    parms = ((lookup_lower(codestate, arg) for arg in @view args[2:end])...,)
     if length(parms) >= 2
         # branching on https://github.com/JuliaLang/julia/pull/41137
         @static if isdefined(Core.Compiler, :OverlayMethodTable)
@@ -358,7 +295,12 @@ end
 function interpret_lower(codestate, node)
     codestate.interpstate.debug && @show :interpret_lower typeof(node) node
     try
-        codestate.ssavalues[codestate.pc] = lookup_lower(codestate, node)
+        time = time_ns()
+        try
+            codestate.ssavalues[codestate.pc] = lookup_lower(codestate, node)
+        finally
+            handle_times(codestate, time, time_ns())
+        end
         codestate.pc += 1
     catch 
         handle_error(codestate, Compat.current_exceptions())
@@ -379,8 +321,13 @@ end
 function interpret_lower(codestate, returnnode::Core.ReturnNode)
     codestate.interpstate.debug && @show :interpret_lower returnnode
     try
-        ans = lookup_lower(codestate, returnnode.val)
-        return Some{typeof(ans)}(ans)
+        time = time_ns()
+        try
+            ans = lookup_lower(codestate, returnnode.val)
+            return Some{typeof(ans)}(ans)
+        finally
+            handle_times(codestate, time, time_ns())
+        end
     catch 
         handle_error(codestate, Compat.current_exceptions())
     end
@@ -412,7 +359,12 @@ end
 function interpret_lower(codestate, expr::Expr)
     codestate.interpstate.debug && @show :interpret_lower expr
     try
-        interpret_lower(codestate, Val(expr.head), expr.args)
+        time = time_ns()
+        try
+            interpret_lower(codestate, Val(expr.head), expr.args)
+        finally
+            handle_times(codestate, time, time_ns())
+        end
         codestate.pc += 1
     catch 
         handle_error(codestate, Compat.current_exceptions())
@@ -424,8 +376,13 @@ function interpret_lower(interpstate, parent::Union{Nothing, CodeState}, src::Co
     codestate = code_state_from_thunk(interpstate, src)
     # interpstate.debug = true
     try
-        codestate.interpstate.debug && @show :interpret_lower codestate.src
-        return run_code_state(codestate)
+        time = time_ns()
+        try
+            codestate.interpstate.debug && @show :interpret_lower codestate.src
+            return run_code_state(codestate)
+        finally
+            handle_times(codestate, time, time_ns())
+        end
     finally
         # interpstate.debug = false
     end
