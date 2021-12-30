@@ -43,19 +43,18 @@ function lookup_lower(codestate, ::Val{:new}, args)
     # eval_ast(codestate.interpstate, Expr(:new, type, parms...))
     ccall(:jl_new_structv, Any, (Any, Ptr{Any}, UInt64), type, parms, length(parms))
 end
-interpretable(fun) = !(fun isa Core.Builtin) && !(fun isa Core.IntrinsicFunction) &&
-    !(Base.moduleroot(parentmodule(fun)) in [Base, Core])
 function lookup_lower(codestate, ::Val{:call}, args)
     # @show :call args
     fun = lookup_lower(codestate, args[1])
-    @assert fun isa Base.Callable
     # @show fun
     parms = ((lookup_lower(codestate, arg) for arg in @view args[2:end])...,)
     # @show parms
     intercept = get(codestate.interpstate.intercepts, fun, fun)
     if intercept != fun
         return intercept(codestate, parms)
-    elseif interpretable(fun)
+    elseif fun in codestate.interpstate.passthroughs
+        # 
+    elseif fun isa Base.Callable && !(fun isa Core.Builtin) && !(fun isa Core.IntrinsicFunction) 
         if !isassigned(codestate.times, codestate.pc) || codestate.times[codestate.pc] < codestate.interpstate.budget
             childstate = code_state_from_call(codestate, fun, parms)
             if childstate !== nothing
@@ -80,7 +79,7 @@ function lookup_lower(codestate, ::Val{:call}, args)
         else
             rethrow()
         end
-    end =#
+    end =# 
     Base.@invokelatest fun(parms...)
 end
 function quote_lower(symbol::Symbol)
@@ -93,11 +92,11 @@ function lookup_lower(codestate, ::Val{:foreigncall}, args)
     # @show :foreigncall args
     fun = quote_lower(lookup_lower(codestate, args[1]))
     # @show fun
-    if codestate.meth isa Method && !isempty(codestate.lenv) 
-        rt = ccall(:jl_instantiate_type_in_env, Any, (Any, Any, Ptr{Any}), 
+    if codestate.meth isa Method && !isempty(codestate.lenv)
+        rt = ccall(:jl_instantiate_type_in_env, Any, (Any, Any, Ptr{Any}),
             args[2], codestate.meth.sig, codestate.lenv)
         at = Core.svec((
-            ccall(:jl_instantiate_type_in_env, Any, (Any, Any, Ptr{Any}), 
+            ccall(:jl_instantiate_type_in_env, Any, (Any, Any, Ptr{Any}),
                 arg, codestate.meth.sig, codestate.lenv) for arg in args[3])...)
     else
         rt = args[2]
@@ -105,7 +104,7 @@ function lookup_lower(codestate, ::Val{:foreigncall}, args)
     end
     nreq = args[4]
     cc = args[5]
-    # @show rt at nreq cc    
+    # @show rt at nreq cc
     parms = ((quote_lower(lookup_lower(codestate, arg)) for arg in args[6:end])...,)
     # @show parms
     eval_ast(codestate.interpstate, Expr(:foreigncall, fun, rt, at, nreq, cc, parms...))
@@ -193,7 +192,7 @@ function handle_times(codestate, start, stop)
         codestate.times[codestate.pc] = stop - start
     else
         codestate.times[codestate.pc] += stop - start
-    end 
+    end
 end
 
 function handle_error(codestate, exceptions)
@@ -211,14 +210,14 @@ function interpret_lower(codestate, ::Val{T}, args) where T
     codestate.ssavalues[codestate.pc] = lookup_lower(codestate, Expr(T, args...))
 end
 
-function interpret_lower(codestate, ::Val{:enter}, args)    
+function interpret_lower(codestate, ::Val{:enter}, args)
     codestate.interpstate.debug && @show :interpret_lower :enter args
     push!(codestate.handlers, args[1])
     codestate.ssavalues[codestate.pc] = length(codestate.interpstate.exceptions)
 end
 function interpret_lower(codestate, ::Val{:pop_exception}, args)
     codestate.interpstate.debug && @show :interpret_lower :pop_exception args
-    deleteat!(codestate.interpstate.exceptions, 
+    deleteat!(codestate.interpstate.exceptions,
         lookup_lower(codestate, args[1]) + 1:length(codestate.interpstate.exceptions))
 end
 function interpret_lower(codestate, ::Val{:leave}, args)
@@ -235,7 +234,7 @@ end
 
 function interpret_lower(codestate, ::Val{:method}, args)
     codestate.interpstate.debug && @show :interpret_lower :method args
-    meth = args[1] 
+    meth = args[1]
     parms = ((lookup_lower(codestate, arg) for arg in @view args[2:end])...,)
     if length(parms) >= 2
         # branching on https://github.com/JuliaLang/julia/pull/41137
@@ -288,7 +287,7 @@ copy_lower(expr::Expr) = copy(expr)
 copy_lower(val) = val
 function interpret_lower(codestate, ::Val{:copyast}, args)
     codestate.interpstate.debug && @show :interpret_lower :copyast args
-    codestate.ssavalues[codestate.pc] = 
+    codestate.ssavalues[codestate.pc] =
         copy_lower(lookup_lower(codestate, args[1]))
 end
 
@@ -302,7 +301,7 @@ function interpret_lower(codestate, node)
             handle_times(codestate, time, time_ns())
         end
         codestate.pc += 1
-    catch 
+    catch
         handle_error(codestate, Compat.current_exceptions())
     end
     return nothing
@@ -312,7 +311,7 @@ function interpret_lower(codestate, newvarnode::Core.NewvarNode)
     codestate.interpstate.debug && @show :interpret_lower newvarnode
     try
         codestate.pc += 1
-    catch 
+    catch
         handle_error(codestate, Compat.current_exceptions())
     end
     return nothing
@@ -328,7 +327,7 @@ function interpret_lower(codestate, returnnode::Core.ReturnNode)
         finally
             handle_times(codestate, time, time_ns())
         end
-    catch 
+    catch
         handle_error(codestate, Compat.current_exceptions())
     end
     return nothing
@@ -341,7 +340,7 @@ function interpret_lower(codestate, gotoifnot::Core.GotoIfNot)
         else
             codestate.pc = gotoifnot.dest
         end
-    catch 
+    catch
         handle_error(codestate, Compat.current_exceptions())
     end
     return nothing
@@ -350,7 +349,7 @@ function interpret_lower(codestate, gotonode::Core.GotoNode)
     codestate.interpstate.debug && @show :interpret_lower gotonode
     try
         codestate.pc = gotonode.label
-    catch 
+    catch
         handle_error(codestate, Compat.current_exceptions())
     end
     return nothing
@@ -366,7 +365,7 @@ function interpret_lower(codestate, expr::Expr)
             handle_times(codestate, time, time_ns())
         end
         codestate.pc += 1
-    catch 
+    catch
         handle_error(codestate, Compat.current_exceptions())
     end
     return nothing
@@ -376,15 +375,9 @@ function interpret_lower(interpstate, parent::Union{Nothing, CodeState}, src::Co
     codestate = code_state_from_thunk(interpstate, src)
     # interpstate.debug = true
     try
-        time = time_ns()
-        try
-            codestate.interpstate.debug && @show :interpret_lower codestate.src
-            return run_code_state(codestate)
-        finally
-            handle_times(codestate, time, time_ns())
-        end
+        codestate.interpstate.debug && @show :interpret_lower codestate.pc codestate.src
+        return run_code_state(codestate)
     finally
         # interpstate.debug = false
     end
 end
-

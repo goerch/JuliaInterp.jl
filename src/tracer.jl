@@ -27,7 +27,7 @@ function tracer()
             "cmdlineargs.jl",
             "combinatorics.jl",
             "complex.jl",
-            "copy.jl", 
+            "copy.jl",
             "core.jl",
             "corelogging.jl",
             "deprecation_exec.jl",
@@ -59,7 +59,7 @@ function tracer()
             "iterators.jl",
             "keywordargs.jl",
             "llvmcall.jl",
-            "llvmcall2.jl", 
+            "llvmcall2.jl",
             "loading.jl",
             "math.jl",
             "meta.jl",
@@ -67,9 +67,9 @@ function tracer()
             "missing.jl",
             "mod2pi.jl",
             "mpfr.jl",
-            "namedtuple.jl", 
+            "namedtuple.jl", =#
             "numbers.jl",
-            "offsetarray.jl", 
+            #= "offsetarray.jl",
             "opaque_closure.jl",
             "operators.jl",
             "ordering.jl",
@@ -102,14 +102,14 @@ function tracer()
             "stress.jl",
             "strings/basic.jl",
             "strings/io.jl",
-            "strings/search.jl", =#
+            "strings/search.jl",
             "strings/types.jl",
-            #= "strings/util.jl",
+            "strings/util.jl",
             "subarray.jl",
-            "subtype.jl", 
+            "subtype.jl",
             "syntax.jl",
             "sysinfo.jl",
-            "test_sourcepath.jl", 
+            "test_sourcepath.jl",
             "threads.jl",
             "triplequote.jl",
             "tuple.jl",
@@ -124,12 +124,10 @@ function tracer()
                 end
             catch exception
                 @show :toplevel exception
-                rethrow(exception)
+                # rethrow(exception)
             end
         end
     finally
         cd(home)
     end
 end
-
-

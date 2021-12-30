@@ -62,16 +62,8 @@ function _sigatomic_end(codestate, parms)
     end        
     return nothing
 end
-function _lock(codestate, parms)
-    # @show :lock codestate.src
-    return Base.lock(parms...)
-end
-function _unlock(codestate, parms)
-    # @show :unlock codestate.src
-    return Base.unlock(parms...)
-end
 function _llvmcall(codestate, parms)
-    # @show :llvmcall codestate.src
+    @show :llvmcall codestate.src
     funname = gensym("llvmcall")
     argnames = ((Symbol(:(_), i) for i = 1:length(parms) - 3)...,)
     ir = parms[1]
@@ -92,6 +84,7 @@ end
 
 mutable struct InterpState
     intercepts::Dict{Function, Function}
+    passthroughs::Set{Base.Callable}
     debug::Bool
     budget::UInt64
     mods::Vector{ModuleState}
@@ -102,7 +95,7 @@ mutable struct InterpState
 end
 
 function interp_state(debug, budget, mod)
-    interpstate = InterpState(Dict(), debug, budget, [ModuleState(mod)], Dict(), [], false, false)
+    interpstate = InterpState(Dict(), Set(), debug, budget, [ModuleState(mod)], Dict(), [], false, false)
     interpstate.intercepts[current_exceptions] = _current_exceptions
     interpstate.intercepts[Base.catch_backtrace] = _catch_backtrace
     interpstate.intercepts[Base.rethrow] = _rethrow
@@ -110,9 +103,21 @@ function interp_state(debug, budget, mod)
     interpstate.intercepts[Base.iolock_end] = _iolock_end
     interpstate.intercepts[Base.sigatomic_begin] = _sigatomic_begin
     interpstate.intercepts[Base.sigatomic_end] = _sigatomic_end
-    interpstate.intercepts[Base.lock] = _lock
-    interpstate.intercepts[Base.unlock] = _unlock
     interpstate.intercepts[Base.llvmcall] = _llvmcall
+    push!(interpstate.passthroughs, Base.lock)
+    push!(interpstate.passthroughs, Base.unlock)
+    for name in names(Base)
+        fun = getfield(Base, name)
+        if fun isa Base.Callable
+            push!(interpstate.passthroughs, fun)
+        end
+    end
+    for name in names(Core)
+        fun = getfield(Core, name)
+        if fun isa Base.Callable
+            push!(interpstate.passthroughs, fun)
+        end
+    end
     interpstate
 end
 
