@@ -22,8 +22,9 @@ function runtests(name, path, isolate=true; seed=nothing)
             # Random.seed!(nothing) will fail
             seed != nothing && Random.seed!(seed)
             # Base.include(m, "$path.jl")
-            println("Interpreting $path.jl")
+            println("Begin interpreting $path.jl")
             JuliaInterp.include(m, "$path.jl")
+            println("End interpreting $path.jl")
         end
         rss = Sys.maxrss()
         #res_and_time_data[1] is the testset

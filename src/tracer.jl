@@ -62,14 +62,14 @@ function tracer()
             "llvmcall2.jl",
             "loading.jl",
             "math.jl",
-            "meta.jl",
+            "meta.jl", =#
             "misc.jl",
-            "missing.jl",
+            #= "missing.jl",
             "mod2pi.jl",
             "mpfr.jl",
-            "namedtuple.jl", =#
+            "namedtuple.jl",
             "numbers.jl",
-            #= "offsetarray.jl",
+            "offsetarray.jl",
             "opaque_closure.jl",
             "operators.jl",
             "ordering.jl",
@@ -118,7 +118,7 @@ function tracer()
             "worlds.jl",
             "testdefs.jl" =#]
             try
-                mod = @eval(Main, module IsolatedTests using Base, Test, Random, Distributed, Compat, JuliaInterp; end)
+                mod = @eval Main (module IsolatedTests using Base, Test, Random, Distributed, Compat, JuliaInterp; end)
                 @testset verbose=true begin
                     JuliaInterp.include(mod, path, false)
                 end

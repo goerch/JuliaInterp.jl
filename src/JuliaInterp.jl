@@ -1,6 +1,6 @@
 module JuliaInterp
 
-using Compat
+using Compat, Random
 
 include("types.jl")
 include("lower.jl")

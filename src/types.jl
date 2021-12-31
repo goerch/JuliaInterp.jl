@@ -8,7 +8,7 @@ function _current_exceptions(codestate, parms)
         return codestate.interpstate.exceptions
     else
         return Compat.current_exceptions(parms...)
-    end 
+    end
 end
 function _catch_backtrace(codestate, parms)
     if isempty(codestate.interpstate.exceptions)
@@ -18,7 +18,7 @@ function _catch_backtrace(codestate, parms)
     end
 end
 function _rethrow(codestate, parms)
-    if isempty(parms) 
+    if isempty(parms)
         if isempty(codestate.interpstate.exceptions)
             parms = (ErrorException("rethrow() not allowed outside a catch block"),)
         else
@@ -31,39 +31,39 @@ function _rethrow(codestate, parms)
 end
 # https://github.com/JuliaLang/julia/issues/43556
 function _iolock_begin(codestate, parms)
-    # @show :iolock_begin codestate.interpstate.iolock codestate.src
-    # if !codestate.interpstate.iolock 
+    # @show :_iolock_begin codestate.interpstate.iolock codestate.src
+    # if !codestate.interpstate.iolock
     #     Base.iolock_begin(parms...)
     #     codestate.interpstate.iolock = true
     # end
     return nothing
 end
 function _iolock_end(codestate, parms)
-    # @show :iolock_end codestate.interpstate.iolock codestate.src
-    # if codestate.interpstate.iolock 
+    # @show :_iolock_end codestate.interpstate.iolock codestate.src
+    # if codestate.interpstate.iolock
     #     codestate.interpstate.iolock = false
     #     Base.iolock_end(parms...)
     # end
     return nothing
 end
 function _sigatomic_begin(codestate, parms)
-    # @show :sigatomic_begin codestate.interpstate.sigatomic codestate.src
-    # if !codestate.interpstate.sigatomic 
+    # @show :_sigatomic_begin codestate.interpstate.sigatomic codestate.src
+    # if !codestate.interpstate.sigatomic
         Base.sigatomic_begin(parms...)
         codestate.interpstate.sigatomic = true
     # end
     return nothing
 end
 function _sigatomic_end(codestate, parms)
-    # @show :sigatomic_end codestate.interpstate.sigatomic codestate.src
-    if codestate.interpstate.sigatomic 
+    # @show :_sigatomic_end codestate.interpstate.sigatomic codestate.src
+    if codestate.interpstate.sigatomic
         codestate.interpstate.sigatomic = false
         Base.sigatomic_end(parms...)
-    end        
+    end
     return nothing
 end
 function _llvmcall(codestate, parms)
-    @show :llvmcall codestate.src
+    @show :_llvmcall parms
     funname = gensym("llvmcall")
     argnames = ((Symbol(:(_), i) for i = 1:length(parms) - 3)...,)
     ir = parms[1]
@@ -77,14 +77,29 @@ function _llvmcall(codestate, parms)
     end
     return eval_ast(codestate.interpstate, impl)
 end
+function _eval(codestate, parms)
+    wc1 = ccall(:jl_get_world_counter, UInt, ())
+    @show :_eval Int(wc1)
+    local ans
+    if length(parms) == 1
+        ans = interpret_ast(last(codestate.interpstate.mods).mod, parms[1], 
+            codestate.interpstate.debug, codestate.interpstate.budget)
+    else
+        ans = interpret_ast(parms[1], parms[2], 
+            codestate.interpstate.debug, codestate.interpstate.budget)
+    end
+    wc2 = ccall(:jl_get_world_counter, UInt, ())
+    @show :_eval Int(wc2)
+    return ans
+end
 
 struct ModuleState
     mod::Module
 end
 
 mutable struct InterpState
-    intercepts::Dict{Function, Function}
-    passthroughs::Set{Base.Callable}
+    intercepts::Dict{Symbol, Function}
+    passthroughs::Set{Symbol}
     debug::Bool
     budget::UInt64
     mods::Vector{ModuleState}
@@ -96,26 +111,41 @@ end
 
 function interp_state(debug, budget, mod)
     interpstate = InterpState(Dict(), Set(), debug, budget, [ModuleState(mod)], Dict(), [], false, false)
-    interpstate.intercepts[current_exceptions] = _current_exceptions
-    interpstate.intercepts[Base.catch_backtrace] = _catch_backtrace
-    interpstate.intercepts[Base.rethrow] = _rethrow
-    interpstate.intercepts[Base.iolock_begin] = _iolock_begin
-    interpstate.intercepts[Base.iolock_end] = _iolock_end
-    interpstate.intercepts[Base.sigatomic_begin] = _sigatomic_begin
-    interpstate.intercepts[Base.sigatomic_end] = _sigatomic_end
-    interpstate.intercepts[Base.llvmcall] = _llvmcall
-    push!(interpstate.passthroughs, Base.lock)
-    push!(interpstate.passthroughs, Base.unlock)
-    for name in names(Base)
-        fun = getfield(Base, name)
-        if fun isa Base.Callable
-            push!(interpstate.passthroughs, fun)
+    interpstate.intercepts[Symbol(current_exceptions)] = _current_exceptions
+    interpstate.intercepts[Symbol(Base.catch_backtrace)] = _catch_backtrace
+    interpstate.intercepts[Symbol(Base.rethrow)] = _rethrow
+    interpstate.intercepts[Symbol(Base.iolock_begin)] = _iolock_begin
+    interpstate.intercepts[Symbol(Base.iolock_end)] = _iolock_end
+    interpstate.intercepts[Symbol(Base.sigatomic_begin)] = _sigatomic_begin
+    interpstate.intercepts[Symbol(Base.sigatomic_end)] = _sigatomic_end
+    interpstate.intercepts[Symbol(Base.llvmcall)] = _llvmcall
+    # interpstate.intercepts[Symbol(Base.eval)] = _eval
+    push!(interpstate.passthroughs, Symbol(Core.eval))
+    push!(interpstate.passthroughs, Symbol(Base.eval))
+    push!(interpstate.passthroughs, Symbol(Base.lock))
+    push!(interpstate.passthroughs, Symbol(Base.unlock))
+    for name in names(Core; all=true)
+        if isdefined(Base, name)
+            fun = getfield(Core, name)
+            if fun isa Base.Callable
+                push!(interpstate.passthroughs, Symbol(fun))
+            end
         end
     end
-    for name in names(Core)
-        fun = getfield(Core, name)
-        if fun isa Base.Callable
-            push!(interpstate.passthroughs, fun)
+    for name in names(Base; all=true)
+        if isdefined(Base, name)
+            fun = getfield(Base, name)
+            if fun isa Base.Callable
+                push!(interpstate.passthroughs, Symbol(fun))
+            end
+        end
+    end
+    for name in names(Random; all=true)
+        if isdefined(Random, name)
+            fun = getfield(Random, name)
+            if fun isa Base.Callable
+                push!(interpstate.passthroughs, Symbol(fun))
+            end
         end
     end
     interpstate
@@ -123,6 +153,7 @@ end
 
 mutable struct CodeState
     interpstate::InterpState
+    wc::UInt
     meth::Union{Method, Module}
     names::Vector{Symbol}
     lenv::Core.SimpleVector
@@ -135,9 +166,11 @@ mutable struct CodeState
 end
 
 function code_state_from_thunk(interpstate, src)
-    CodeState(interpstate, last(interpstate.mods).mod, [], Core.svec(), src, 1,
-        Vector(undef, length(src.code)), 
-        Vector{UInt64}(undef, length(src.code)), 
+    wc = ccall(:jl_get_world_counter, UInt, ())
+    # @show :code_state_from_thunk Int(wc)
+    CodeState(interpstate, wc, last(interpstate.mods).mod, [], Core.svec(), src, 1,
+        Vector(undef, length(src.code)),
+        Vector{UInt64}(undef, length(src.code)),
         Vector(undef, length(src.slotnames)),
         Int[])
 end
@@ -155,8 +188,9 @@ function code_state_from_call(codestate, fun, parms)
             return nothing
         end
         rethrow(exception)
-    end =# 
+    end =#
     wc = ccall(:jl_get_world_counter, UInt, ())
+    # @show :code_state_from_call fun Int(wc) Int(codestate.wc)
     tt = Tuple{typeof_lower.((fun, parms...))...}
     meth, names, lenv, src = get(codestate.interpstate.meths, (wc, tt), (nothing, nothing, nothing, nothing))
     if meth === nothing
@@ -164,7 +198,7 @@ function code_state_from_call(codestate, fun, parms)
         if meth === nothing
             @show :code_state_from_call fun
             return nothing
-        end 
+        end
         names = Base.method_argnames(meth)
         sig = Base.signature_type(fun, typeof_lower.(parms))
         (ti, lenv) = ccall(:jl_type_intersection_with_env, Any, (Any, Any), sig, meth.sig)
@@ -172,28 +206,25 @@ function code_state_from_call(codestate, fun, parms)
             src = Base.uncompressed_ast(meth)
             # src = Base.uncompressed_ir(meth)
         else
-            expr = Base.@invokelatest meth.generator(lenv..., meth.generator.argnames...)
+            @show :generator
+            expr = Base.invokelatest(meth.generator, lenv..., meth.generator.argnames...)
             src = generate_lower(codestate, expr)
         end
         codestate.interpstate.meths[(wc, tt)] = (meth, names, lenv, src)
     end
-    codestate = CodeState(codestate.interpstate, meth, names, lenv, src, 1,
-        Vector(undef, length(src.code)), 
-        Vector{UInt64}(undef, length(src.code)), 
+    childstate = CodeState(codestate.interpstate, wc, meth, names, lenv, src, 1,
+        Vector(undef, length(src.code)),
+        Vector{UInt64}(undef, length(src.code)),
         Vector(undef, length(src.slotnames)),
         Int[])
-    codestate.slots[1] = fun
+    childstate.slots[1] = fun
     if !meth.isva
-        for idx in 2:meth.nargs 
-            codestate.slots[idx] = parms[idx - 1]
-        end
+        @views childstate.slots[2:meth.nargs] .= parms[1:meth.nargs - 1]
     else
-        for idx in 2:meth.nargs - 1
-            codestate.slots[idx] = parms[idx - 1]
-        end
-        codestate.slots[meth.nargs] = parms[meth.nargs - 1:end]
+        @views childstate.slots[2:meth.nargs - 1] .= parms[1:meth.nargs - 2]
+        childstate.slots[meth.nargs] = parms[meth.nargs - 1:end]
     end
-    return codestate
+    return childstate
 end
 
 function run_code_state(codestate)

@@ -59,7 +59,7 @@ end
 function interpret_ast(interpstate, ::Val{:macrocall}, args)
     interpstate.debug && @show :macrocall args
     expr = Expr(:macrocall, args...) 
-    # Macros be better handled by the compiler
+    # Macros be better handled by the compiler?
     eval_ast(interpstate, expr)
 end
 function interpret_ast(interpstate, ::Val{:(.=)}, args)
@@ -138,7 +138,7 @@ end
 function interpret_ast(interpstate, ::Val{:macro}, args)
     interpstate.debug && @show :macro args
     expr = Expr(:macro, args...)
-    # Macros be better handled by the compiler
+    # Macros be better handled by the compiler?
     eval_ast(interpstate, expr)
 end
 function interpret_ast(interpstate, ::Val{:struct}, args)
