@@ -13,7 +13,7 @@ Clone the repository from GitHub.
 Change directory to the test folder of the project and execute
 
 ```
-julia.exe -t5 runtests.jl --skip compiler stdlib
+julia.exe -t5 runtests.jl --skip compiler stdlib misc
 ```
 
 ## Results
