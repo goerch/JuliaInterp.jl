@@ -67,9 +67,9 @@ function tracer()
             "missing.jl",
             "mod2pi.jl",
             "mpfr.jl", 
-            "namedtuple.jl", =#
+            "namedtuple.jl", 
             "numbers.jl",
-            #= "offsetarray.jl",
+            "offsetarray.jl",
             "opaque_closure.jl",
             "operators.jl",
             "ordering.jl",
@@ -112,15 +112,15 @@ function tracer()
             "test_sourcepath.jl",
             "threads.jl",
             "triplequote.jl",
-            "tuple.jl",
+            "tuple.jl", =#
             "vecelement.jl",
-            "version.jl",
+            #= "version.jl",
             "worlds.jl",
             "testdefs.jl" =#]
             try
                 mod = @eval Main (module IsolatedTests using Base, Test, Random, Distributed, Compat, JuliaInterp; end)
                 @testset verbose=true begin
-                    JuliaInterp.include(mod, path, false)
+                    JuliaInterp.include(mod, path, true, UInt(1_000_000))
                 end
             catch exception
                 @show :toplevel exception

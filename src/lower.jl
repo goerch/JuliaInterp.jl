@@ -233,36 +233,36 @@ function interpret_lower_expr(codestate, val::Val{T}, args) where T
                :inbounds, :isdefined, :loopinfo, :meta, 
                :new, :new_opaque_closure, :splatnew, 
                :static_parameter, :the_exception])
-        @show :interpret_lower T args
+        @show :interpret_lower_expr T args
         @assert false
     end
-    codestate.interpstate.debug && @show :interpret_lower T args
+    codestate.interpstate.debug && @show :interpret_lower_expr T args
     lookup_lower_expr(codestate, val, args)
 end
 
 function interpret_lower_expr(codestate, ::Val{:enter}, args)
-    codestate.interpstate.debug && @show :interpret_lower :enter args
+    codestate.interpstate.debug && @show :interpret_lower_expr :enter args
     push!(codestate.handlers, args[1])
     length(codestate.interpstate.exceptions)
 end
 function interpret_lower_expr(codestate, ::Val{:pop_exception}, args)
-    codestate.interpstate.debug && @show :interpret_lower :pop_exception args
+    codestate.interpstate.debug && @show :interpret_lower_expr :pop_exception args
     deleteat!(codestate.interpstate.exceptions,
         lookup_lower(codestate, args[1]) + 1:length(codestate.interpstate.exceptions))
 end
 function interpret_lower_expr(codestate, ::Val{:leave}, args)
-    codestate.interpstate.debug && @show :interpret_lower :leave args
+    codestate.interpstate.debug && @show :interpret_lower_expr :leave args
     len = length(codestate.handlers)
     deleteat!(codestate.handlers, len - args[1] + 1:len)
 end
 
 function interpret_lower_expr(codestate, ::Val{:(=)}, args)
-    codestate.interpstate.debug && @show :interpret_lower :(=) args
+    codestate.interpstate.debug && @show :interpret_lower_expr :(=) args
     assign_lower(codestate, args[1], lookup_lower(codestate, args[2]))
 end
 
 function interpret_lower_expr(codestate, ::Val{:method}, args)
-    codestate.interpstate.debug && @show :interpret_lower :method args
+    codestate.interpstate.debug && @show :interpret_lower_expr :method args
     meth = args[1]
     parms = ((lookup_lower(codestate, arg) for arg in @view args[2:end])...,)
     if length(parms) >= 2
@@ -282,31 +282,31 @@ function interpret_lower_expr(codestate, ::Val{:method}, args)
     end
 end
 function interpret_lower_expr(codestate, ::Val{:cfunction}, args)
-    codestate.interpstate.debug && @show :interpret_lower :cfunction args
+    codestate.interpstate.debug && @show :interpret_lower_expr :cfunction args
     eval_ast(codestate.interpstate, Expr(:cfunction, args...))
 end
 function interpret_lower_expr(codestate, ::Val{:const}, args)
-    codestate.interpstate.debug && @show :interpret_lower :const args
+    codestate.interpstate.debug && @show :interpret_lower_expr :const args
     eval_ast(codestate.interpstate, Expr(:const, args...))
 end
 function interpret_lower_expr(codestate, ::Val{:global}, args)
-    codestate.interpstate.debug && @show :interpret_lower :global args
+    codestate.interpstate.debug && @show :interpret_lower_expr :global args
     eval_ast(codestate.interpstate, Expr(:global, args...))
 end
 function interpret_lower_expr(codestate, ::Val{:using}, args)
-    codestate.interpstate.debug && @show :interpret_lower :using args
+    codestate.interpstate.debug && @show :interpret_lower_expr :using args
     eval_ast(codestate.interpstate, Expr(:using, args...))
 end
 
 function interpret_lower_expr(codestate, ::Val{:thunk}, args)
-    codestate.interpstate.debug && @show :interpret_lower :thunk args
+    codestate.interpstate.debug && @show :interpret_lower_expr :thunk args
     interpret_lower(codestate.interpstate, codestate, args[1])
 end
 
 copy_lower(expr::Expr) = copy(expr)
 copy_lower(val) = val
 function interpret_lower_expr(codestate, ::Val{:copyast}, args)
-    codestate.interpstate.debug && @show :interpret_lower :copyast args
+    codestate.interpstate.debug && @show :interpret_lower_expr :copyast args
     copy_lower(lookup_lower(codestate, args[1]))
 end
 
