@@ -62,11 +62,11 @@ function tracer()
             "llvmcall2.jl",
             "loading.jl",
             "math.jl",
-            "meta.jl", =#
+            "meta.jl", 
             "misc.jl",
-            #= "missing.jl",
+            "missing.jl",
             "mod2pi.jl",
-            "mpfr.jl",
+            "mpfr.jl", 
             "namedtuple.jl",
             "numbers.jl",
             "offsetarray.jl",
@@ -111,9 +111,9 @@ function tracer()
             "sysinfo.jl",
             "test_sourcepath.jl",
             "threads.jl",
-            "triplequote.jl",
+            "triplequote.jl", =#
             "tuple.jl",
-            "vecelement.jl",
+            #= "vecelement.jl",
             "version.jl",
             "worlds.jl",
             "testdefs.jl" =#]

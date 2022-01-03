@@ -304,6 +304,16 @@ cd(__DIR__) do
                                 else # single process testing
                                     error("Halting tests. Memory limit reached : $resp > $max_worker_rss")
                                 end
+                            else
+                                # recyle worker to prevent spurious errors
+                                if n > 1
+                                    rmprocs(wrkr, waitfor=30)
+                                    p = addprocs_with_testenv(1)[1]
+                                    remotecall_fetch(include, p, joinpath(__HOME__, "testdefs.jl"))
+                                    if use_revise
+                                        Distributed.remotecall_eval(Main, p, revise_init_expr)
+                                    end
+                                end
                             end
                        end
                     end
