@@ -1,8 +1,3 @@
-@static if !isdefined(Base, :current_exceptions)
-    current_exceptions = Base.catch_stack
-else
-    current_exceptions = Base.current_exceptions
-end
 function _current_exceptions(codestate, parms)
     if isempty(parms) || parms[1] == current_task()
         return codestate.interpstate.exceptions
@@ -22,7 +17,7 @@ function _rethrow(codestate, parms)
         if isempty(codestate.interpstate.exceptions)
             parms = (ErrorException("rethrow() not allowed outside a catch block"),)
         else
-            parms = (pop!(codestate.interpstate.exceptions),)
+            parms = (pop!(codestate.interpstate.exceptions).exception,)
         end
     elseif isempty(codestate.interpstate.exceptions)
         parms = (ErrorException("rethrow(exc) not allowed outside a catch block"),)
@@ -97,9 +92,11 @@ struct ModuleState
     mod::Module
 end
 
+const ModuleSymbol = Tuple{Module, Symbol}
+
 mutable struct InterpState
-    intercepts::Dict{Symbol, Function}
-    passthroughs::Set{Symbol}
+    intercepts::Dict{ModuleSymbol, Function}
+    passthroughs::Set{ModuleSymbol}
     debug::Bool
     budget::UInt64
     mods::Vector{ModuleState}
@@ -111,42 +108,31 @@ end
 
 function interp_state(debug, budget, mod)
     interpstate = InterpState(Dict(), Set(), debug, budget, [ModuleState(mod)], Dict(), [], false, false)
-    interpstate.intercepts[Symbol(current_exceptions)] = _current_exceptions
-    interpstate.intercepts[Symbol(Base.catch_backtrace)] = _catch_backtrace
-    interpstate.intercepts[Symbol(Base.rethrow)] = _rethrow
-    interpstate.intercepts[Symbol(Base.iolock_begin)] = _iolock_begin
-    interpstate.intercepts[Symbol(Base.iolock_end)] = _iolock_end
-    interpstate.intercepts[Symbol(Base.sigatomic_begin)] = _sigatomic_begin
-    interpstate.intercepts[Symbol(Base.sigatomic_end)] = _sigatomic_end
-    interpstate.intercepts[Symbol(Base.llvmcall)] = _llvmcall
-    # interpstate.intercepts[Symbol(Base.eval)] = _eval
-    push!(interpstate.passthroughs, Symbol(Core.eval))
-    push!(interpstate.passthroughs, Symbol(Base.eval))
-    push!(interpstate.passthroughs, Symbol(Base.lock))
-    push!(interpstate.passthroughs, Symbol(Base.unlock))
-    for name in names(Core; all=true)
-        if isdefined(Base, name)
-            fun = getfield(Core, name)
-            if fun isa Base.Callable
-                push!(interpstate.passthroughs, Symbol(fun))
-            end
-        end
+    @static if !isdefined(Base, :current_exceptions)
+        interpstate.intercepts[(Base, :catch_stack)] = _current_exceptions
+    else
+        interpstate.intercepts[(Base, :current_exceptions)] = _current_exceptions
     end
-    for name in names(Base; all=true)
-        if isdefined(Base, name)
-            fun = getfield(Base, name)
-            if fun isa Base.Callable
-                push!(interpstate.passthroughs, Symbol(fun))
-            end
-        end
-    end
-    for name in names(Random; all=true)
-        if isdefined(Random, name)
-            fun = getfield(Random, name)
-            if fun isa Base.Callable
-                push!(interpstate.passthroughs, Symbol(fun))
-            end
-        end
+    interpstate.intercepts[(Base, :catch_backtrace)] = _catch_backtrace
+    interpstate.intercepts[(Base, :rethrow)] = _rethrow
+    interpstate.intercepts[(Base, :iolock_begin)] = _iolock_begin
+    interpstate.intercepts[(Base, :iolock_end)] = _iolock_end
+    interpstate.intercepts[(Base, :sigatomic_begin)] = _sigatomic_begin
+    interpstate.intercepts[(Base, :sigatomic_end)] = _sigatomic_end
+    interpstate.intercepts[(Base, :llvmcall)] = _llvmcall
+    # interpstate.intercepts[(Core, :eval)] = _eval
+    # interpstate.intercepts[(Base, :eval)] = _eval
+    # interpstate.intercepts[(mod, :eval)] = _eval
+    push!(interpstate.passthroughs, (Core, :eval))
+    push!(interpstate.passthroughs, (Base, :eval))
+    push!(interpstate.passthroughs, (mod, :eval))
+    push!(interpstate.passthroughs, (Base, :lock))
+    push!(interpstate.passthroughs, (Base, :unlock))
+    for mod in (Base, Core, Random)
+        union!(interpstate.passthroughs,
+            (mod, name) for name in names(mod; all=true)
+                if isdefined(mod, name) &&
+                   getfield(mod, name) isa Base.Callable)
     end
     interpstate
 end

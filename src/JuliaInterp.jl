@@ -6,7 +6,7 @@ include("types.jl")
 include("lower.jl")
 include("ast.jl")
 
-function include(mod::Module, path, debug=false, budget=UInt64(10))
+function include(mod, path, debug=false, budget=UInt64(10))
     code = read(path, String)
     tls = task_local_storage()
     prev = haskey(tls, :SOURCE_PATH) ? tls[:SOURCE_PATH] : nothing

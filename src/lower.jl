@@ -1,59 +1,59 @@
-function isdefined_lower(codestate, val, args)
+function isdefined_lower_expr(codestate, val, args)
     @show val args
     @assert false
 end
-function lookup_lower(codestate, val, args)
+function lookup_lower_expr(codestate, val, args)
     @show val args
     @assert false
 end
 
-function lookup_lower(codestate, ::Val{:boundscheck}, args)
-    @show :boundscheck args
+function lookup_lower_expr(codestate, ::Val{:boundscheck}, args)
+    # @show :boundscheck args
     true
 end
-function lookup_lower(codestate, ::Val{:loopinfo}, args)
-    @show :loopinfo args
+function lookup_lower_expr(codestate, ::Val{:loopinfo}, args)
+    # @show :loopinfo args
     nothing
 end
-function lookup_lower(codestate, ::Val{:inbounds}, args)
+function lookup_lower_expr(codestate, ::Val{:inbounds}, args)
     # @show :inbounds args
     args[1]
 end
-function lookup_lower(codestate, ::Val{:meta}, args)
-    @show :meta args
+function lookup_lower_expr(codestate, ::Val{:meta}, args)
+    # @show :meta args
     args[1]
 end
 
-function lookup_lower(codestate, ::Val{:gc_preserve_begin}, args)
-    @show :gc_preserve_begin args
+function lookup_lower_expr(codestate, ::Val{:gc_preserve_begin}, args)
+    # @show :gc_preserve_begin args
     nothing
 end
-function lookup_lower(codestate, ::Val{:gc_preserve_end}, args)
-    @show :gc_preserve_end args
+function lookup_lower_expr(codestate, ::Val{:gc_preserve_end}, args)
+    # @show :gc_preserve_end args
     nothing
 end
 
-function isdefined_lower(codestate, ::Val{:static_parameter}, args)
+function isdefined_lower_expr(codestate, ::Val{:static_parameter}, args)
     isassigned(codestate.lenv, args[1])
 end
-function lookup_lower(codestate, ::Val{:static_parameter}, args)
+function lookup_lower_expr(codestate, ::Val{:static_parameter}, args)
     @assert isassigned(codestate.lenv, args[1])
     codestate.lenv[args[1]]
 end
 
-function isdefined_lower(codestate, ::Val{:the_exception}, args)
+function isdefined_lower_expr(codestate, ::Val{:the_exception}, args)
     !isempty(codestate.interpstate.exceptions)
 end
-function lookup_lower(codestate, ::Val{:the_exception}, args)
+function lookup_lower_expr(codestate, ::Val{:the_exception}, args)
     @assert !isempty(codestate.interpstate.exceptions)
     last(codestate.interpstate.exceptions).exception
 end
 
-function lookup_lower(codestate, ::Val{:isdefined}, args)
+function lookup_lower_expr(codestate, ::Val{:isdefined}, args)
     isdefined_lower(codestate, args[1])
 end
 
-function lookup_lower(codestate, ::Val{:new}, args)
+function lookup_lower_expr(codestate, ::Val{:new}, args)
     # @show :new args
     type = lookup_lower(codestate, args[1])
     # @show type
@@ -62,11 +62,11 @@ function lookup_lower(codestate, ::Val{:new}, args)
     # eval_ast(codestate.interpstate, Expr(:new, type, parms...))
     ccall(:jl_new_structv, Any, (Any, Ptr{Any}, UInt64), type, parms, length(parms))
 end
-function lookup_lower(codestate, ::Val{:new_opaque_closure}, args)
+function lookup_lower_expr(codestate, ::Val{:new_opaque_closure}, args)
     @show :new_opaque_closure args
     nothing
 end
-function lookup_lower(codestate, ::Val{:splatnew}, args)
+function lookup_lower_expr(codestate, ::Val{:splatnew}, args)
     # @show :splatnew args
     type = lookup_lower(codestate, args[1])
     # @show type
@@ -75,37 +75,40 @@ function lookup_lower(codestate, ::Val{:splatnew}, args)
     # eval_ast(codestate.interpstate, Expr(:splatnew, type, parms[1]))
     ccall(:jl_new_structt, Any, (Any, Any), type, parms[1])
 end
-function lookup_lower(codestate, ::Val{:call}, args)
+function lookup_lower_expr(codestate, ::Val{:call}, args)
     # @show :call args
     fun = lookup_lower(codestate, args[1])
     # @show fun
     parms = ((lookup_lower(codestate, arg) for arg in @view args[2:end])...,)
     # @show parms
-    intercept = get(codestate.interpstate.intercepts, Symbol(fun), fun)
-    if intercept != fun
-        return intercept(codestate, parms)
-    elseif Symbol(fun) in codestate.interpstate.passthroughs
-        # 
-    elseif fun isa Base.Callable && !(fun isa Core.Builtin) && !(fun isa Core.IntrinsicFunction) 
-        if !isassigned(codestate.times, codestate.pc) || codestate.times[codestate.pc] < codestate.interpstate.budget
-            childstate = code_state_from_call(codestate, fun, parms)
-            if childstate !== nothing
-                # childstate.interpstate.debug = true
-                try
-                    childstate.interpstate.debug && @show childstate.src
-                    return run_code_state(childstate)
-                finally
-                    # childstate.interpstate.debug = false
+    if fun isa Base.Callable
+        id = (parentmodule(fun), nameof(fun))
+        intercept = get(codestate.interpstate.intercepts, id, fun)
+        if intercept != fun
+            return intercept(codestate, parms)
+        elseif id in codestate.interpstate.passthroughs
+            # 
+        elseif fun isa Base.Callable && !(fun isa Core.Builtin) && !(fun isa Core.IntrinsicFunction) 
+            if !isassigned(codestate.times, codestate.pc) || codestate.times[codestate.pc] < codestate.interpstate.budget
+                childstate = code_state_from_call(codestate, fun, parms)
+                if childstate !== nothing
+                    # childstate.interpstate.debug = true
+                    try
+                        childstate.interpstate.debug && @show childstate.src
+                        return run_code_state(childstate)
+                    finally
+                        # childstate.interpstate.debug = false
+                    end
+                else
+                    codestate.times[codestate.pc] = codestate.interpstate.budget
                 end
-            else
-                codestate.times[codestate.pc] = codestate.interpstate.budget
             end
         end
     end
     # eval_ast(codestate.interpstate, Expr(:call, fun, parms...))
     Base.invokelatest(fun, parms...)
 end
-function lookup_lower(codestate, ::Val{:foreigncall}, args)
+function lookup_lower_expr(codestate, ::Val{:foreigncall}, args)
     # @show :foreigncall args
     fun = QuoteNode(lookup_lower(codestate, args[1]))
     # @show fun
@@ -126,7 +129,7 @@ function lookup_lower(codestate, ::Val{:foreigncall}, args)
     # @show parms
     eval_ast(codestate.interpstate, Expr(:foreigncall, fun, rt, at, nreq, cc, parms...))
 end
-function lookup_lower(codestate, ::Val{:method}, args)
+function lookup_lower_expr(codestate, ::Val{:method}, args)
     args[1]
 end
 
@@ -179,10 +182,10 @@ function lookup_lower(codestate, quotenode::QuoteNode)
     quotenode.value
 end
 function isdefined_lower(codestate, expr::Expr)
-    isdefined_lower(codestate, Val(expr.head), expr.args)
+    isdefined_lower_expr(codestate, Val(expr.head), expr.args)
 end
 function lookup_lower(codestate, expr::Expr)
-    lookup_lower(codestate, Val(expr.head), expr.args)
+    lookup_lower_expr(codestate, Val(expr.head), expr.args)
 end
 
 function assign_lower(codestate, var, val)
@@ -223,7 +226,7 @@ function handle_error(codestate, exceptions)
     end
 end
 
-function interpret_lower(codestate, ::Val{T}, args) where T
+function interpret_lower_expr(codestate, val::Val{T}, args) where T
     if !(T in [:boundscheck, 
                :call, :foreigncall, 
                :gc_preserve_begin, :gc_preserve_end, 
@@ -234,31 +237,31 @@ function interpret_lower(codestate, ::Val{T}, args) where T
         @assert false
     end
     codestate.interpstate.debug && @show :interpret_lower T args
-    lookup_lower(codestate, Expr(T, args...))
+    lookup_lower_expr(codestate, val, args)
 end
 
-function interpret_lower(codestate, ::Val{:enter}, args)
+function interpret_lower_expr(codestate, ::Val{:enter}, args)
     codestate.interpstate.debug && @show :interpret_lower :enter args
     push!(codestate.handlers, args[1])
     length(codestate.interpstate.exceptions)
 end
-function interpret_lower(codestate, ::Val{:pop_exception}, args)
+function interpret_lower_expr(codestate, ::Val{:pop_exception}, args)
     codestate.interpstate.debug && @show :interpret_lower :pop_exception args
     deleteat!(codestate.interpstate.exceptions,
         lookup_lower(codestate, args[1]) + 1:length(codestate.interpstate.exceptions))
 end
-function interpret_lower(codestate, ::Val{:leave}, args)
+function interpret_lower_expr(codestate, ::Val{:leave}, args)
     codestate.interpstate.debug && @show :interpret_lower :leave args
     len = length(codestate.handlers)
     deleteat!(codestate.handlers, len - args[1] + 1:len)
 end
 
-function interpret_lower(codestate, ::Val{:(=)}, args)
+function interpret_lower_expr(codestate, ::Val{:(=)}, args)
     codestate.interpstate.debug && @show :interpret_lower :(=) args
     assign_lower(codestate, args[1], lookup_lower(codestate, args[2]))
 end
 
-function interpret_lower(codestate, ::Val{:method}, args)
+function interpret_lower_expr(codestate, ::Val{:method}, args)
     codestate.interpstate.debug && @show :interpret_lower :method args
     meth = args[1]
     parms = ((lookup_lower(codestate, arg) for arg in @view args[2:end])...,)
@@ -278,31 +281,31 @@ function interpret_lower(codestate, ::Val{:method}, args)
         lookup_lower(codestate, meth)
     end
 end
-function interpret_lower(codestate, ::Val{:cfunction}, args)
+function interpret_lower_expr(codestate, ::Val{:cfunction}, args)
     codestate.interpstate.debug && @show :interpret_lower :cfunction args
     eval_ast(codestate.interpstate, Expr(:cfunction, args...))
 end
-function interpret_lower(codestate, ::Val{:const}, args)
+function interpret_lower_expr(codestate, ::Val{:const}, args)
     codestate.interpstate.debug && @show :interpret_lower :const args
     eval_ast(codestate.interpstate, Expr(:const, args...))
 end
-function interpret_lower(codestate, ::Val{:global}, args)
+function interpret_lower_expr(codestate, ::Val{:global}, args)
     codestate.interpstate.debug && @show :interpret_lower :global args
     eval_ast(codestate.interpstate, Expr(:global, args...))
 end
-function interpret_lower(codestate, ::Val{:using}, args)
+function interpret_lower_expr(codestate, ::Val{:using}, args)
     codestate.interpstate.debug && @show :interpret_lower :using args
     eval_ast(codestate.interpstate, Expr(:using, args...))
 end
 
-function interpret_lower(codestate, ::Val{:thunk}, args)
+function interpret_lower_expr(codestate, ::Val{:thunk}, args)
     codestate.interpstate.debug && @show :interpret_lower :thunk args
     interpret_lower(codestate.interpstate, codestate, args[1])
 end
 
 copy_lower(expr::Expr) = copy(expr)
 copy_lower(val) = val
-function interpret_lower(codestate, ::Val{:copyast}, args)
+function interpret_lower_expr(codestate, ::Val{:copyast}, args)
     codestate.interpstate.debug && @show :interpret_lower :copyast args
     copy_lower(lookup_lower(codestate, args[1]))
 end
@@ -378,7 +381,7 @@ function interpret_lower(codestate, expr::Expr)
         time = time_ns()
         try
             assign_lower(codestate, Core.SSAValue(codestate.pc),
-                interpret_lower(codestate, Val(expr.head), expr.args))
+                interpret_lower_expr(codestate, Val(expr.head), expr.args))
         finally
             handle_times(codestate, time, time_ns())
         end
@@ -389,7 +392,7 @@ function interpret_lower(codestate, expr::Expr)
     return nothing
 end
 
-function interpret_lower(interpstate, parent::Union{Nothing, CodeState}, src::Core.CodeInfo)
+function interpret_lower(interpstate, parent, src)
     codestate = code_state_from_thunk(interpstate, src)
     # interpstate.debug = true
     try
