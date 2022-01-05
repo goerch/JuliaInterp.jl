@@ -9,7 +9,7 @@ include("ast.jl")
 function include(mod, path, debug=false, budget=UInt64(1000))
     code = read(path, String)
     tls = task_local_storage()
-    prev = haskey(tls, :SOURCE_PATH) ? tls[:SOURCE_PATH] : nothing
+    prev = get(tls, :SOURCE_PATH, nothing)
     tls[:SOURCE_PATH] = path
     try
         expr = Meta.parseall(code, filename=path)

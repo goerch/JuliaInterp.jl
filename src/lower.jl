@@ -88,7 +88,7 @@ function lookup_lower_expr(codestate, ::Val{:call}, args)
             return intercept(codestate, parms)
         elseif id in codestate.interpstate.passthroughs
             # 
-        elseif fun isa Base.Callable && !(fun isa Core.Builtin) && !(fun isa Core.IntrinsicFunction) 
+        elseif !(fun isa Core.Builtin) && !(fun isa Core.IntrinsicFunction) 
             if !isassigned(codestate.times, codestate.pc) || codestate.times[codestate.pc] < codestate.interpstate.budget
                 childstate = code_state_from_call(codestate, fun, parms)
                 if childstate !== nothing
@@ -275,10 +275,10 @@ function interpret_lower_expr(codestate, ::Val{:method}, args)
                 parms[1], parms[2], last(codestate.interpstate.mods).mod)
         end
     end
-    if meth isa Symbol
-        eval_ast(codestate.interpstate, Expr(:function, meth))
+    if isdefined_lower(codestate, meth)
+        return lookup_lower(codestate, meth)
     else
-        lookup_lower(codestate, meth)
+        eval_ast(codestate.interpstate, Expr(:function, meth))
     end
 end
 function interpret_lower_expr(codestate, ::Val{:cfunction}, args)
@@ -310,8 +310,8 @@ function interpret_lower_expr(codestate, ::Val{:copyast}, args)
     copy_lower(lookup_lower(codestate, args[1]))
 end
 
-function interpret_lower(codestate, node)
-    codestate.interpstate.debug && @show :interpret_lower typeof(node) node
+function interpret_lower_node(codestate, node)
+    codestate.interpstate.debug && @show :interpret_lower_node typeof(node) node
     try
         time = time_ns()
         try
@@ -327,8 +327,8 @@ function interpret_lower(codestate, node)
     return nothing
 end
 
-function interpret_lower(codestate, newvarnode::Core.NewvarNode)
-    codestate.interpstate.debug && @show :interpret_lower newvarnode
+function interpret_lower_node(codestate, newvarnode::Core.NewvarNode)
+    codestate.interpstate.debug && @show :interpret_lower_node newvarnode
     try
         codestate.pc += 1
     catch
@@ -337,8 +337,8 @@ function interpret_lower(codestate, newvarnode::Core.NewvarNode)
     return nothing
 end
 
-function interpret_lower(codestate, returnnode::Core.ReturnNode)
-    codestate.interpstate.debug && @show :interpret_lower returnnode
+function interpret_lower_node(codestate, returnnode::Core.ReturnNode)
+    codestate.interpstate.debug && @show :interpret_lower_node returnnode
     try
         time = time_ns()
         try
@@ -352,8 +352,8 @@ function interpret_lower(codestate, returnnode::Core.ReturnNode)
     end
     return nothing
 end
-function interpret_lower(codestate, gotoifnot::Core.GotoIfNot)
-    codestate.interpstate.debug && @show :interpret_lower gotoifnot
+function interpret_lower_node(codestate, gotoifnot::Core.GotoIfNot)
+    codestate.interpstate.debug && @show :interpret_lower_node gotoifnot
     try
         if lookup_lower(codestate, gotoifnot.cond)
             codestate.pc += 1
@@ -365,8 +365,8 @@ function interpret_lower(codestate, gotoifnot::Core.GotoIfNot)
     end
     return nothing
 end
-function interpret_lower(codestate, gotonode::Core.GotoNode)
-    codestate.interpstate.debug && @show :interpret_lower gotonode
+function interpret_lower_node(codestate, gotonode::Core.GotoNode)
+    codestate.interpstate.debug && @show :interpret_lower_node gotonode
     try
         codestate.pc = gotonode.label
     catch
@@ -375,8 +375,8 @@ function interpret_lower(codestate, gotonode::Core.GotoNode)
     return nothing
 end
 
-function interpret_lower(codestate, expr::Expr)
-    codestate.interpstate.debug && @show :interpret_lower expr
+function interpret_lower_node(codestate, expr::Expr)
+    codestate.interpstate.debug && @show :interpret_lower_node expr
     try
         time = time_ns()
         try

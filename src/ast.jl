@@ -96,7 +96,7 @@ function interpret_ast_expr(interpstate, ::Val{:block}, args)
     interpstate.debug && @show :block args
     local ans
     for arg in args
-        ans = interpret_ast(interpstate, arg)
+        ans = interpret_ast_node(interpstate, arg)
     end
     ans
 end
@@ -182,7 +182,7 @@ function interpret_ast_expr(interpstate, ::Val{:toplevel}, args)
     interpstate.debug && @show :toplevel args
     local ans
     for arg in args
-        ans = interpret_ast(interpstate, arg)
+        ans = interpret_ast_node(interpstate, arg)
     end
     ans
 end 
@@ -192,16 +192,16 @@ function interpret_ast_expr(interpstate, ::Val{:module}, args)
     eval_lower_ast(interpstate, expr)
 end
 
-function interpret_ast(interpstate, node)
+function interpret_ast_node(interpstate, node)
     node
 end
-function interpret_ast(interpstate, expr::Expr)
+function interpret_ast_node(interpstate, expr::Expr)
     interpret_ast_expr(interpstate, Val(expr.head), expr.args)
 end 
 
 function interpret_ast(mod, expr, debug, budget)
     interpstate = interp_state(debug, budget, mod)
-    ans = interpret_ast(interpstate, expr)
+    ans = interpret_ast_node(interpstate, expr)
     pop!(interpstate.mods)
     ans
 end 

@@ -120,6 +120,7 @@ function interp_state(debug, budget, mod)
     interpstate.intercepts[(Base, :sigatomic_begin)] = _sigatomic_begin
     interpstate.intercepts[(Base, :sigatomic_end)] = _sigatomic_end
     interpstate.intercepts[(Core.Intrinsics, :llvmcall)] = _llvmcall
+    interpstate.intercepts[(Base, :llvmcall)] = _llvmcall
     # interpstate.intercepts[(Core, :eval)] = _eval
     # interpstate.intercepts[(Base, :eval)] = _eval
     # interpstate.intercepts[(mod, :eval)] = _eval
@@ -161,33 +162,53 @@ function code_state_from_thunk(interpstate, src)
         Int[])
 end
 
-typeof_lower(type::Type) = Type{type}
-typeof_lower(val) = typeof(val)
-generate_lower(codestate, expr::Expr) = Meta.lower(last(codestate.interpstate.mods).mod, expr)
-generate_lower(codestate, val) = val
-function code_state_from_call(codestate, fun, parms)
-    #= local meth
-    try
-        meth = which(fun, typeof_lower.(parms))
+function _which(tt, wc)
+    #= try
+        return which(tt)
     catch exception
-        if exception isa MethodError
+        @show :_which exception
+        if !(exception isa ErrorException)
+            rethrow()
+        else
             return nothing
         end
-        rethrow(exception)
     end =#
+    @static if VERSION >= v"1.8.0-DEV"
+        # Adapted Base._which
+        min_valid = Base.RefValue{UInt}(typemin(UInt))
+        max_valid = Base.RefValue{UInt}(typemax(UInt))
+        match = ccall(:jl_gf_invoke_lookup_worlds, Any,
+            (Any, UInt, Ptr{Csize_t}, Ptr{Csize_t}),
+            tt, wc, min_valid, max_valid)
+        if match !== nothing
+            return match.method
+        else
+            return nothing
+        end
+    else
+        return ccall(:jl_gf_invoke_lookup, Any, (Any, UInt), tt, wc)
+    end
+end
+
+typeof_lower(type::Type) = Type{type}
+typeof_lower(val) = typeof(val)
+
+generate_lower(codestate, expr::Expr) = Meta.lower(last(codestate.interpstate.mods).mod, expr)
+generate_lower(codestate, val) = val 
+
+function code_state_from_call(codestate, fun, parms)
     wc = ccall(:jl_get_world_counter, UInt, ())
-    # @show :code_state_from_call fun Int(wc) Int(codestate.wc)
-    tt = Tuple{typeof_lower.((fun, parms...))...}
+    t = Base.to_tuple_type(typeof_lower.(parms))
+    tt = Base.signature_type(fun, t)
     meth, names, lenv, src = get(codestate.interpstate.meths, (wc, tt), (nothing, nothing, nothing, nothing))
     if meth === nothing
-        meth = ccall(:jl_gf_invoke_lookup, Any, (Any, UInt), tt, wc)
+        meth = _which(tt, wc)
         if meth === nothing
             @show :code_state_from_call fun
             return nothing
         end
         names = Base.method_argnames(meth)
-        sig = Base.signature_type(fun, typeof_lower.(parms))
-        (ti, lenv) = ccall(:jl_type_intersection_with_env, Any, (Any, Any), sig, meth.sig)
+        (ti, lenv) = ccall(:jl_type_intersection_with_env, Any, (Any, Any), tt, meth.sig)
         if !isdefined(meth, :generator)
             src = Base.uncompressed_ast(meth)
             # src = Base.uncompressed_ir(meth)
@@ -216,7 +237,7 @@ end
 function run_code_state(codestate)
     while true
         codestate.interpstate.debug && @show :run_code_state codestate.pc codestate.src.code[codestate.pc]
-        ans = interpret_lower(codestate, codestate.src.code[codestate.pc])
+        ans = interpret_lower_node(codestate, codestate.src.code[codestate.pc])
         if ans isa Some
             codestate.interpstate.debug && @show :run_code_state ans
             return something(ans)
