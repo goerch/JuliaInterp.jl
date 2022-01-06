@@ -60,7 +60,7 @@ function lookup_lower_expr(codestate, ::Val{:new}, args)
     parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
     # @show parms
     # eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth), 
-    #   Expr(:new, type, parms...))
+    #     Expr(:new, type, parms...))
     ccall(:jl_new_structv, Any, (Any, Ptr{Any}, UInt64), type, parms, length(parms))
 end
 function lookup_lower_expr(codestate, ::Val{:new_opaque_closure}, args)
@@ -74,7 +74,7 @@ function lookup_lower_expr(codestate, ::Val{:splatnew}, args)
     parms = ((lookup_lower(codestate, arg) for arg in @view args[2:end])...,)
     # @show parms
     # eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth), 
-    #   Expr(:splatnew, type, parms[1]))
+    #     Expr(:splatnew, type, parms...))
     ccall(:jl_new_structt, Any, (Any, Any), type, parms[1])
 end
 function lookup_lower_expr(codestate, ::Val{:call}, args)

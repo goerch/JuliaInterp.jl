@@ -118,8 +118,7 @@ function interp_state(debug, budget, mod)
     interpstate.intercepts[(Base, :iolock_end)] = _iolock_end
     interpstate.intercepts[(Base, :sigatomic_begin)] = _sigatomic_begin
     interpstate.intercepts[(Base, :sigatomic_end)] = _sigatomic_end
-    interpstate.intercepts[(Core.Intrinsics, :llvmcall)] = _llvmcall
-    interpstate.intercepts[(Base, :llvmcall)] = _llvmcall
+    interpstate.intercepts[(Core, :llvmcall)] = _llvmcall
     # interpstate.intercepts[(Core, :eval)] = _eval
     # interpstate.intercepts[(Base, :eval)] = _eval
     # interpstate.intercepts[(mod, :eval)] = _eval
