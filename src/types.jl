@@ -64,20 +64,19 @@ function _llvmcall(codestate, parms)
     ir = parms[1]
     rt = parms[2]
     at = parms[3]
-    impl = quote
-        function $funname($(argnames...))
-            Base.llvmcall($ir, $rt, $at, $(argnames...))
-        end
-        $funname($(parms[4:end]...))
-    end
-    return eval_ast(codestate.interpstate, impl)
+    return eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth), 
+        quote
+            function $funname($(argnames...))
+                Base.llvmcall($ir, $rt, $at, $(argnames...))
+            end
+            $funname($(parms[4:end]...))
+        end)
 end
 function _eval(codestate, parms)
     wc1 = ccall(:jl_get_world_counter, UInt, ())
     @show :_eval Int(wc1)
-    local ans
     if length(parms) == 1
-        ans = interpret_ast(last(codestate.interpstate.mods).mod, parms[1], 
+        ans = interpret_ast(moduleof(codestate.mod_or_meth), parms[1], 
             codestate.interpstate.debug, codestate.interpstate.budget)
     else
         ans = interpret_ast(parms[1], parms[2], 
@@ -88,9 +87,10 @@ function _eval(codestate, parms)
     return ans
 end
 
-struct ModuleState
-    mod::Module
-end
+const ModuleOrMethod = Union{Module, Method}
+
+moduleof(meth::Method) = meth.module
+moduleof(mod::Module) = mod
 
 const ModuleSymbol = Tuple{Module, Symbol}
 
@@ -99,15 +99,14 @@ mutable struct InterpState
     passthroughs::Set{ModuleSymbol}
     debug::Bool
     budget::UInt64
-    mods::Vector{ModuleState}
-    meths::Dict{Tuple{UInt, Any}, Tuple{Union{Method, Module}, Vector{Symbol}, Core.SimpleVector, Core.CodeInfo}}
+    meths::Dict{Tuple{UInt, Any}, Tuple{ModuleOrMethod, Vector{Symbol}, Core.SimpleVector, Core.CodeInfo}}
     exceptions::Vector
     iolock::Bool
     sigatomic::Bool
 end
 
 function interp_state(debug, budget, mod)
-    interpstate = InterpState(Dict(), Set(), debug, budget, [ModuleState(mod)], Dict(), [], false, false)
+    interpstate = InterpState(Dict(), Set(), debug, budget, Dict(), [], false, false)
     @static if !isdefined(Base, :current_exceptions)
         interpstate.intercepts[(Base, :catch_stack)] = _current_exceptions
     else
@@ -130,6 +129,7 @@ function interp_state(debug, budget, mod)
     push!(interpstate.passthroughs, (Base, :lock))
     push!(interpstate.passthroughs, (Base, :unlock))
     for mod in (Base, Core, Random)
+    # for mod in (Core,)
         union!(interpstate.passthroughs,
             (mod, name) for name in names(mod; all=true)
                 if isdefined(mod, name) &&
@@ -141,7 +141,7 @@ end
 mutable struct CodeState
     interpstate::InterpState
     wc::UInt
-    meth::Union{Method, Module}
+    mod_or_meth::ModuleOrMethod
     names::Vector{Symbol}
     lenv::Core.SimpleVector
     src::Core.CodeInfo
@@ -152,10 +152,10 @@ mutable struct CodeState
     handlers::Vector{Int}
 end
 
-function code_state_from_thunk(interpstate, src)
+function code_state_from_thunk(interpstate, mod, src)
     wc = ccall(:jl_get_world_counter, UInt, ())
     # @show :code_state_from_thunk Int(wc)
-    CodeState(interpstate, wc, last(interpstate.mods).mod, [], Core.svec(), src, 1,
+    CodeState(interpstate, wc, mod, [], Core.svec(), src, 1,
         Vector(undef, length(src.code)),
         Vector{UInt64}(undef, length(src.code)),
         Vector(undef, length(src.slotnames)),
@@ -193,7 +193,7 @@ end
 typeof_lower(type::Type) = Type{type}
 typeof_lower(val) = typeof(val)
 
-generate_lower(codestate, expr::Expr) = Meta.lower(last(codestate.interpstate.mods).mod, expr)
+generate_lower(codestate, expr::Expr) = Meta.lower(moduleof(codestate.mod_or_meth), expr)
 generate_lower(codestate, val) = val 
 
 function code_state_from_call(codestate, fun, parms)
