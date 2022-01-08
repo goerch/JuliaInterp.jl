@@ -15,12 +15,15 @@ end
 function _rethrow(codestate, parms)
     if isempty(parms)
         if isempty(codestate.interpstate.exceptions)
-            parms = (ErrorException("rethrow() not allowed outside a catch block"),)
+            # parms = (ErrorException("rethrow() not allowed outside a catch block"),)
+            parms = Any[ErrorException("rethrow() not allowed outside a catch block")]
         else
-            parms = (pop!(codestate.interpstate.exceptions).exception,)
+            # parms = (pop!(codestate.interpstate.exceptions).exception,)
+            parms = Any[pop!(codestate.interpstate.exceptions).exception]
         end
     elseif isempty(codestate.interpstate.exceptions)
-        parms = (ErrorException("rethrow(exc) not allowed outside a catch block"),)
+        # parms = (ErrorException("rethrow(exc) not allowed outside a catch block"),)
+        parms = Any[ErrorException("rethrow(exc) not allowed outside a catch block")]
     end
     return Base.throw(parms...)
 end
@@ -64,7 +67,7 @@ function _llvmcall(codestate, parms)
     ir = parms[1]
     rt = parms[2]
     at = parms[3]
-    return eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth), 
+    return eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth),
         quote
             function $funname($(argnames...))
                 Base.llvmcall($ir, $rt, $at, $(argnames...))
@@ -76,10 +79,10 @@ function _eval(codestate, parms)
     wc1 = ccall(:jl_get_world_counter, UInt, ())
     @show :_eval Int(wc1)
     if length(parms) == 1
-        ans = interpret_ast(moduleof(codestate.mod_or_meth), parms[1], 
+        ans = interpret_ast(moduleof(codestate.mod_or_meth), parms[1],
             codestate.interpstate.options)
     else
-        ans = interpret_ast(parms[1], parms[2], 
+        ans = interpret_ast(parms[1], parms[2],
             codestate.interpstate.options)
     end
     wc2 = ccall(:jl_get_world_counter, UInt, ())
@@ -109,7 +112,7 @@ struct InterpOptions
     debug::Bool
     excludes::Vector{Module}
     budget::UInt
-end    
+end
 
 function options(debug, excludes, budget)
     InterpOptions(debug, excludes, budget)
@@ -124,7 +127,7 @@ const ModuleSymbol = Tuple{Module, Symbol}
 
 mutable struct InterpState
     options::InterpOptions
-    intercepts::Dict{ModuleSymbol, Function}
+    intercepts::Dict{ModuleSymbol, Base.Callable}
     passthroughs::Set{ModuleSymbol}
     meths::Dict{Tuple{UInt, Any}, Tuple{ModuleOrMethod, Vector{Symbol}, Core.SimpleVector, Core.CodeInfo}}
     exceptions::Vector{Any}
@@ -170,17 +173,22 @@ mutable struct CodeState
     lenv::Core.SimpleVector
     src::Core.CodeInfo
     pc::Int
+    cc::Int
     ssavalues::Vector{Any}
+    childstates::Vector{Vector{Tuple{Base.Callable, Union{Nothing, Base.Callable, CodeState}}}}
     times::Vector{UInt}
     slots::Vector{Any}
     handlers::Vector{Int}
 end
 
+const ChildState = Tuple{Base.Callable, Union{Nothing, Base.Callable, CodeState}}
+
 function code_state_from_thunk(interpstate, mod, src)
     wc = ccall(:jl_get_world_counter, UInt, ())
     # @show :code_state_from_thunk Int(wc)
-    CodeState(interpstate, wc, mod, [], Core.svec(), src, 1,
+    CodeState(interpstate, wc, mod, [], Core.svec(), src, 1, 1,
         Vector{Any}(undef, length(src.code)),
+        Vector{Vector{ChildState}}(undef, length(src.code)),
         Vector{UInt}(undef, length(src.code)),
         Vector{Any}(undef, length(src.slotnames)),
         Int[])
@@ -218,7 +226,7 @@ typeof_lower(type::Type) = Type{type}
 typeof_lower(val) = typeof(val)
 
 generate_lower(codestate, expr::Expr) = Meta.lower(moduleof(codestate.mod_or_meth), expr)
-generate_lower(codestate, val) = val 
+generate_lower(codestate, val) = val
 
 function code_state_from_call(codestate, fun, parms)
     wc = ccall(:jl_get_world_counter, UInt, ())
@@ -243,20 +251,31 @@ function code_state_from_call(codestate, fun, parms)
         end
         codestate.interpstate.meths[(wc, tt)] = (meth, names, lenv, src)
     end
-    childstate = 
-        CodeState(codestate.interpstate, wc, meth, names, lenv, src, 1,
-            Vector{Any}(undef, length(src.code)),
-            Vector{UInt}(undef, length(src.code)),
-            Vector(undef, length(src.slotnames)),
-            Int[])
-    childstate.slots[1] = fun
+    CodeState(codestate.interpstate, wc, meth, names, lenv, src, 1, 1,
+        Vector{Any}(undef, length(src.code)),
+        Vector{Vector{ChildState}}(undef, length(src.code)),
+        Vector{UInt}(undef, length(src.code)),
+        Vector(undef, length(src.slotnames)),
+        Int[])
+end
+
+function update_code_state(codestate, fun, parms)
+    codestate.pc = 1
+    resize!(codestate.ssavalues, 0)
+    resize!(codestate.ssavalues, length(codestate.src.code))
+    # resize!(codestate.times, 0)
+    # resize!(codestate.times, length(codestate.src.code))
+    empty!(codestate.handlers)
+    meth = codestate.mod_or_meth
+    codestate.slots[1] = fun
     if !meth.isva
-        @views childstate.slots[2:meth.nargs] .= parms[1:meth.nargs - 1]
+        @views codestate.slots[2:meth.nargs] .= parms[1:meth.nargs - 1]
     else
-        @views childstate.slots[2:meth.nargs - 1] .= parms[1:meth.nargs - 2]
-        childstate.slots[meth.nargs] = parms[meth.nargs - 1:end]
+        @views codestate.slots[2:meth.nargs - 1] .= parms[1:meth.nargs - 2]
+        # codestate.slots[meth.nargs] = parms[meth.nargs - 1:end]
+        codestate.slots[meth.nargs] = (parms[meth.nargs - 1:end]...,)
     end
-    return childstate
+    codestate
 end
 
 function run_code_state(codestate)

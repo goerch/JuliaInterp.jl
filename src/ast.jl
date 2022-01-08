@@ -16,7 +16,7 @@ function eval_lower_ast(interpstate, mod, expr)
     try
         lwr = Meta.lower(mod, expr)
         if lwr.head == :thunk
-            ans = interpret_lower(interpstate, mod, lwr.args[1])
+            ans = interpret_lower(interpstate, mod, lwr.args[1]::Core.CodeInfo)
         else
             # ans = Core.eval(mod, expr)
             ans = @eval mod $expr
@@ -58,7 +58,7 @@ function interpret_ast_expr(interpstate, mod, ::Val{:call}, args)
 end
 function interpret_ast_expr(interpstate, mod, ::Val{:macrocall}, args)
     interpstate.options.debug && @show mod :macrocall args
-    expr = Expr(:macrocall, args...) 
+    expr = Expr(:macrocall, args...)
     # Macros be better handled by the compiler?
     eval_ast(interpstate, mod, expr)
 end
@@ -69,7 +69,7 @@ function interpret_ast_expr(interpstate, mod, ::Val{:(.=)}, args)
 end
 function interpret_ast_expr(interpstate, mod, ::Val{:(=)}, args)
     interpstate.options.debug && @show mod :(=) args
-    expr = Expr(:(=), args...) 
+    expr = Expr(:(=), args...)
     eval_lower_ast(interpstate, mod, expr)
 end
 function interpret_ast_expr(interpstate, mod, ::Val{:const}, args)
@@ -84,12 +84,12 @@ function interpret_ast_expr(interpstate, mod, ::Val{:local}, args)
 end
 function interpret_ast_expr(interpstate, mod, ::Val{:global}, args)
     interpstate.options.debug && @show mod :global args
-    expr = Expr(:global, args...) 
+    expr = Expr(:global, args...)
     eval_lower_ast(interpstate, mod, expr)
 end
 function interpret_ast_expr(interpstate, mod, ::Val{:let}, args)
     interpstate.options.debug && @show mod :let args
-    expr = Expr(:let, args...) 
+    expr = Expr(:let, args...)
     eval_lower_ast(interpstate, mod, expr)
 end
 function interpret_ast_expr(interpstate, mod, ::Val{:block}, args)
@@ -107,7 +107,7 @@ function interpret_ast_expr(interpstate, mod, ::Val{:try}, args)
 end
 function interpret_ast_expr(interpstate, mod, ::Val{:do}, args)
     interpstate.options.debug && @show mod :do args
-    expr = Expr(:do, args...) 
+    expr = Expr(:do, args...)
     eval_lower_ast(interpstate, mod, expr)
 end
 function interpret_ast_expr(interpstate, mod, ::Val{:if}, args)
@@ -174,10 +174,10 @@ end
 
 function interpret_ast_expr(interpstate, mod, ::Val{:error}, args)
     @show mod :error args
-end 
+end
 function interpret_ast_expr(interpstate, mod, ::Val{:incomplete}, args)
     @show mod :incomplete args
-end 
+end
 function interpret_ast_expr(interpstate, mod, ::Val{:toplevel}, args)
     interpstate.options.debug && @show mod :toplevel args
     local ans
@@ -185,7 +185,7 @@ function interpret_ast_expr(interpstate, mod, ::Val{:toplevel}, args)
         ans = interpret_ast_node(interpstate, mod, arg)
     end
     ans
-end 
+end
 function interpret_ast_expr(interpstate, mod, ::Val{:module}, args)
     interpstate.options.debug && @show mod :module args
     expr = Expr(:module, args...)
@@ -197,9 +197,9 @@ function interpret_ast_node(interpstate, mod, node)
 end
 function interpret_ast_node(interpstate, mod, expr::Expr)
     interpret_ast_expr(interpstate, mod, Val(expr.head), expr.args)
-end 
+end
 
 function interpret_ast(mod, expr, options)
     interpstate = interp_state(mod, options)
     interpret_ast_node(interpstate, mod, expr)
-end 
+end

@@ -10,7 +10,7 @@ function tracer(files)
             try
                 mod = @eval Main (module IsolatedTests using Base, Test, Random, Distributed, Compat, JuliaInterp; end)
                 @testset verbose=true begin
-                    JuliaInterp.include(mod, file, options)
+                    JuliaInterp.include(mod::Module, file, options)
                 end
             catch exception
                 @show :toplevel exception
