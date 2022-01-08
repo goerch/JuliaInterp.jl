@@ -20,10 +20,11 @@ function runtests(name, path, isolate=true; seed=nothing)
         end
         res_and_time_data = @timed @testset "$name" begin
             # Random.seed!(nothing) will fail
-            seed != nothing && Random.seed!(seed)
+            seed !== nothing && Random.seed!(seed)
             # Base.include(m, "$path.jl")
             println("Begin interpreting $path.jl")
-            JuliaInterp.include(m, "$path.jl")
+            options = JuliaInterp.options(false, [Core, Base, Random], UInt(1_000))
+            JuliaInterp.include(m, "$path.jl", options)
             println("End interpreting $path.jl")
         end
         rss = Sys.maxrss()

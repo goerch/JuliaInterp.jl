@@ -61,7 +61,7 @@ function lookup_lower_expr(codestate, ::Val{:new}, args)
     # @show parms
     # eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth), 
     #     Expr(:new, type, parms...))
-    ccall(:jl_new_structv, Any, (Any, Ptr{Any}, UInt64), type, parms, length(parms))
+    ccall(:jl_new_structv, Any, (Any, Ptr{Any}, UInt), type, parms, length(parms))
 end
 function lookup_lower_expr(codestate, ::Val{:new_opaque_closure}, args)
     @show :new_opaque_closure args
@@ -79,7 +79,7 @@ function lookup_lower_expr(codestate, ::Val{:splatnew}, args)
 end
 function lookup_lower_expr(codestate, ::Val{:call}, args)
     # @show :call args
-    fun = lookup_lower(codestate, args[1])
+    fun = lookup_lower(codestate, args[1])    
     # @show fun
     parms = ((lookup_lower(codestate, arg) for arg in @view args[2:end])...,)
     # @show parms
@@ -89,20 +89,20 @@ function lookup_lower_expr(codestate, ::Val{:call}, args)
         if intercept != fun
             return intercept(codestate, parms)
         elseif id in codestate.interpstate.passthroughs
-            # 
+            #
         elseif !(fun isa Core.Builtin) && !(fun isa Core.IntrinsicFunction) 
-            if !isassigned(codestate.times, codestate.pc) || codestate.times[codestate.pc] < codestate.interpstate.budget
+            if !isassigned(codestate.times, codestate.pc) || codestate.times[codestate.pc] < codestate.interpstate.options.budget
                 childstate = code_state_from_call(codestate, fun, parms)
                 if childstate !== nothing
-                    # childstate.interpstate.debug = true
+                    # childstate.interpstate.options.debug = true
                     try
-                        childstate.interpstate.debug && @show childstate.src
+                        childstate.interpstate.options.debug && @show childstate.src
                         return run_code_state(childstate)
                     finally
-                        # childstate.interpstate.debug = false
+                        # childstate.interpstate.options.debug = false
                     end
                 else
-                    codestate.times[codestate.pc] = codestate.interpstate.budget
+                    codestate.times[codestate.pc] = codestate.interpstate.options.budget
                 end
             end
         end
@@ -223,7 +223,7 @@ function handle_times(codestate, start, stop)
 end
 
 function handle_error(codestate, exceptions)
-    codestate.interpstate.debug && @show :handle_error last(exceptions)
+    codestate.interpstate.options.debug && @show :handle_error last(exceptions)
     append!(codestate.interpstate.exceptions, exceptions)
     if isempty(codestate.handlers)
         rethrow(pop!(codestate.interpstate.exceptions).exception)
@@ -242,33 +242,33 @@ function interpret_lower_expr(codestate, val::Val{T}, args) where T
         @show :interpret_lower_expr T args
         @assert false
     end
-    codestate.interpstate.debug && @show :interpret_lower_expr T args
+    codestate.interpstate.options.debug && @show :interpret_lower_expr T args
     lookup_lower_expr(codestate, val, args)
 end
 
 function interpret_lower_expr(codestate, ::Val{:enter}, args)
-    codestate.interpstate.debug && @show :interpret_lower_expr :enter args
+    codestate.interpstate.options.debug && @show :interpret_lower_expr :enter args
     push!(codestate.handlers, args[1])
     length(codestate.interpstate.exceptions)
 end
 function interpret_lower_expr(codestate, ::Val{:pop_exception}, args)
-    codestate.interpstate.debug && @show :interpret_lower_expr :pop_exception args
+    codestate.interpstate.options.debug && @show :interpret_lower_expr :pop_exception args
     deleteat!(codestate.interpstate.exceptions,
         lookup_lower(codestate, args[1]) + 1:length(codestate.interpstate.exceptions))
 end
 function interpret_lower_expr(codestate, ::Val{:leave}, args)
-    codestate.interpstate.debug && @show :interpret_lower_expr :leave args
+    codestate.interpstate.options.debug && @show :interpret_lower_expr :leave args
     len = length(codestate.handlers)
     deleteat!(codestate.handlers, len - args[1] + 1:len)
 end
 
 function interpret_lower_expr(codestate, ::Val{:(=)}, args)
-    codestate.interpstate.debug && @show :interpret_lower_expr :(=) args
+    codestate.interpstate.options.debug && @show :interpret_lower_expr :(=) args
     assign_lower(codestate, args[1], lookup_lower(codestate, args[2]))
 end
 
 function interpret_lower_expr(codestate, ::Val{:method}, args)
-    codestate.interpstate.debug && @show :interpret_lower_expr :method args
+    codestate.interpstate.options.debug && @show :interpret_lower_expr :method args
     meth = args[1]
     parms = ((lookup_lower(codestate, arg) for arg in @view args[2:end])...,)
     if length(parms) >= 2
@@ -289,40 +289,40 @@ function interpret_lower_expr(codestate, ::Val{:method}, args)
     end
 end
 function interpret_lower_expr(codestate, ::Val{:cfunction}, args)
-    codestate.interpstate.debug && @show :interpret_lower_expr :cfunction args
+    codestate.interpstate.options.debug && @show :interpret_lower_expr :cfunction args
     eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth), 
         Expr(:cfunction, args...))
 end
 function interpret_lower_expr(codestate, ::Val{:const}, args)
-    codestate.interpstate.debug && @show :interpret_lower_expr :const args
+    codestate.interpstate.options.debug && @show :interpret_lower_expr :const args
     eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth), 
         Expr(:const, args...))
 end
 function interpret_lower_expr(codestate, ::Val{:global}, args)
-    codestate.interpstate.debug && @show :interpret_lower_expr :global args
+    codestate.interpstate.options.debug && @show :interpret_lower_expr :global args
     eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth), 
         Expr(:global, args...))
 end
 function interpret_lower_expr(codestate, ::Val{:using}, args)
-    codestate.interpstate.debug && @show :interpret_lower_expr :using args
+    codestate.interpstate.options.debug && @show :interpret_lower_expr :using args
     eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth), 
         Expr(:using, args...))
 end
 
 function interpret_lower_expr(codestate, ::Val{:thunk}, args)
-    codestate.interpstate.debug && @show :interpret_lower_expr :thunk args
+    codestate.interpstate.options.debug && @show :interpret_lower_expr :thunk args
     interpret_lower(codestate.interpstate, moduleof(codestate.mod_or_meth), args[1])
 end
 
 copy_lower(expr::Expr) = copy(expr)
 copy_lower(val) = val
 function interpret_lower_expr(codestate, ::Val{:copyast}, args)
-    codestate.interpstate.debug && @show :interpret_lower_expr :copyast args
+    codestate.interpstate.options.debug && @show :interpret_lower_expr :copyast args
     copy_lower(lookup_lower(codestate, args[1]))
 end
 
 function interpret_lower_node(codestate, node)
-    codestate.interpstate.debug && @show :interpret_lower_node typeof(node) node
+    codestate.interpstate.options.debug && @show :interpret_lower_node typeof(node) node
     try
         time = time_ns()
         try
@@ -339,7 +339,7 @@ function interpret_lower_node(codestate, node)
 end
 
 function interpret_lower_node(codestate, newvarnode::Core.NewvarNode)
-    codestate.interpstate.debug && @show :interpret_lower_node newvarnode
+    codestate.interpstate.options.debug && @show :interpret_lower_node newvarnode
     try
         codestate.pc += 1
     catch
@@ -349,7 +349,7 @@ function interpret_lower_node(codestate, newvarnode::Core.NewvarNode)
 end
 
 function interpret_lower_node(codestate, returnnode::Core.ReturnNode)
-    codestate.interpstate.debug && @show :interpret_lower_node returnnode
+    codestate.interpstate.options.debug && @show :interpret_lower_node returnnode
     try
         time = time_ns()
         try
@@ -364,7 +364,7 @@ function interpret_lower_node(codestate, returnnode::Core.ReturnNode)
     return nothing
 end
 function interpret_lower_node(codestate, gotoifnot::Core.GotoIfNot)
-    codestate.interpstate.debug && @show :interpret_lower_node gotoifnot
+    codestate.interpstate.options.debug && @show :interpret_lower_node gotoifnot
     try
         if lookup_lower(codestate, gotoifnot.cond)
             codestate.pc += 1
@@ -377,7 +377,7 @@ function interpret_lower_node(codestate, gotoifnot::Core.GotoIfNot)
     return nothing
 end
 function interpret_lower_node(codestate, gotonode::Core.GotoNode)
-    codestate.interpstate.debug && @show :interpret_lower_node gotonode
+    codestate.interpstate.options.debug && @show :interpret_lower_node gotonode
     try
         codestate.pc = gotonode.label
     catch
@@ -387,7 +387,7 @@ function interpret_lower_node(codestate, gotonode::Core.GotoNode)
 end
 
 function interpret_lower_node(codestate, expr::Expr)
-    codestate.interpstate.debug && @show :interpret_lower_node expr
+    codestate.interpstate.options.debug && @show :interpret_lower_node expr
     try
         time = time_ns()
         try
@@ -405,11 +405,11 @@ end
 
 function interpret_lower(interpstate, mod, src)
     codestate = code_state_from_thunk(interpstate, mod, src)
-    # interpstate.debug = true
+    # interpstate.options.debug = true
     try
-        codestate.interpstate.debug && @show :interpret_lower codestate.pc codestate.src
+        codestate.interpstate.options.debug && @show :interpret_lower codestate.pc codestate.src
         return run_code_state(codestate)
     finally
-        # interpstate.debug = false
+        # interpstate.options.debug = false
     end
 end

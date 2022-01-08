@@ -77,14 +77,42 @@ function _eval(codestate, parms)
     @show :_eval Int(wc1)
     if length(parms) == 1
         ans = interpret_ast(moduleof(codestate.mod_or_meth), parms[1], 
-            codestate.interpstate.debug, codestate.interpstate.budget)
+            codestate.interpstate.options)
     else
         ans = interpret_ast(parms[1], parms[2], 
-            codestate.interpstate.debug, codestate.interpstate.budget)
+            codestate.interpstate.options)
     end
     wc2 = ccall(:jl_get_world_counter, UInt, ())
     @show :_eval Int(wc2)
     return ans
+end
+
+function intrinsics()
+    ((Core, name) for name in names(Core.Intrinsics; all=true)
+        if isdefined(Core.Intrinsics, name) &&
+           getfield(Core.Intrinsics, name) isa Core.IntrinsicFunction)
+end
+
+function builtins()
+    ((Core, name) for name in names(Core; all=true)
+        if isdefined(Core, name) &&
+           getfield(Core, name) isa Core.Builtin)
+end
+
+function callables(mod)
+    ((mod, name) for name in names(mod; all=true)
+        if isdefined(mod, name) &&
+           getfield(mod, name) isa Base.Callable)
+end
+
+struct InterpOptions
+    debug::Bool
+    excludes::Vector{Module}
+    budget::UInt
+end    
+
+function options(debug, excludes, budget)
+    InterpOptions(debug, excludes, budget)
 end
 
 const ModuleOrMethod = Union{Module, Method}
@@ -95,18 +123,17 @@ moduleof(mod::Module) = mod
 const ModuleSymbol = Tuple{Module, Symbol}
 
 mutable struct InterpState
+    options::InterpOptions
     intercepts::Dict{ModuleSymbol, Function}
     passthroughs::Set{ModuleSymbol}
-    debug::Bool
-    budget::UInt64
     meths::Dict{Tuple{UInt, Any}, Tuple{ModuleOrMethod, Vector{Symbol}, Core.SimpleVector, Core.CodeInfo}}
-    exceptions::Vector
+    exceptions::Vector{Any}
     iolock::Bool
     sigatomic::Bool
 end
 
-function interp_state(debug, budget, mod)
-    interpstate = InterpState(Dict(), Set(), debug, budget, Dict(), [], false, false)
+function interp_state(mod, options)
+    interpstate = InterpState(options, Dict(), Set(), Dict(), [], false, false)
     @static if !isdefined(Base, :current_exceptions)
         interpstate.intercepts[(Base, :catch_stack)] = _current_exceptions
     else
@@ -122,17 +149,15 @@ function interp_state(debug, budget, mod)
     # interpstate.intercepts[(Core, :eval)] = _eval
     # interpstate.intercepts[(Base, :eval)] = _eval
     # interpstate.intercepts[(mod, :eval)] = _eval
+    # union!(interpstate.passthroughs, intrinsics())
+    # union!(interpstate.passthroughs, builtins())
     push!(interpstate.passthroughs, (Core, :eval))
     push!(interpstate.passthroughs, (Base, :eval))
     push!(interpstate.passthroughs, (mod, :eval))
     push!(interpstate.passthroughs, (Base, :lock))
     push!(interpstate.passthroughs, (Base, :unlock))
-    for mod in (Base, Core, Random)
-    # for mod in (Core,)
-        union!(interpstate.passthroughs,
-            (mod, name) for name in names(mod; all=true)
-                if isdefined(mod, name) &&
-                   getfield(mod, name) isa Base.Callable)
+    for mod in options.excludes
+        union!(interpstate.passthroughs, callables(mod))
     end
     interpstate
 end
@@ -145,9 +170,9 @@ mutable struct CodeState
     lenv::Core.SimpleVector
     src::Core.CodeInfo
     pc::Int
-    ssavalues::Vector
-    times::Vector{UInt64}
-    slots::Vector
+    ssavalues::Vector{Any}
+    times::Vector{UInt}
+    slots::Vector{Any}
     handlers::Vector{Int}
 end
 
@@ -155,9 +180,9 @@ function code_state_from_thunk(interpstate, mod, src)
     wc = ccall(:jl_get_world_counter, UInt, ())
     # @show :code_state_from_thunk Int(wc)
     CodeState(interpstate, wc, mod, [], Core.svec(), src, 1,
-        Vector(undef, length(src.code)),
-        Vector{UInt64}(undef, length(src.code)),
-        Vector(undef, length(src.slotnames)),
+        Vector{Any}(undef, length(src.code)),
+        Vector{UInt}(undef, length(src.code)),
+        Vector{Any}(undef, length(src.slotnames)),
         Int[])
 end
 
@@ -218,11 +243,12 @@ function code_state_from_call(codestate, fun, parms)
         end
         codestate.interpstate.meths[(wc, tt)] = (meth, names, lenv, src)
     end
-    childstate = CodeState(codestate.interpstate, wc, meth, names, lenv, src, 1,
-        Vector(undef, length(src.code)),
-        Vector{UInt64}(undef, length(src.code)),
-        Vector(undef, length(src.slotnames)),
-        Int[])
+    childstate = 
+        CodeState(codestate.interpstate, wc, meth, names, lenv, src, 1,
+            Vector{Any}(undef, length(src.code)),
+            Vector{UInt}(undef, length(src.code)),
+            Vector(undef, length(src.slotnames)),
+            Int[])
     childstate.slots[1] = fun
     if !meth.isva
         @views childstate.slots[2:meth.nargs] .= parms[1:meth.nargs - 1]
@@ -235,10 +261,10 @@ end
 
 function run_code_state(codestate)
     while true
-        codestate.interpstate.debug && @show :run_code_state codestate.pc codestate.src.code[codestate.pc]
+        codestate.interpstate.options.debug && @show :run_code_state codestate.pc codestate.src.code[codestate.pc]
         ans = interpret_lower_node(codestate, codestate.src.code[codestate.pc])
         if ans isa Some
-            codestate.interpstate.debug && @show :run_code_state ans
+            codestate.interpstate.options.debug && @show :run_code_state ans
             return something(ans)
         end
     end

@@ -6,14 +6,14 @@ include("types.jl")
 include("lower.jl")
 include("ast.jl")
 
-function include(mod, path, debug=false, budget=UInt64(1000))
+function include(mod, path, options)
     code = read(path, String)
     tls = task_local_storage()
     prev = get(tls, :SOURCE_PATH, nothing)
     tls[:SOURCE_PATH] = path
     try
         expr = Meta.parseall(code, filename=path)
-        interpret_ast(mod, expr, debug, budget)
+        interpret_ast(mod, expr, options)
     finally
         if prev === nothing
             delete!(tls, :SOURCE_PATH)
