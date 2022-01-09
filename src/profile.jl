@@ -13,6 +13,7 @@ const X = rand(1:10, 10_000)
 using Profile
 Profile.clear()
 options = JuliaInterp.options(false, [], UInt(0))
+JuliaInterp.interpret_ast(Main, Meta.parse("f(X)"), options)
 @profile JuliaInterp.interpret_ast(Main, Meta.parse("f(X)"), options)
 # Profile.print()
 Juno.profiler()

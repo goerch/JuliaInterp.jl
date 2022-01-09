@@ -129,8 +129,8 @@ mutable struct InterpState
     options::InterpOptions
     intercepts::Dict{ModuleSymbol, Base.Callable}
     passthroughs::Set{ModuleSymbol}
-    meths::Dict{Tuple{UInt, Any}, Tuple{ModuleOrMethod, Vector{Symbol}, Core.SimpleVector, Core.CodeInfo}}
-    exceptions::Vector{Any}
+    meths::Dict{Tuple{UInt, Type}, Tuple{Method, Vector{Symbol}, Core.SimpleVector, Core.CodeInfo}}
+    exceptions::Vector{NamedTuple{(:exception, :backtrace), Tuple{Any, Vector{Any}}}}
     iolock::Bool
     sigatomic::Bool
 end
@@ -212,7 +212,7 @@ function _which(tt, wc)
         match = ccall(:jl_gf_invoke_lookup_worlds, Any,
             (Any, UInt, Ptr{Csize_t}, Ptr{Csize_t}),
             tt, wc, min_valid, max_valid)
-        if match !== nothing
+        if match isa Core.MethodMatch
             return match.method
         else
             return nothing
@@ -228,10 +228,11 @@ typeof_lower(val) = typeof(val)
 generate_lower(codestate, expr::Expr) = Meta.lower(moduleof(codestate.mod_or_meth), expr)
 generate_lower(codestate, val) = val
 
-function code_state_from_call(codestate, fun, parms)
+function code_state_from_call(codestate::CodeState, fun::Base.Callable, parms::Vector{Any})
+    @nospecialize fun parms
     wc = ccall(:jl_get_world_counter, UInt, ())
     t = Base.to_tuple_type(typeof_lower.(parms))
-    tt = Base.signature_type(fun, t)
+    tt = Base.signature_type(fun, t)::Type
     meth, names, lenv, src = get(codestate.interpstate.meths, (wc, tt), (nothing, nothing, nothing, nothing))
     if meth === nothing
         meth = _which(tt, wc)
@@ -245,8 +246,9 @@ function code_state_from_call(codestate, fun, parms)
             src = Base.uncompressed_ast(meth)
             # src = Base.uncompressed_ir(meth)
         else
-            @show :generator
-            expr = Base.invokelatest(meth.generator, lenv..., meth.generator.argnames...)
+            @show :generator meth.generator
+            generator = meth.generator
+            expr = Base.invokelatest(generator, lenv..., meth.generator.argnames...)::Expr
             src = generate_lower(codestate, expr)
         end
         codestate.interpstate.meths[(wc, tt)] = (meth, names, lenv, src)
@@ -259,14 +261,15 @@ function code_state_from_call(codestate, fun, parms)
         Int[])
 end
 
-function update_code_state(codestate, fun, parms)
+function update_code_state(codestate::CodeState, fun::Base.Callable, parms::Vector{Any})
+    # @nospecialize fun parms
     codestate.pc = 1
     resize!(codestate.ssavalues, 0)
     resize!(codestate.ssavalues, length(codestate.src.code))
     # resize!(codestate.times, 0)
     # resize!(codestate.times, length(codestate.src.code))
     empty!(codestate.handlers)
-    meth = codestate.mod_or_meth
+    meth = codestate.mod_or_meth::Method
     codestate.slots[1] = fun
     if !meth.isva
         @views codestate.slots[2:meth.nargs] .= parms[1:meth.nargs - 1]
@@ -278,13 +281,13 @@ function update_code_state(codestate, fun, parms)
     codestate
 end
 
-function run_code_state(codestate)
+function run_code_state(codestate::CodeState)
     while true
         codestate.interpstate.options.debug && @show :run_code_state codestate.pc codestate.src.code[codestate.pc]
-        ans = interpret_lower_node(codestate, codestate.src.code[codestate.pc])
-        if ans isa Some
-            codestate.interpstate.options.debug && @show :run_code_state ans
-            return something(ans)
+        node = codestate.src.code[codestate.pc]
+        ans = interpret_lower_node(codestate, node)
+        if node isa Core.ReturnNode
+            return ans
         end
     end
 end
