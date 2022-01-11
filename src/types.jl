@@ -76,7 +76,7 @@ function _llvmcall(codestate, parms)
         end)
 end
 function _eval(codestate, parms)
-    wc1 = ccall(:jl_get_world_counter, UInt, ())
+    wc1 = Base.get_world_counter()
     @show :_eval Int(wc1)
     if length(parms) == 1
         ans = interpret_ast(moduleof(codestate.mod_or_meth), parms[1],
@@ -85,7 +85,7 @@ function _eval(codestate, parms)
         ans = interpret_ast(parms[1], parms[2],
             codestate.interpstate.options)
     end
-    wc2 = ccall(:jl_get_world_counter, UInt, ())
+    wc2 = Base.get_world_counter()
     @show :_eval Int(wc2)
     return ans
 end
@@ -127,16 +127,19 @@ const ModuleSymbol = Tuple{Module, Symbol}
 
 mutable struct InterpState
     options::InterpOptions
+    wc::UInt
     intercepts::Dict{ModuleSymbol, Base.Callable}
     passthroughs::Set{ModuleSymbol}
-    meths::Dict{Tuple{UInt, Type}, Tuple{Method, Vector{Symbol}, Core.SimpleVector, Core.CodeInfo}}
-    exceptions::Vector{NamedTuple{(:exception, :backtrace), Tuple{Any, Vector{Any}}}}
+    # meths::Dict{Tuple{UInt, Type}, Tuple{Method, Vector{Symbol}, Core.SimpleVector, Core.CodeInfo}}
+    meths::Dict{Tuple{UInt, Type}, Tuple{Method, Core.SimpleVector, Core.CodeInfo}}
+    exceptions::Vector{NamedTuple{(:exception, :backtrace), Tuple{Any, Vector{Union{Ptr{Nothing}, Base.InterpreterIP}}}}}
     iolock::Bool
     sigatomic::Bool
 end
 
 function interp_state(mod, options)
-    interpstate = InterpState(options, Dict(), Set(), Dict(), [], false, false)
+    wc = Base.get_world_counter()
+    interpstate = InterpState(options, wc, Dict(), Set(), Dict(), [], false, false)
     @static if !isdefined(Base, :current_exceptions)
         interpstate.intercepts[(Base, :catch_stack)] = _current_exceptions
     else
@@ -169,7 +172,7 @@ mutable struct CodeState
     interpstate::InterpState
     wc::UInt
     mod_or_meth::ModuleOrMethod
-    names::Vector{Symbol}
+    # names::Vector{Symbol}
     lenv::Core.SimpleVector
     src::Core.CodeInfo
     pc::Int
@@ -184,9 +187,10 @@ end
 const ChildState = Tuple{Base.Callable, Union{Nothing, Base.Callable, CodeState}}
 
 function code_state_from_thunk(interpstate, mod, src)
-    wc = ccall(:jl_get_world_counter, UInt, ())
+    wc = Base.get_world_counter()
     # @show :code_state_from_thunk Int(wc)
-    CodeState(interpstate, wc, mod, [], Core.svec(), src, 1, 1,
+    # CodeState(interpstate, wc, mod, [], Core.svec(), src, 1, 1,
+    CodeState(interpstate, wc, mod, Core.svec(), src, 1, 1,
         Vector{Any}(undef, length(src.code)),
         Vector{Vector{ChildState}}(undef, length(src.code)),
         Vector{UInt}(undef, length(src.code)),
@@ -212,11 +216,12 @@ function _which(tt, wc)
         match = ccall(:jl_gf_invoke_lookup_worlds, Any,
             (Any, UInt, Ptr{Csize_t}, Ptr{Csize_t}),
             tt, wc, min_valid, max_valid)
-        if match isa Core.MethodMatch
+        return match
+        #= if match isa Core.MethodMatch
             return match.method
         else
             return nothing
-        end
+        end =#
     else
         return ccall(:jl_gf_invoke_lookup, Any, (Any, UInt), tt, wc)
     end
@@ -230,30 +235,54 @@ generate_lower(codestate, val) = val
 
 function code_state_from_call(codestate::CodeState, fun::Base.Callable, parms::Vector{Any})
     @nospecialize fun parms
-    wc = ccall(:jl_get_world_counter, UInt, ())
+    # @show :code_state_from_call Int(wc)
+    wc = Base.get_world_counter()
     t = Base.to_tuple_type(typeof_lower.(parms))
     tt = Base.signature_type(fun, t)::Type
-    meth, names, lenv, src = get(codestate.interpstate.meths, (wc, tt), (nothing, nothing, nothing, nothing))
+    # meth, names, lenv, src = get(codestate.interpstate.meths, (wc, tt), (nothing, nothing, nothing, nothing))
+    meth, lenv, src = get(codestate.interpstate.meths, (wc, tt), (nothing, nothing, nothing))
     if meth === nothing
-        meth = _which(tt, wc)
-        if meth === nothing
-            @show :code_state_from_call fun
-            return nothing
+        @static if VERSION >= v"1.8.0-DEV"
+            # Core.MethodMatch
+            match = _which(tt, wc)
+            if match === nothing
+                @show :code_state_from_call fun
+                return nothing
+            end
+            # @show typeof(match) match match.sparams
+            # Core.MethodInstance
+            mi = Core.Compiler.specialize_method(match) 
+            # @show typeof(mi) mi mi.sparam_vals
+            meth = match.method
+            lenv = mi.sparam_vals
+        else
+            meth = _which(tt, wc)
+            if meth === nothing
+                @show :code_state_from_call fun
+                return nothing
+            end
+            (ti, lenv) = ccall(:jl_type_intersection_with_env, Any, (Any, Any), tt, meth.sig)
         end
-        names = Base.method_argnames(meth)
-        (ti, lenv) = ccall(:jl_type_intersection_with_env, Any, (Any, Any), tt, meth.sig)
         if !isdefined(meth, :generator)
             src = Base.uncompressed_ast(meth)
             # src = Base.uncompressed_ir(meth)
         else
             @show :generator meth.generator
             generator = meth.generator
-            expr = Base.invokelatest(generator, lenv..., meth.generator.argnames...)::Expr
+            if codestate.mod_or_meth isa Module
+                expr = Base.invokelatest(generator, lenv..., meth.generator.argnames...)::Expr
+            else
+                # expr = generator(lenv..., meth.generator.argnames...)::Expr
+                # expr = Base.invoke_in_world(wc, generator, lenv..., meth.generator.argnames...)::Expr
+                expr = Base.invokelatest(generator, lenv..., meth.generator.argnames...)::Expr
+            end
             src = generate_lower(codestate, expr)
         end
-        codestate.interpstate.meths[(wc, tt)] = (meth, names, lenv, src)
+        # codestate.interpstate.meths[(wc, tt)] = (meth, names, lenv, src)
+        codestate.interpstate.meths[(wc, tt)] = (meth, lenv, src)
     end
-    CodeState(codestate.interpstate, wc, meth, names, lenv, src, 1, 1,
+    # CodeState(codestate.interpstate, wc, meth, names, lenv, src, 1, 1,
+    CodeState(codestate.interpstate, wc, meth, lenv, src, 1, 1,
         Vector{Any}(undef, length(src.code)),
         Vector{Vector{ChildState}}(undef, length(src.code)),
         Vector{UInt}(undef, length(src.code)),
@@ -264,10 +293,9 @@ end
 function update_code_state(codestate::CodeState, fun::Base.Callable, parms::Vector{Any})
     # @nospecialize fun parms
     codestate.pc = 1
-    resize!(codestate.ssavalues, 0)
-    resize!(codestate.ssavalues, length(codestate.src.code))
-    # resize!(codestate.times, 0)
-    # resize!(codestate.times, length(codestate.src.code))
+    codestate.ssavalues = Vector{Any}(undef, length(codestate.src.code))
+    # codestate.times = Vector{UInt}(undef, length(codestate.src.code))
+    codestate.slots = Vector{Any}(undef, length(codestate.src.slotnames))
     empty!(codestate.handlers)
     meth = codestate.mod_or_meth::Method
     codestate.slots[1] = fun

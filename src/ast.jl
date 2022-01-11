@@ -18,6 +18,7 @@ function eval_lower_ast(interpstate::InterpState, mod, expr)
         if lwr.head == :thunk
             ans = interpret_lower(interpstate, mod, lwr.args[1]::Core.CodeInfo)
         else
+            @show lwr mod expr
             # ans = Core.eval(mod, expr)
             ans = @eval mod $expr
         end
@@ -85,7 +86,7 @@ end
 function interpret_ast_global(interpstate::InterpState, mod, args)
     interpstate.options.debug && @show mod :global args
     expr = Expr(:global, args...)
-    eval_lower_ast(interpstate, mod, expr)
+    eval_ast(interpstate, mod, expr)
 end
 function interpret_ast_let(interpstate::InterpState, mod, args)
     interpstate.options.debug && @show mod :let args
@@ -94,11 +95,20 @@ function interpret_ast_let(interpstate::InterpState, mod, args)
 end
 function interpret_ast_block(interpstate::InterpState, mod, args)
     interpstate.options.debug && @show mod :block args
-    local ans
-    for arg in args
-        ans = interpret_ast_node(interpstate, mod, arg)
+    local lnn
+    try
+        local ans
+        for arg in args
+            ans = interpret_ast_node(interpstate, mod, arg)
+            if ans isa LineNumberNode
+                lnn = ans
+            end
+        end
+        ans            
+    catch exception
+        @show lnn
+        rethrow()
     end
-    ans
 end
 function interpret_ast_try(interpstate::InterpState, mod, args)
     interpstate.options.debug && @show mod :try args
@@ -159,16 +169,17 @@ end
 function interpret_ast_using(interpstate::InterpState, mod, args)
     interpstate.options.debug && @show mod :using args
     expr = Expr(:using, args...)
-    eval_lower_ast(interpstate, mod, expr)
+    eval_ast(interpstate, mod, expr)
 end
 function interpret_ast_import(interpstate::InterpState, mod, args)
     interpstate.options.debug && @show mod :import args
     expr = Expr(:import, args...)
-    eval_lower_ast(interpstate, mod, expr)
+    eval_ast(interpstate, mod, expr)
 end
 function interpret_ast_export(interpstate::InterpState, mod, args)
     interpstate.options.debug && @show mod :export args
     expr = Expr(:export, args...)
+    # Can we really lower exports?
     eval_lower_ast(interpstate, mod, expr)
 end
 
@@ -180,16 +191,25 @@ function interpret_ast_incomplete(interpstate, mod, args)
 end
 function interpret_ast_toplevel(interpstate::InterpState, mod, args)
     interpstate.options.debug && @show mod :toplevel args
-    local ans
-    for arg in args
-        ans = interpret_ast_node(interpstate, mod, arg)
+    local lnn
+    try
+        local ans
+        for arg in args
+            ans = interpret_ast_node(interpstate, mod, arg)
+            if ans isa LineNumberNode
+                lnn = ans
+            end
+        end
+        ans            
+    catch exception
+        @show lnn
+        rethrow()
     end
-    ans
 end
 function interpret_ast_module(interpstate::InterpState, mod, args)
     interpstate.options.debug && @show mod :module args
     expr = Expr(:module, args...)
-    eval_lower_ast(interpstate, mod, expr)
+    eval_ast(interpstate, mod, expr)
 end
 
 function interpret_ast_expr(interpstate::InterpState, mod, expr::Expr)
@@ -266,8 +286,15 @@ function interpret_ast_node(interpstate::InterpState, mod, node)
     if node isa Expr
         expr = node
         interpret_ast_expr(interpstate, mod, expr)
+    elseif node isa Symbol
+        symbol = node
+        eval_ast(interpstate, mod, symbol)
+    elseif node isa LineNumberNode
+        lnn = node
+        lnn
     else
-        node
+        @show typeof(node) node
+        @assert false
     end
 end
 
