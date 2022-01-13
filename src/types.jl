@@ -125,13 +125,59 @@ moduleof(mod::Module) = mod
 
 const ModuleSymbol = Tuple{Module, Symbol}
 
+function module_symbol(callable::Base.Callable)
+    (parentmodule(callable), nameof(callable))::ModuleSymbol
+end
+
+const WorldType = Tuple{UInt, Type}
+
+typeof_lower(type::Type) = Type{type}
+typeof_lower(val) = typeof(val)
+
+function world_type(callable::Base.Callable, parms::Vector{Any})
+    @nospecialize callable
+    wc = Base.get_world_counter()
+    t = Base.to_tuple_type(typeof_lower.(parms))
+    tt = Base.signature_type(callable, t)
+    (wc, tt)
+end
+
+function _which(wt)
+    #= try
+        return which(wt[2])
+    catch exception
+        @show :_which exception
+        if !(exception isa ErrorException)
+            rethrow()
+        else
+            return nothing
+        end
+    end =#
+    @static if VERSION >= v"1.8.0-DEV"
+        # Adapted Base._which
+        min_valid = Base.RefValue{UInt}(typemin(UInt))
+        max_valid = Base.RefValue{UInt}(typemax(UInt))
+        match = ccall(:jl_gf_invoke_lookup_worlds, Any,
+            (Any, UInt, Ptr{Csize_t}, Ptr{Csize_t}),
+            wt[2], wt[1], min_valid, max_valid)
+        return match
+        #= if match isa Core.MethodMatch
+            return match.method
+        else
+            return nothing
+        end =#
+    else
+        return ccall(:jl_gf_invoke_lookup, Any, (Any, UInt), wt[2], wt[1])
+    end
+end
+
 mutable struct InterpState
     options::InterpOptions
     wc::UInt
     intercepts::Dict{ModuleSymbol, Base.Callable}
     passthroughs::Set{ModuleSymbol}
-    # meths::Dict{Tuple{UInt, Type}, Tuple{Method, Vector{Symbol}, Core.SimpleVector, Core.CodeInfo}}
-    meths::Dict{Tuple{UInt, Type}, Tuple{Method, Core.SimpleVector, Core.CodeInfo}}
+    # meths::Dict{WorldType, Tuple{Method, Vector{Symbol}, Core.SimpleVector, Core.CodeInfo}}
+    meths::Dict{WorldType, Tuple{Method, Core.SimpleVector, Core.CodeInfo}}
     exceptions::Vector{NamedTuple{(:exception, :backtrace), Tuple{Any, Vector{Union{Ptr{Nothing}, Base.InterpreterIP}}}}}
     iolock::Bool
     sigatomic::Bool
@@ -173,12 +219,12 @@ mutable struct CodeState
     wc::UInt
     mod_or_meth::ModuleOrMethod
     # names::Vector{Symbol}
-    lenv::Core.SimpleVector
+    sparam_vals::Core.SimpleVector
     src::Core.CodeInfo
     pc::Int
     cc::Int
     ssavalues::Vector{Any}
-    childstates::Vector{Vector{Tuple{Base.Callable, Union{Nothing, Base.Callable, CodeState}}}}
+    childstates::Vector{Vector{Tuple{WorldType, Union{Nothing, Base.Callable, CodeState}}}}
     times::Vector{UInt}
     slots::Vector{Any}
     handlers::Vector{Int}
@@ -187,8 +233,8 @@ end
 const ChildState = Tuple{Base.Callable, Union{Nothing, Base.Callable, CodeState}}
 
 function code_state_from_thunk(interpstate, mod, src)
+    # @show :code_state_from_thunk
     wc = Base.get_world_counter()
-    # @show :code_state_from_thunk Int(wc)
     # CodeState(interpstate, wc, mod, [], Core.svec(), src, 1, 1,
     CodeState(interpstate, wc, mod, Core.svec(), src, 1, 1,
         Vector{Any}(undef, length(src.code)),
@@ -198,91 +244,58 @@ function code_state_from_thunk(interpstate, mod, src)
         Int[])
 end
 
-function _which(tt, wc)
-    #= try
-        return which(tt)
-    catch exception
-        @show :_which exception
-        if !(exception isa ErrorException)
-            rethrow()
-        else
-            return nothing
-        end
-    end =#
-    @static if VERSION >= v"1.8.0-DEV"
-        # Adapted Base._which
-        min_valid = Base.RefValue{UInt}(typemin(UInt))
-        max_valid = Base.RefValue{UInt}(typemax(UInt))
-        match = ccall(:jl_gf_invoke_lookup_worlds, Any,
-            (Any, UInt, Ptr{Csize_t}, Ptr{Csize_t}),
-            tt, wc, min_valid, max_valid)
-        return match
-        #= if match isa Core.MethodMatch
-            return match.method
-        else
-            return nothing
-        end =#
-    else
-        return ccall(:jl_gf_invoke_lookup, Any, (Any, UInt), tt, wc)
-    end
-end
-
-typeof_lower(type::Type) = Type{type}
-typeof_lower(val) = typeof(val)
-
 generate_lower(codestate, expr::Expr) = Meta.lower(moduleof(codestate.mod_or_meth), expr)
 generate_lower(codestate, val) = val
 
-function code_state_from_call(codestate::CodeState, fun::Base.Callable, parms::Vector{Any})
-    @nospecialize fun parms
-    # @show :code_state_from_call Int(wc)
-    wc = Base.get_world_counter()
-    t = Base.to_tuple_type(typeof_lower.(parms))
-    tt = Base.signature_type(fun, t)::Type
-    # meth, names, lenv, src = get(codestate.interpstate.meths, (wc, tt), (nothing, nothing, nothing, nothing))
-    meth, lenv, src = get(codestate.interpstate.meths, (wc, tt), (nothing, nothing, nothing))
+function code_state_from_call(codestate::CodeState, wt::WorldType)
+    @nospecialize wt
+    # @show :code_state_from_call
+    # meth, names, sparam_vals, src = get(codestate.interpstate.meths, wt, (nothing, nothing, nothing, nothing))
+    meth, sparam_vals, src = get(codestate.interpstate.meths, wt, (nothing, nothing, nothing))
     if meth === nothing
         @static if VERSION >= v"1.8.0-DEV"
-            # Core.MethodMatch
-            match = _which(tt, wc)
+            match = _which(wt)
             if match === nothing
-                @show :code_state_from_call fun
+                @show :code_state_from_call wt
                 return nothing
             end
-            # @show typeof(match) match match.sparams
-            # Core.MethodInstance
-            mi = Core.Compiler.specialize_method(match) 
-            # @show typeof(mi) mi mi.sparam_vals
             meth = match.method
-            lenv = mi.sparam_vals
+            mi = Core.Compiler.specialize_method(match)
+            sparam_vals = mi.sparam_vals
         else
-            meth = _which(tt, wc)
+            meth = _which(wt)
             if meth === nothing
-                @show :code_state_from_call fun
+                @show :code_state_from_call wt
                 return nothing
             end
-            (ti, lenv) = ccall(:jl_type_intersection_with_env, Any, (Any, Any), tt, meth.sig)
+            (ti, sparam_vals) = ccall(:jl_type_intersection_with_env, Any, (Any, Any), wt[2], meth.sig)
         end
         if !isdefined(meth, :generator)
             src = Base.uncompressed_ast(meth)
             # src = Base.uncompressed_ir(meth)
         else
-            @show :generator meth.generator
             generator = meth.generator
             if codestate.mod_or_meth isa Module
-                expr = Base.invokelatest(generator, lenv..., meth.generator.argnames...)::Expr
+                expr_or_src = Base.invokelatest(generator, sparam_vals..., generator.argnames...)
             else
-                # expr = generator(lenv..., meth.generator.argnames...)::Expr
-                # expr = Base.invoke_in_world(wc, generator, lenv..., meth.generator.argnames...)::Expr
-                expr = Base.invokelatest(generator, lenv..., meth.generator.argnames...)::Expr
+                # expr_or_src = generator(sparam_vals..., generator.argnames...)
+                expr_or_src = Base.invokelatest(generator, sparam_vals..., generator.argnames...)
             end
-            src = generate_lower(codestate, expr)
+            if expr_or_src isa Core.CodeInfo
+                src = expr_or_src
+            elseif expr_or_src isa Expr
+                expr = expr_or_src
+                src = generate_lower(codestate, expr)
+            else
+                @show expr_or_src
+                @assert false
+            end
         end
-        # codestate.interpstate.meths[(wc, tt)] = (meth, names, lenv, src)
-        codestate.interpstate.meths[(wc, tt)] = (meth, lenv, src)
+        # codestate.interpstate.meths[wt] = (meth, names, sparam_vals, src)
+        codestate.interpstate.meths[wt] = (meth, sparam_vals, src)
     end
-    # CodeState(codestate.interpstate, wc, meth, names, lenv, src, 1, 1,
-    CodeState(codestate.interpstate, wc, meth, lenv, src, 1, 1,
+    # CodeState(codestate.interpstate, wc, meth, names, sparam_vals, src, 1, 1,
+    CodeState(codestate.interpstate, wt[1], meth, sparam_vals, src, 1, 1,
         Vector{Any}(undef, length(src.code)),
         Vector{Vector{ChildState}}(undef, length(src.code)),
         Vector{UInt}(undef, length(src.code)),
@@ -290,15 +303,15 @@ function code_state_from_call(codestate::CodeState, fun::Base.Callable, parms::V
         Int[])
 end
 
-function update_code_state(codestate::CodeState, fun::Base.Callable, parms::Vector{Any})
-    # @nospecialize fun parms
+function update_code_state(codestate::CodeState, callable::Base.Callable, parms::Vector{Any})
+    @nospecialize callable 
     codestate.pc = 1
     codestate.ssavalues = Vector{Any}(undef, length(codestate.src.code))
     # codestate.times = Vector{UInt}(undef, length(codestate.src.code))
     codestate.slots = Vector{Any}(undef, length(codestate.src.slotnames))
     empty!(codestate.handlers)
     meth = codestate.mod_or_meth::Method
-    codestate.slots[1] = fun
+    codestate.slots[1] = callable
     if !meth.isva
         @views codestate.slots[2:meth.nargs] .= parms[1:meth.nargs - 1]
     else

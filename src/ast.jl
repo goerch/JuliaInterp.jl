@@ -105,7 +105,7 @@ function interpret_ast_block(interpstate::InterpState, mod, args)
             end
         end
         ans            
-    catch exception
+    catch 
         @show lnn
         rethrow()
     end
@@ -201,7 +201,7 @@ function interpret_ast_toplevel(interpstate::InterpState, mod, args)
             end
         end
         ans            
-    catch exception
+    catch 
         @show lnn
         rethrow()
     end
