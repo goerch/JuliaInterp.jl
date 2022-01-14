@@ -95,8 +95,9 @@ function lookup_lower_call(codestate::CodeState, args)
                 codestate.childstates[codestate.pc][codestate.cc] =
                     callable, code_state_from_call(codestate, wt)
             elseif codestate.childstates[codestate.pc][codestate.cc][2] isa CodeState
+                childstate = codestate.childstates[codestate.pc][codestate.cc][2]
                 wt = world_type(callable, parms)
-                if wt != codestate.wt
+                if wt != childstate.wt
                     codestate.childstates[codestate.pc][codestate.cc] =
                         callable, code_state_from_call(codestate, wt)
                 end

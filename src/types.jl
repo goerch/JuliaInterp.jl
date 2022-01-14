@@ -137,7 +137,7 @@ const WorldType = Tuple{UInt, Type}
 typeof_lower(type::Type) = Type{type}
 typeof_lower(val) = typeof(val)
 
-function world_type(callable::Base.Callable, parms::Vector{Any})::WorldType
+function world_type(callable::Base.Callable, parms)::WorldType
     @nospecialize callable
     wc = Base.get_world_counter()
     t = Base.to_tuple_type(typeof_lower.(parms))
@@ -303,7 +303,7 @@ function code_state_from_call(codestate::CodeState, wt::WorldType)
         Int[])
 end
 
-function update_code_state(codestate::CodeState, callable::Base.Callable, parms::Vector{Any})
+function update_code_state(codestate::CodeState, callable::Base.Callable, parms)
     @nospecialize callable
     codestate.pc = 1
     codestate.ssavalues = Vector{Any}(undef, length(codestate.src.code))
