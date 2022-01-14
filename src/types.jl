@@ -126,7 +126,8 @@ moduleof(mod::Module) = mod
 const ModuleSymbol = Tuple{Module, Symbol}
 
 function module_symbol(callable::Base.Callable)
-    (parentmodule(callable), nameof(callable))::ModuleSymbol
+    # @nospecialize callable
+    (parentmodule(callable), nameof(callable))
 end
 
 const WorldType = Tuple{UInt, Type}
@@ -135,7 +136,7 @@ typeof_lower(type::Type) = Type{type}
 typeof_lower(val) = typeof(val)
 
 function world_type(callable::Base.Callable, parms::Vector{Any})
-    @nospecialize callable
+    # @nospecialize callable
     wc = Base.get_world_counter()
     t = Base.to_tuple_type(typeof_lower.(parms))
     tt = Base.signature_type(callable, t)
@@ -176,7 +177,6 @@ mutable struct InterpState
     wc::UInt
     intercepts::Dict{ModuleSymbol, Base.Callable}
     passthroughs::Set{ModuleSymbol}
-    # meths::Dict{WorldType, Tuple{Method, Vector{Symbol}, Core.SimpleVector, Core.CodeInfo}}
     meths::Dict{WorldType, Tuple{Method, Core.SimpleVector, Core.CodeInfo}}
     exceptions::Vector{NamedTuple{(:exception, :backtrace), Tuple{Any, Vector{Union{Ptr{Nothing}, Base.InterpreterIP}}}}}
     iolock::Bool
@@ -216,15 +216,14 @@ end
 
 mutable struct CodeState
     interpstate::InterpState
-    wc::UInt
+    wt::WorldType
     mod_or_meth::ModuleOrMethod
-    # names::Vector{Symbol}
     sparam_vals::Core.SimpleVector
     src::Core.CodeInfo
     pc::Int
     cc::Int
     ssavalues::Vector{Any}
-    childstates::Vector{Vector{Tuple{WorldType, Union{Nothing, Base.Callable, CodeState}}}}
+    childstates::Vector{Vector{Tuple{Base.Callable, Union{Nothing, Base.Callable, CodeState}}}}
     times::Vector{UInt}
     slots::Vector{Any}
     handlers::Vector{Int}
@@ -236,7 +235,7 @@ function code_state_from_thunk(interpstate, mod, src)
     # @show :code_state_from_thunk
     wc = Base.get_world_counter()
     # CodeState(interpstate, wc, mod, [], Core.svec(), src, 1, 1,
-    CodeState(interpstate, wc, mod, Core.svec(), src, 1, 1,
+    CodeState(interpstate, (wc, Nothing), mod, Core.svec(), src, 1, 1,
         Vector{Any}(undef, length(src.code)),
         Vector{Vector{ChildState}}(undef, length(src.code)),
         Vector{UInt}(undef, length(src.code)),
@@ -248,9 +247,8 @@ generate_lower(codestate, expr::Expr) = Meta.lower(moduleof(codestate.mod_or_met
 generate_lower(codestate, val) = val
 
 function code_state_from_call(codestate::CodeState, wt::WorldType)
-    @nospecialize wt
+    # @nospecialize wt
     # @show :code_state_from_call
-    # meth, names, sparam_vals, src = get(codestate.interpstate.meths, wt, (nothing, nothing, nothing, nothing))
     meth, sparam_vals, src = get(codestate.interpstate.meths, wt, (nothing, nothing, nothing))
     if meth === nothing
         @static if VERSION >= v"1.8.0-DEV"
@@ -291,20 +289,18 @@ function code_state_from_call(codestate::CodeState, wt::WorldType)
                 @assert false
             end
         end
-        # codestate.interpstate.meths[wt] = (meth, names, sparam_vals, src)
         codestate.interpstate.meths[wt] = (meth, sparam_vals, src)
     end
-    # CodeState(codestate.interpstate, wc, meth, names, sparam_vals, src, 1, 1,
-    CodeState(codestate.interpstate, wt[1], meth, sparam_vals, src, 1, 1,
+    CodeState(codestate.interpstate, wt, meth, sparam_vals, src, 1, 1,
         Vector{Any}(undef, length(src.code)),
         Vector{Vector{ChildState}}(undef, length(src.code)),
         Vector{UInt}(undef, length(src.code)),
-        Vector(undef, length(src.slotnames)),
+        Vector{Any}(undef, length(src.slotnames)),
         Int[])
 end
 
 function update_code_state(codestate::CodeState, callable::Base.Callable, parms::Vector{Any})
-    @nospecialize callable 
+    # @nospecialize callable 
     codestate.pc = 1
     codestate.ssavalues = Vector{Any}(undef, length(codestate.src.code))
     # codestate.times = Vector{UInt}(undef, length(codestate.src.code))

@@ -80,21 +80,23 @@ function lookup_lower_call(codestate::CodeState, args)
     parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
     # @show parms
     if fun isa Base.Callable 
-        callable = fun
-        wt = world_type(callable, parms)
-        if !isassigned(codestate.childstates[codestate.pc], codestate.cc) ||
-           codestate.childstates[codestate.pc][codestate.cc][1] != wt
-            if callable isa Core.Builtin || callable isa Core.IntrinsicFunction
-                codestate.childstates[codestate.pc][codestate.cc] = wt, nothing
-            else
-                id = module_symbol(callable)
-                intercept = get(codestate.interpstate.intercepts, id, callable)
-                if intercept != callable
-                    codestate.childstates[codestate.pc][codestate.cc] = wt, intercept
-                elseif id in codestate.interpstate.passthroughs
-                    codestate.childstates[codestate.pc][codestate.cc] = wt, nothing
-                else
-                    codestate.childstates[codestate.pc][codestate.cc] = wt, code_state_from_call(codestate, wt)
+        callable = fun::Base.Callable
+        if callable isa Core.Builtin || callable isa Core.IntrinsicFunction
+            codestate.childstates[codestate.pc][codestate.cc] = callable, nothing
+        else
+            id = module_symbol(callable)
+            intercept = get(codestate.interpstate.intercepts, id, callable)
+            if intercept != callable
+                codestate.childstates[codestate.pc][codestate.cc] = callable, intercept
+            elseif id in codestate.interpstate.passthroughs
+                codestate.childstates[codestate.pc][codestate.cc] = callable, nothing
+            elseif !isassigned(codestate.childstates[codestate.pc], codestate.cc)
+                wt = world_type(callable, parms)
+                codestate.childstates[codestate.pc][codestate.cc] = callable, code_state_from_call(codestate, wt)
+            elseif codestate.childstates[codestate.pc][codestate.cc][1] isa CodeState
+                wt = world_type(callable, parms)
+                if wt != codestate.wt
+                    codestate.childstates[codestate.pc][codestate.cc] = callable, code_state_from_call(codestate, wt)
                 end
             end
         end
@@ -102,10 +104,10 @@ function lookup_lower_call(codestate::CodeState, args)
             intercept = codestate.childstates[codestate.pc][codestate.cc][2]
             return intercept(codestate, parms)
         elseif codestate.childstates[codestate.pc][codestate.cc][2] isa CodeState
-            childstate = codestate.childstates[codestate.pc][codestate.cc][2]
             if codestate.interpstate.options.budget == 0 ||
                !isassigned(codestate.times, codestate.pc) ||
                codestate.times[codestate.pc] < codestate.interpstate.options.budget
+                childstate = codestate.childstates[codestate.pc][codestate.cc][2]
                 update_code_state(childstate, callable, parms)
                 # childstate.interpstate.options.debug = true
                 try
@@ -115,7 +117,7 @@ function lookup_lower_call(codestate::CodeState, args)
                     # childstate.interpstate.options.debug = false
                 end
             else
-                codestate.childstates[codestate.pc][codestate.cc] = wt, nothing
+                codestate.childstates[codestate.pc][codestate.cc] = callable, nothing
             end
         end
     end
