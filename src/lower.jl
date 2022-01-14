@@ -81,19 +81,18 @@ function lookup_lower_call(codestate::CodeState, args)
     # @show parms
     if fun isa Base.Callable
         callable = fun
-        if callable isa Core.Builtin || callable isa Core.IntrinsicFunction
-            codestate.childstates[codestate.pc][codestate.cc] = callable, nothing
-        else
-            id = module_symbol(callable)
-            intercept = get(codestate.interpstate.intercepts, id, callable)
-            if intercept != callable
-                codestate.childstates[codestate.pc][codestate.cc] = callable, intercept
-            elseif id in codestate.interpstate.passthroughs
-                codestate.childstates[codestate.pc][codestate.cc] = callable, nothing
-            elseif !isassigned(codestate.childstates[codestate.pc], codestate.cc)
+        if callable isa Core.Builtin || callable isa Core.IntrinsicFunction ||
+           Base.moduleroot(parentmodule(callable)) in codestate.interpstate.options.excludes
+            codestate.childstates[codestate.pc][codestate.cc] =
+                callable, nothing
+        elseif haskey(codestate.interpstate.intercepts, callable)
+            intercept = codestate.interpstate.intercepts[callable]
+            return intercept(codestate, parms)
+        elseif Base.moduleroot(parentmodule(callable)) in codestate.interpstate.options.includes
+            if !isassigned(codestate.childstates[codestate.pc], codestate.cc)
                 wt = world_type(callable, parms)
                 codestate.childstates[codestate.pc][codestate.cc] =
-                    callable, code_state_from_call(codestate, wt)
+                        callable, code_state_from_call(codestate, wt)
             elseif codestate.childstates[codestate.pc][codestate.cc][2] isa CodeState
                 childstate = codestate.childstates[codestate.pc][codestate.cc][2]
                 wt = world_type(callable, parms)
@@ -102,27 +101,29 @@ function lookup_lower_call(codestate::CodeState, args)
                         callable, code_state_from_call(codestate, wt)
                 end
             else
-                codestate.childstates[codestate.pc][codestate.cc] = callable, nothing
+                codestate.childstates[codestate.pc][codestate.cc] =
+                    callable, nothing
             end
+        else
+            codestate.childstates[codestate.pc][codestate.cc] =
+                callable, nothing
         end
-        if codestate.childstates[codestate.pc][codestate.cc][2] isa Base.Callable
-            intercept = codestate.childstates[codestate.pc][codestate.cc][2]
-            return intercept(codestate, parms)
-        elseif codestate.childstates[codestate.pc][codestate.cc][2] isa CodeState
-            childstate = codestate.childstates[codestate.pc][codestate.cc][2]
+        if codestate.childstates[codestate.pc][codestate.cc][2] isa CodeState
             if codestate.interpstate.options.budget == 0 ||
                !isassigned(codestate.times, codestate.pc) ||
                codestate.times[codestate.pc] < codestate.interpstate.options.budget
+                childstate = codestate.childstates[codestate.pc][codestate.cc][2]
                 update_code_state(childstate, callable, parms)
                 # childstate.interpstate.options.debug = true
                 try
                     childstate.interpstate.options.debug && @show childstate.src
-                    return run_code_state(childstate)
+                    return interpret_lower(childstate)
                 finally
                     # childstate.interpstate.options.debug = false
                 end
             else
-                codestate.childstates[codestate.pc][codestate.cc] = callable, nothing
+                codestate.childstates[codestate.pc][codestate.cc] =
+                    callable, nothing
             end
         end
     end
@@ -259,7 +260,8 @@ end
 function lookup_lower_thunk(codestate::CodeState, args)
     codestate.interpstate.options.debug && @show :lookup_lower_thunk args
     mod = moduleof(codestate.mod_or_meth)
-    interpret_lower(codestate.interpstate, mod, args[1]::Core.CodeInfo)
+    codestate = code_state_from_thunk(codestate.interpstate, mod, args[1]::Core.CodeInfo)
+    interpret_lower(codestate)
 end
 
 function isdefined_lower_expr(codestate::CodeState, expr::Expr)
@@ -460,10 +462,10 @@ function prepare_calls(codestate)
     end
 end
 
-function interpret_lower_node(codestate::CodeState, node)
-    @nospecialize node
-    codestate.interpstate.options.debug && @show :interpret_lower_node typeof(node) node
-    try
+function interpret_lower(codestate::CodeState)
+    while true
+        codestate.interpstate.options.debug && @show :interpret_lower codestate.pc codestate.src.code[codestate.pc]
+        node = codestate.src.code[codestate.pc]
         time = time_ns()
         try
             if node isa Core.NewvarNode
@@ -491,33 +493,28 @@ function interpret_lower_node(codestate::CodeState, node)
                 assign_lower(codestate, Core.SSAValue(codestate.pc), val)
                 codestate.pc += 1
             end
-        finally
             if !isassigned(codestate.times, codestate.pc)
                 codestate.times[codestate.pc] = time_ns() - time
             else
                 codestate.times[codestate.pc] += time_ns() - time
+            end 
+        catch
+            exceptions = Compat.current_exceptions()
+            # codestate.interpstate.options.debug && @show :interpret_lower last(exceptions)
+            append!(codestate.interpstate.exceptions, exceptions)
+            if isempty(codestate.handlers)
+                rethrow(pop!(codestate.interpstate.exceptions).exception)
+            else
+                codestate.pc = last(codestate.handlers)
             end
-        end
-    catch
-        exceptions = Compat.current_exceptions()
-        # codestate.interpstate.options.debug && @show :interpret_lower_node last(exceptions)
-        append!(codestate.interpstate.exceptions, exceptions)
-        if isempty(codestate.handlers)
-            rethrow(pop!(codestate.interpstate.exceptions).exception)
-        else
-            codestate.pc = last(codestate.handlers)
+        # TODO: crashes
+        #= finally
+            if !isassigned(codestate.times, codestate.pc)
+                codestate.times[codestate.pc] = time_ns() - time
+            else
+                codestate.times[codestate.pc] += time_ns() - time
+            end =#
         end
     end
-    return nothing
 end
 
-function interpret_lower(interpstate::InterpState, mod::Module, src::Core.CodeInfo)
-    codestate = code_state_from_thunk(interpstate, mod, src)
-    # interpstate.options.debug = true
-    try
-        codestate.interpstate.options.debug && @show :interpret_lower codestate.pc codestate.src
-        return run_code_state(codestate)
-    finally
-        # interpstate.options.debug = false
-    end
-end

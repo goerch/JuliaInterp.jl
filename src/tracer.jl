@@ -5,10 +5,10 @@ function tracer(files)
     home = pwd()
     cd(dir)
     try
-        options = JuliaInterp.options(false, [Core, Base, Random], UInt(0))
         for file in files
             try
                 mod = @eval Main (module IsolatedTests using Base, Test, Random, Distributed, Compat, JuliaInterp; end)
+                options = JuliaInterp.options(false, [Test, mod], [Core, Base, Random], UInt(0))
                 @testset verbose=true begin
                     JuliaInterp.include(mod::Module, file, options)
                 end

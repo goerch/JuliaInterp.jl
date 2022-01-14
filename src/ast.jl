@@ -16,7 +16,8 @@ function eval_lower_ast(interpstate::InterpState, mod, expr)
     try
         lwr = Meta.lower(mod, expr)::Expr
         if lwr.head == :thunk
-            ans = interpret_lower(interpstate, mod, lwr.args[1]::Core.CodeInfo)
+            codestate = code_state_from_thunk(interpstate, mod, lwr.args[1]::Core.CodeInfo)
+            ans = interpret_lower(codestate)
         else
             @show lwr mod expr
             # ans = Core.eval(mod, expr)

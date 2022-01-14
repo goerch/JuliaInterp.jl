@@ -90,32 +90,15 @@ function _eval(codestate, parms)
     return ans
 end
 
-function intrinsics()
-    ((Core, name) for name in names(Core.Intrinsics; all=true)
-        if isdefined(Core.Intrinsics, name) &&
-           getfield(Core.Intrinsics, name) isa Core.IntrinsicFunction)
-end
-
-function builtins()
-    ((Core, name) for name in names(Core; all=true)
-        if isdefined(Core, name) &&
-           getfield(Core, name) isa Core.Builtin)
-end
-
-function callables(mod)
-    ((mod, name) for name in names(mod; all=true)
-        if isdefined(mod, name) &&
-           getfield(mod, name) isa Base.Callable)
-end
-
 struct InterpOptions
     debug::Bool
+    includes::Vector{Module}
     excludes::Vector{Module}
     budget::UInt
 end
 
-function options(debug, excludes, budget)
-    InterpOptions(debug, excludes, budget)
+function options(debug, includes, excludes, budget)
+    InterpOptions(debug, includes, excludes, budget)
 end
 
 const Callsite = Union{Ptr{Nothing}, Base.InterpreterIP}
@@ -125,20 +108,12 @@ const ModuleOrMethod = Union{Module, Method}
 moduleof(meth::Method) = meth.module
 moduleof(mod::Module) = mod
 
-const ModuleSymbol = Tuple{Module, Symbol}
-
-function module_symbol(callable::Base.Callable)::ModuleSymbol
-    @nospecialize callable
-    (parentmodule(callable), nameof(callable))
-end
-
 const WorldType = Tuple{UInt, Type}
 
 typeof_lower(type::Type) = Type{type}
 typeof_lower(val) = typeof(val)
 
-function world_type(callable::Base.Callable, parms)::WorldType
-    @nospecialize callable
+function world_type(callable, parms)
     wc = Base.get_world_counter()
     t = Base.to_tuple_type(typeof_lower.(parms))
     tt = Base.signature_type(callable, t)
@@ -177,44 +152,38 @@ end
 mutable struct InterpState
     options::InterpOptions
     wc::UInt
-    intercepts::Dict{ModuleSymbol, Base.Callable}
-    passthroughs::Set{ModuleSymbol}
+    intercepts::Dict{Base.Callable, Base.Callable}
     meths::Dict{WorldType, Tuple{Method, Core.SimpleVector, Core.CodeInfo}}
     exceptions::Vector{NamedTuple{(:exception, :backtrace), Tuple{Any, Vector{<:Callsite}}}}
     iolock::Bool
     sigatomic::Bool
 end
 
-Base.stacktrace
-
 function interp_state(mod, options)
     wc = Base.get_world_counter()
-    interpstate = InterpState(options, wc, Dict(), Set(), Dict(), [], false, false)
+    interpstate = InterpState(options, wc, Dict(), Dict(), [], false, false)
     @static if !isdefined(Base, :current_exceptions)
-        interpstate.intercepts[(Base, :catch_stack)] = _current_exceptions
+        interpstate.intercepts[Base.catch_stack] = _current_exceptions
     else
-        interpstate.intercepts[(Base, :current_exceptions)] = _current_exceptions
+        interpstate.intercepts[Base.current_exceptions] = _current_exceptions
     end
-    interpstate.intercepts[(Base, :catch_backtrace)] = _catch_backtrace
-    interpstate.intercepts[(Base, :rethrow)] = _rethrow
-    interpstate.intercepts[(Base, :iolock_begin)] = _iolock_begin
-    interpstate.intercepts[(Base, :iolock_end)] = _iolock_end
-    interpstate.intercepts[(Base, :sigatomic_begin)] = _sigatomic_begin
-    interpstate.intercepts[(Base, :sigatomic_end)] = _sigatomic_end
-    interpstate.intercepts[(Core, :llvmcall)] = _llvmcall
-    # interpstate.intercepts[(Core, :eval)] = _eval
-    # interpstate.intercepts[(Base, :eval)] = _eval
-    # interpstate.intercepts[(mod, :eval)] = _eval
+    interpstate.intercepts[Base.catch_backtrace] = _catch_backtrace
+    interpstate.intercepts[Base.rethrow] = _rethrow
+    interpstate.intercepts[Base.iolock_begin] = _iolock_begin
+    interpstate.intercepts[Base.iolock_end] = _iolock_end
+    interpstate.intercepts[Base.sigatomic_begin] = _sigatomic_begin
+    interpstate.intercepts[Base.sigatomic_end] = _sigatomic_end
+    interpstate.intercepts[Core.Intrinsics.llvmcall] = _llvmcall
+    # interpstate.intercepts[Core.eval] = _eval
+    # interpstate.intercepts[Base.eval] = _eval
+    # interpstate.intercepts[mod.eval] = _eval
     # union!(interpstate.passthroughs, intrinsics())
     # union!(interpstate.passthroughs, builtins())
-    push!(interpstate.passthroughs, (Core, :eval))
-    push!(interpstate.passthroughs, (Base, :eval))
-    push!(interpstate.passthroughs, (mod, :eval))
-    push!(interpstate.passthroughs, (Base, :lock))
-    push!(interpstate.passthroughs, (Base, :unlock))
-    for mod in options.excludes
-        union!(interpstate.passthroughs, callables(mod))
-    end
+    #= push!(interpstate.passthroughs, Core.eval)
+    push!(interpstate.passthroughs, Base.eval)
+    push!(interpstate.passthroughs, getfield(mod, :eval))
+    push!(interpstate.passthroughs, Base.lock)
+    push!(interpstate.passthroughs, Base.unlock) =#
     interpstate
 end
 
@@ -227,13 +196,13 @@ mutable struct CodeState
     pc::Int
     cc::Int
     ssavalues::Vector{Any}
-    childstates::Vector{Vector{Tuple{Base.Callable, Union{Nothing, Base.Callable, CodeState}}}}
+    childstates::Vector{Vector{Tuple{Base.Callable, Union{Nothing, CodeState}}}}
     times::Vector{UInt}
     slots::Vector{Any}
     handlers::Vector{Int}
 end
 
-const ChildState = Tuple{Base.Callable, Union{Nothing, Base.Callable, CodeState}}
+const ChildState = Tuple{Base.Callable, Union{Nothing, CodeState}}
 
 function code_state_from_thunk(interpstate, mod, src)
     # @show :code_state_from_thunk
@@ -250,11 +219,9 @@ end
 generate_lower(codestate, expr::Expr) = Meta.lower(moduleof(codestate.mod_or_meth), expr)
 generate_lower(codestate, val) = val
 
-function code_state_from_call(codestate::CodeState, wt::WorldType)
-    @nospecialize wt
+function code_state_from_call(codestate::CodeState, wt)
     # @show :code_state_from_call
-    meth, sparam_vals, src = get(codestate.interpstate.meths, wt, (nothing, nothing, nothing))
-    if meth === nothing
+    if !haskey(codestate.interpstate.meths, wt)
         @static if VERSION >= v"1.8.0-DEV"
             match = _which(wt)
             if match === nothing
@@ -294,6 +261,8 @@ function code_state_from_call(codestate::CodeState, wt::WorldType)
             end
         end
         codestate.interpstate.meths[wt] = (meth, sparam_vals, src)
+    else
+        meth, sparam_vals, src = codestate.interpstate.meths[wt]
     end
     CodeState(codestate.interpstate, wt, meth, sparam_vals, src, 1, 1,
         Vector{Any}(undef, length(src.code)),
@@ -303,8 +272,7 @@ function code_state_from_call(codestate::CodeState, wt::WorldType)
         Int[])
 end
 
-function update_code_state(codestate::CodeState, callable::Base.Callable, parms)
-    @nospecialize callable
+function update_code_state(codestate::CodeState, callable, parms)
     codestate.pc = 1
     codestate.ssavalues = Vector{Any}(undef, length(codestate.src.code))
     # codestate.times = Vector{UInt}(undef, length(codestate.src.code))
@@ -320,15 +288,4 @@ function update_code_state(codestate::CodeState, callable::Base.Callable, parms)
         codestate.slots[meth.nargs] = (parms[meth.nargs - 1:end]...,)
     end
     codestate
-end
-
-function run_code_state(codestate::CodeState)
-    while true
-        codestate.interpstate.options.debug && @show :run_code_state codestate.pc codestate.src.code[codestate.pc]
-        node = codestate.src.code[codestate.pc]
-        ans = interpret_lower_node(codestate, node)
-        if node isa Core.ReturnNode
-            return ans
-        end
-    end
 end
