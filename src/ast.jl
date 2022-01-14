@@ -95,18 +95,18 @@ function interpret_ast_let(interpstate::InterpState, mod, args)
 end
 function interpret_ast_block(interpstate::InterpState, mod, args)
     interpstate.options.debug && @show mod :block args
-    local lnn
+    local linenumbernode
     try
         local ans
         for arg in args
             ans = interpret_ast_node(interpstate, mod, arg)
             if ans isa LineNumberNode
-                lnn = ans
+                linenumbernode = ans
             end
         end
         ans            
     catch 
-        @show lnn
+        @show linenumbernode
         rethrow()
     end
 end
@@ -191,18 +191,18 @@ function interpret_ast_incomplete(interpstate, mod, args)
 end
 function interpret_ast_toplevel(interpstate::InterpState, mod, args)
     interpstate.options.debug && @show mod :toplevel args
-    local lnn
+    local linenumbernode
     try
         local ans
         for arg in args
             ans = interpret_ast_node(interpstate, mod, arg)
             if ans isa LineNumberNode
-                lnn = ans
+                linenumbernode = ans
             end
         end
         ans            
     catch 
-        @show lnn
+        @show linenumbernode
         rethrow()
     end
 end
@@ -290,8 +290,8 @@ function interpret_ast_node(interpstate::InterpState, mod, node)
         symbol = node
         eval_ast(interpstate, mod, symbol)
     elseif node isa LineNumberNode
-        lnn = node
-        lnn
+        linenumbernode = node
+        linenumbernode
     else
         @show typeof(node) node
         @assert false

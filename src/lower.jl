@@ -1,3 +1,5 @@
+quote_all(val) = QuoteNode(val)
+
 function lookup_lower_boundscheck(codestate::CodeState, args)
     # @show :boundscheck args
     true
@@ -44,8 +46,6 @@ function lookup_lower_isdefined(codestate::CodeState, args)
     isdefined_lower(codestate, args[1])
 end
 
-quote_all(val) = QuoteNode(val)
-
 function lookup_lower_new(codestate::CodeState, args)
     # @show :new args
     type = quote_all(lookup_lower(codestate, args[1]))
@@ -79,8 +79,8 @@ function lookup_lower_call(codestate::CodeState, args)
     # parms = ((lookup_lower(codestate, arg) for arg in @view args[2:end])...,)
     parms = Any[lookup_lower(codestate, arg) for arg in @view args[2:end]]
     # @show parms
-    if fun isa Base.Callable 
-        callable = fun::Base.Callable
+    if fun isa Base.Callable
+        callable = fun
         if callable isa Core.Builtin || callable isa Core.IntrinsicFunction
             codestate.childstates[codestate.pc][codestate.cc] = callable, nothing
         else
@@ -92,22 +92,26 @@ function lookup_lower_call(codestate::CodeState, args)
                 codestate.childstates[codestate.pc][codestate.cc] = callable, nothing
             elseif !isassigned(codestate.childstates[codestate.pc], codestate.cc)
                 wt = world_type(callable, parms)
-                codestate.childstates[codestate.pc][codestate.cc] = callable, code_state_from_call(codestate, wt)
-            elseif codestate.childstates[codestate.pc][codestate.cc][1] isa CodeState
+                codestate.childstates[codestate.pc][codestate.cc] =
+                    callable, code_state_from_call(codestate, wt)
+            elseif codestate.childstates[codestate.pc][codestate.cc][2] isa CodeState
                 wt = world_type(callable, parms)
                 if wt != codestate.wt
-                    codestate.childstates[codestate.pc][codestate.cc] = callable, code_state_from_call(codestate, wt)
+                    codestate.childstates[codestate.pc][codestate.cc] =
+                        callable, code_state_from_call(codestate, wt)
                 end
+            else
+                codestate.childstates[codestate.pc][codestate.cc] = callable, nothing
             end
         end
         if codestate.childstates[codestate.pc][codestate.cc][2] isa Base.Callable
             intercept = codestate.childstates[codestate.pc][codestate.cc][2]
             return intercept(codestate, parms)
         elseif codestate.childstates[codestate.pc][codestate.cc][2] isa CodeState
+            childstate = codestate.childstates[codestate.pc][codestate.cc][2]
             if codestate.interpstate.options.budget == 0 ||
                !isassigned(codestate.times, codestate.pc) ||
                codestate.times[codestate.pc] < codestate.interpstate.options.budget
-                childstate = codestate.childstates[codestate.pc][codestate.cc][2]
                 update_code_state(childstate, callable, parms)
                 # childstate.interpstate.options.debug = true
                 try
@@ -205,7 +209,7 @@ function lookup_lower_method(codestate::CodeState, args)
 end
 function lookup_lower_copyast(codestate::CodeState, args)
     val = lookup_lower(codestate, args[1])
-    if val isa Expr 
+    if val isa Expr
         expr = val
         copy(expr)
     else
@@ -493,7 +497,7 @@ function interpret_lower_node(codestate::CodeState, node)
                 codestate.times[codestate.pc] += time_ns() - time
             end
         end
-    catch 
+    catch
         exceptions = Compat.current_exceptions()
         # codestate.interpstate.options.debug && @show :interpret_lower_node last(exceptions)
         append!(codestate.interpstate.exceptions, exceptions)

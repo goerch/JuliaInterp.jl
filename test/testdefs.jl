@@ -23,7 +23,7 @@ function runtests(name, path, isolate=true; seed=nothing)
             seed !== nothing && Random.seed!(seed)
             # Base.include(m, "$path.jl")
             println("Begin interpreting $path.jl")
-            options = JuliaInterp.options(false, [Core, Base, Random], UInt(1_000))
+            options = JuliaInterp.options(false, [Core, Base, Random], UInt(0))
             JuliaInterp.include(m, "$path.jl", options)
             println("End interpreting $path.jl")
         end

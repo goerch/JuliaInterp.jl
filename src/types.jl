@@ -118,6 +118,8 @@ function options(debug, excludes, budget)
     InterpOptions(debug, excludes, budget)
 end
 
+const Callsite = Union{Ptr{Nothing}, Base.InterpreterIP}
+
 const ModuleOrMethod = Union{Module, Method}
 
 moduleof(meth::Method) = meth.module
@@ -125,8 +127,8 @@ moduleof(mod::Module) = mod
 
 const ModuleSymbol = Tuple{Module, Symbol}
 
-function module_symbol(callable::Base.Callable)
-    # @nospecialize callable
+function module_symbol(callable::Base.Callable)::ModuleSymbol
+    @nospecialize callable
     (parentmodule(callable), nameof(callable))
 end
 
@@ -135,8 +137,8 @@ const WorldType = Tuple{UInt, Type}
 typeof_lower(type::Type) = Type{type}
 typeof_lower(val) = typeof(val)
 
-function world_type(callable::Base.Callable, parms::Vector{Any})
-    # @nospecialize callable
+function world_type(callable::Base.Callable, parms::Vector{Any})::WorldType
+    @nospecialize callable
     wc = Base.get_world_counter()
     t = Base.to_tuple_type(typeof_lower.(parms))
     tt = Base.signature_type(callable, t)
@@ -178,10 +180,12 @@ mutable struct InterpState
     intercepts::Dict{ModuleSymbol, Base.Callable}
     passthroughs::Set{ModuleSymbol}
     meths::Dict{WorldType, Tuple{Method, Core.SimpleVector, Core.CodeInfo}}
-    exceptions::Vector{NamedTuple{(:exception, :backtrace), Tuple{Any, Vector{Union{Ptr{Nothing}, Base.InterpreterIP}}}}}
+    exceptions::Vector{NamedTuple{(:exception, :backtrace), Tuple{Any, Vector{<:Callsite}}}}
     iolock::Bool
     sigatomic::Bool
 end
+
+Base.stacktrace
 
 function interp_state(mod, options)
     wc = Base.get_world_counter()
@@ -247,7 +251,7 @@ generate_lower(codestate, expr::Expr) = Meta.lower(moduleof(codestate.mod_or_met
 generate_lower(codestate, val) = val
 
 function code_state_from_call(codestate::CodeState, wt::WorldType)
-    # @nospecialize wt
+    @nospecialize wt
     # @show :code_state_from_call
     meth, sparam_vals, src = get(codestate.interpstate.meths, wt, (nothing, nothing, nothing))
     if meth === nothing
@@ -300,7 +304,7 @@ function code_state_from_call(codestate::CodeState, wt::WorldType)
 end
 
 function update_code_state(codestate::CodeState, callable::Base.Callable, parms::Vector{Any})
-    # @nospecialize callable 
+    @nospecialize callable
     codestate.pc = 1
     codestate.ssavalues = Vector{Any}(undef, length(codestate.src.code))
     # codestate.times = Vector{UInt}(undef, length(codestate.src.code))

@@ -5,7 +5,7 @@ function tracer(files)
     home = pwd()
     cd(dir)
     try
-        options = JuliaInterp.options(false, [Core, Base, Random], UInt(1_000))
+        options = JuliaInterp.options(false, [Core, Base, Random], UInt(0))
         for file in files
             try
                 mod = @eval Main (module IsolatedTests using Base, Test, Random, Distributed, Compat, JuliaInterp; end)
