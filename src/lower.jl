@@ -71,6 +71,52 @@ function lookup_lower_splatnew(codestate::CodeState, args)
     eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth),
         Expr(:splatnew, type, parms...))
 end
+function rootmodule(mod::Module)
+    ans = mod
+    parent = parentmodule(mod)
+    while parent != mod
+        ans = mod
+        mod = parent
+        parent = parentmodule(mod)
+    end
+    ans
+end
+function rootmodule(callable::Base.Callable)
+    @nospecialize callable
+    parent = parentmodule(callable)::Module
+    rootmodule(parent)
+end
+function clear_child_state(codestate::CodeState, callable)
+    @nospecialize callable
+    codestate.childstates[codestate.pc][codestate.cc] =
+        callable, nothing
+end
+function set_child_state(codestate::CodeState, callable, parms)
+    @nospecialize callable
+    if !isassigned(codestate.childstates[codestate.pc], codestate.cc)
+        wt = world_type(callable, parms)
+        childstate = code_state_from_call(codestate, wt)
+        codestate.childstates[codestate.pc][codestate.cc] = callable, childstate
+        childstate
+    else
+        prev_callable, prev_childstate = codestate.childstates[codestate.pc][codestate.cc]
+        if prev_childstate isa CodeState
+            wt = world_type(callable, parms)
+            if wt != prev_childstate.wt
+                childstate = code_state_from_call(codestate, wt)
+                codestate.childstates[codestate.pc][codestate.cc] = callable, childstate
+                childstate
+            else
+                prev_childstate
+            end  
+        else
+            wt = world_type(callable, parms)
+            childstate = code_state_from_call(codestate, wt)
+            codestate.childstates[codestate.pc][codestate.cc] = callable, childstate
+            childstate
+        end 
+    end
+end
 function lookup_lower_call(codestate::CodeState, args)
     # @nospecialize args
     # @show :call args
@@ -81,50 +127,31 @@ function lookup_lower_call(codestate::CodeState, args)
     # @show parms
     if fun isa Base.Callable
         callable = fun
-        if callable isa Core.Builtin || callable isa Core.IntrinsicFunction ||
-           Base.moduleroot(parentmodule(callable)) in codestate.interpstate.options.excludes
-            codestate.childstates[codestate.pc][codestate.cc] =
-                callable, nothing
+        root = rootmodule(callable)
+        if callable isa Core.Builtin || callable isa Core.IntrinsicFunction 
+            clear_child_state(codestate, callable)
         elseif haskey(codestate.interpstate.intercepts, callable)
+            clear_child_state(codestate, callable)
             intercept = codestate.interpstate.intercepts[callable]
             return intercept(codestate, parms)
-        elseif Base.moduleroot(parentmodule(callable)) in codestate.interpstate.options.includes
-            if !isassigned(codestate.childstates[codestate.pc], codestate.cc)
-                wt = world_type(callable, parms)
-                codestate.childstates[codestate.pc][codestate.cc] =
-                        callable, code_state_from_call(codestate, wt)
-            elseif codestate.childstates[codestate.pc][codestate.cc][2] isa CodeState
-                childstate = codestate.childstates[codestate.pc][codestate.cc][2]
-                wt = world_type(callable, parms)
-                if wt != childstate.wt
-                    codestate.childstates[codestate.pc][codestate.cc] =
-                        callable, code_state_from_call(codestate, wt)
-                end
-            else
-                codestate.childstates[codestate.pc][codestate.cc] =
-                    callable, nothing
-            end
-        else
-            codestate.childstates[codestate.pc][codestate.cc] =
-                callable, nothing
-        end
-        if codestate.childstates[codestate.pc][codestate.cc][2] isa CodeState
-            if codestate.interpstate.options.budget == 0 ||
-               !isassigned(codestate.times, codestate.pc) ||
-               codestate.times[codestate.pc] < codestate.interpstate.options.budget
-                childstate = codestate.childstates[codestate.pc][codestate.cc][2]
+        elseif root in codestate.interpstate.options.modules
+            childstate = set_child_state(codestate, callable, parms)
+            if childstate isa CodeState
                 update_code_state(childstate, callable, parms)
-                # childstate.interpstate.options.debug = true
-                try
-                    childstate.interpstate.options.debug && @show childstate.src
-                    return interpret_lower(childstate)
-                finally
-                    # childstate.interpstate.options.debug = false
-                end
-            else
-                codestate.childstates[codestate.pc][codestate.cc] =
-                    callable, nothing
+                return interpret_lower(childstate)
             end
+        elseif root in codestate.interpstate.options.limiteds && check_code_statistics(codestate)
+            childstate = set_child_state(codestate, callable, parms)
+            if childstate isa CodeState
+                if check_interp_statistics(codestate.interpstate, childstate.mod_or_meth)
+                    update_code_state(childstate, callable, parms)
+                    return interpret_lower(childstate)
+                else
+                    clear_child_state(codestate, callable)
+                end
+            end    
+        else
+            clear_child_state(codestate, callable)
         end
     end
     # eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth),
@@ -462,59 +489,61 @@ function prepare_calls(codestate)
     end
 end
 
-function interpret_lower(codestate::CodeState)
-    while true
-        codestate.interpstate.options.debug && @show :interpret_lower codestate.pc codestate.src.code[codestate.pc]
-        node = codestate.src.code[codestate.pc]
-        time = time_ns()
-        try
-            if node isa Core.NewvarNode
-                newvarnode = node
-                # @assert !isassigned(codestate.slots, newvarnode.slot.id)
+function interpret_lower_node(codestate::CodeState, node)
+    codestate.interpstate.options.debug && @show :interpret_lower codestate.pc codestate.src.code[codestate.pc]
+    time = time_ns()
+    try
+        if node isa Core.NewvarNode
+            newvarnode = node
+            # @assert !isassigned(codestate.slots, newvarnode.slot.id)
+            codestate.pc += 1
+        elseif node isa Core.ReturnNode
+            returnnode = node
+            prepare_calls(codestate)
+            return lookup_lower(codestate, returnnode.val)
+        elseif node isa Core.GotoIfNot
+            gotoifnot = node
+            prepare_calls(codestate)
+            if lookup_lower(codestate, gotoifnot.cond)
                 codestate.pc += 1
-            elseif node isa Core.ReturnNode
-                returnnode = node
-                prepare_calls(codestate)
-                return lookup_lower(codestate, returnnode.val)
-            elseif node isa Core.GotoIfNot
-                gotoifnot = node
-                prepare_calls(codestate)
-                if lookup_lower(codestate, gotoifnot.cond)
-                    codestate.pc += 1
-                else
-                    codestate.pc = gotoifnot.dest
-                end
-            elseif node isa Core.GotoNode
-                gotonode = node
-                codestate.pc = gotonode.label
             else
-                prepare_calls(codestate)
-                val = lookup_lower(codestate, node)
-                assign_lower(codestate, Core.SSAValue(codestate.pc), val)
-                codestate.pc += 1
+                codestate.pc = gotoifnot.dest
             end
-            if !isassigned(codestate.times, codestate.pc)
-                codestate.times[codestate.pc] = time_ns() - time
-            else
-                codestate.times[codestate.pc] += time_ns() - time
-            end 
-        catch
-            exceptions = Compat.current_exceptions()
-            # codestate.interpstate.options.debug && @show :interpret_lower last(exceptions)
-            append!(codestate.interpstate.exceptions, exceptions)
-            if isempty(codestate.handlers)
-                rethrow(pop!(codestate.interpstate.exceptions).exception)
-            else
-                codestate.pc = last(codestate.handlers)
-            end
-        # TODO: crashes
-        #= finally
-            if !isassigned(codestate.times, codestate.pc)
-                codestate.times[codestate.pc] = time_ns() - time
-            else
-                codestate.times[codestate.pc] += time_ns() - time
-            end =#
+        elseif node isa Core.GotoNode
+            gotonode = node
+            codestate.pc = gotonode.label
+        else
+            prepare_calls(codestate)
+            val = lookup_lower(codestate, node)
+            assign_lower(codestate, Core.SSAValue(codestate.pc), val)
+            codestate.pc += 1
         end
+    catch
+        exceptions = Compat.current_exceptions()
+        # codestate.interpstate.options.debug && @show :interpret_lower last(exceptions)
+        append!(codestate.interpstate.exceptions, exceptions)
+        if isempty(codestate.handlers)
+            rethrow(pop!(codestate.interpstate.exceptions).exception)
+        else
+            codestate.pc = last(codestate.handlers)
+        end
+    finally
+        update_code_statistics(codestate, time_ns() - time)
     end
 end
 
+function interpret_lower(codestate::CodeState)
+    codestate.interpstate.options.debug && @show :interpret_lower codestate.pc codestate.src
+    time = time_ns()
+    try
+        while true
+            node = codestate.src.code[codestate.pc]
+            ans = interpret_lower_node(codestate, node)
+            if node isa Core.ReturnNode
+                return ans
+            end
+        end
+    finally
+        update_interp_statistics(codestate.interpstate, codestate.mod_or_meth, time_ns() - time)
+    end
+end

@@ -3,7 +3,7 @@ using BenchmarkTools
 
 const SUITE = BenchmarkGroup()
 
-options = JuliaInterp.options(false, [@__MODULE__], [], UInt(0))
+options = JuliaInterp.options(false, false, [@__MODULE__], [], UInt(0))
 
 # Recursively call itself
 f(i, j) = i == 0 ? j : f(i - 1, j + 1)

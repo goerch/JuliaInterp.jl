@@ -92,13 +92,14 @@ end
 
 struct InterpOptions
     debug::Bool
-    includes::Vector{Module}
-    excludes::Vector{Module}
+    stats::Bool
+    modules::Vector{Module}
+    limiteds::Vector{Module}
     budget::UInt
 end
 
-function options(debug, includes, excludes, budget)
-    InterpOptions(debug, includes, excludes, budget)
+function options(debug, stats, modules, limiteds, budget)
+    InterpOptions(debug, stats, modules, limiteds, budget)
 end
 
 const Callsite = Union{Ptr{Nothing}, Base.InterpreterIP}
@@ -114,6 +115,7 @@ typeof_lower(type::Type) = Type{type}
 typeof_lower(val) = typeof(val)
 
 function world_type(callable, parms)
+    # @nospecialize callable
     wc = Base.get_world_counter()
     t = Base.to_tuple_type(typeof_lower.(parms))
     tt = Base.signature_type(callable, t)
@@ -149,11 +151,17 @@ function _which(wt)
     end
 end
 
+mutable struct Statistics
+    calls::UInt
+    elapsed::UInt
+end
+
 mutable struct InterpState
     options::InterpOptions
     wc::UInt
     intercepts::Dict{Base.Callable, Base.Callable}
     meths::Dict{WorldType, Tuple{Method, Core.SimpleVector, Core.CodeInfo}}
+    stats::Dict{ModuleOrMethod, Statistics}
     exceptions::Vector{NamedTuple{(:exception, :backtrace), Tuple{Any, Vector{<:Callsite}}}}
     iolock::Bool
     sigatomic::Bool
@@ -161,7 +169,7 @@ end
 
 function interp_state(mod, options)
     wc = Base.get_world_counter()
-    interpstate = InterpState(options, wc, Dict(), Dict(), [], false, false)
+    interpstate = InterpState(options, wc, Dict(), Dict(), Dict(), [], false, false)
     @static if !isdefined(Base, :current_exceptions)
         interpstate.intercepts[Base.catch_stack] = _current_exceptions
     else
@@ -187,6 +195,22 @@ function interp_state(mod, options)
     interpstate
 end
 
+function update_interp_statistics(interpstate::InterpState, mod_or_meth, time)
+    if !haskey(interpstate.stats, mod_or_meth)
+        interpstate.stats[mod_or_meth] = Statistics(UInt(1), time)
+    else
+        interpstate.stats[mod_or_meth].calls += UInt(1)
+        interpstate.stats[mod_or_meth].elapsed += time
+    end
+end
+
+function check_interp_statistics(interpstate::InterpState, mod_or_meth)
+    interpstate.options.budget == 0 ||
+    !haskey(interpstate.stats, mod_or_meth) ||
+    interpstate.stats[mod_or_meth].elapsed < interpstate.options.budget
+end
+
+
 mutable struct CodeState
     interpstate::InterpState
     wt::WorldType
@@ -197,7 +221,7 @@ mutable struct CodeState
     cc::Int
     ssavalues::Vector{Any}
     childstates::Vector{Vector{Tuple{Base.Callable, Union{Nothing, CodeState}}}}
-    times::Vector{UInt}
+    childstats::Vector{Statistics}
     slots::Vector{Any}
     handlers::Vector{Int}
 end
@@ -211,21 +235,22 @@ function code_state_from_thunk(interpstate, mod, src)
     CodeState(interpstate, (wc, Nothing), mod, Core.svec(), src, 1, 1,
         Vector{Any}(undef, length(src.code)),
         Vector{Vector{ChildState}}(undef, length(src.code)),
-        Vector{UInt}(undef, length(src.code)),
+        Vector{Statistics}(undef, length(src.code)),
         Vector{Any}(undef, length(src.slotnames)),
         Int[])
 end
 
-generate_lower(codestate, expr::Expr) = Meta.lower(moduleof(codestate.mod_or_meth), expr)
-generate_lower(codestate, val) = val
+generate_lower(codestate::CodeState, expr::Expr) = Meta.lower(moduleof(codestate.mod_or_meth), expr)
+generate_lower(codestate::CodeState, val) = val
 
 function code_state_from_call(codestate::CodeState, wt)
+    # @nospecialize wt
     # @show :code_state_from_call
     if !haskey(codestate.interpstate.meths, wt)
         @static if VERSION >= v"1.8.0-DEV"
             match = _which(wt)
-            if match === nothing
-                @show :code_state_from_call wt
+            if match === nothing 
+                @show :code_state_from_call wt match
                 return nothing
             end
             meth = match.method
@@ -233,8 +258,8 @@ function code_state_from_call(codestate::CodeState, wt)
             sparam_vals = mi.sparam_vals
         else
             meth = _which(wt)
-            if meth === nothing
-                @show :code_state_from_call wt
+            if meth === nothing 
+                @show :code_state_from_call wt meth
                 return nothing
             end
             (ti, sparam_vals) = ccall(:jl_type_intersection_with_env, Any, (Any, Any), wt[2], meth.sig)
@@ -267,15 +292,16 @@ function code_state_from_call(codestate::CodeState, wt)
     CodeState(codestate.interpstate, wt, meth, sparam_vals, src, 1, 1,
         Vector{Any}(undef, length(src.code)),
         Vector{Vector{ChildState}}(undef, length(src.code)),
-        Vector{UInt}(undef, length(src.code)),
+        Vector{Statistics}(undef, length(src.code)),
         Vector{Any}(undef, length(src.slotnames)),
         Int[])
 end
 
 function update_code_state(codestate::CodeState, callable, parms)
+    # @nospecialize callable
     codestate.pc = 1
     codestate.ssavalues = Vector{Any}(undef, length(codestate.src.code))
-    # codestate.times = Vector{UInt}(undef, length(codestate.src.code))
+    # codestate.childstats = Vector{Statistics}(undef, length(codestate.src.code))
     codestate.slots = Vector{Any}(undef, length(codestate.src.slotnames))
     empty!(codestate.handlers)
     meth = codestate.mod_or_meth::Method
@@ -289,3 +315,19 @@ function update_code_state(codestate::CodeState, callable, parms)
     end
     codestate
 end
+
+function update_code_statistics(codestate::CodeState, time)
+    if !isassigned(codestate.childstats, codestate.pc)
+        codestate.childstats[codestate.pc] = Statistics(UInt(1), time)
+    else
+        codestate.childstats[codestate.pc].calls += UInt(1)
+        codestate.childstats[codestate.pc].elapsed += time
+    end
+end
+
+function check_code_statistics(codestate::CodeState)
+    codestate.interpstate.options.budget == 0 ||
+    !isassigned(codestate.childstats, codestate.pc) ||
+    codestate.childstats[codestate.pc].elapsed < codestate.interpstate.options.budget
+end
+

@@ -301,5 +301,16 @@ end
 
 function interpret_ast(mod, expr, options)
     interpstate = interp_state(mod, options)
-    interpret_ast_node(interpstate, mod, expr)
+    try
+        interpret_ast_node(interpstate, mod, expr)
+    finally
+        #= for (wt, (meth, sparam_vals, src)) in interpstate.meths
+            @show wt meth sparam_vals
+        end =#
+        if interpstate.options.stats
+            for (mod_or_meth, stats) in sort(collect(interpstate.stats), by=kv -> kv[2].elapsed)
+                @show mod_or_meth Int(stats.calls) Int(stats.elapsed)
+            end 
+        end
+    end
 end
