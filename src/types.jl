@@ -61,7 +61,7 @@ function _sigatomic_end(codestate, parms)
     return nothing
 end
 function _llvmcall(codestate, parms)
-    @show :_llvmcall parms
+    # @show :_llvmcall parms
     funname = gensym("llvmcall")
     argnames = ((Symbol(:(_), i) for i = 1:length(parms) - 3)...,)
     ir = parms[1]
@@ -115,7 +115,6 @@ typeof_lower(type::Type) = Type{type}
 typeof_lower(val) = typeof(val)
 
 function world_type(callable, parms)
-    # @nospecialize callable
     wc = Base.get_world_counter()
     t = Base.to_tuple_type(typeof_lower.(parms))
     tt = Base.signature_type(callable, t)
@@ -181,6 +180,7 @@ function interp_state(mod, options)
     interpstate.intercepts[Base.iolock_end] = _iolock_end
     interpstate.intercepts[Base.sigatomic_begin] = _sigatomic_begin
     interpstate.intercepts[Base.sigatomic_end] = _sigatomic_end
+    interpstate.intercepts[Base.llvmcall] = _llvmcall
     interpstate.intercepts[Core.Intrinsics.llvmcall] = _llvmcall
     # interpstate.intercepts[Core.eval] = _eval
     # interpstate.intercepts[Base.eval] = _eval
@@ -231,7 +231,6 @@ const ChildState = Tuple{Base.Callable, Union{Nothing, CodeState}}
 function code_state_from_thunk(interpstate, mod, src)
     # @show :code_state_from_thunk
     wc = Base.get_world_counter()
-    # CodeState(interpstate, wc, mod, [], Core.svec(), src, 1, 1,
     CodeState(interpstate, (wc, Nothing), mod, Core.svec(), src, 1, 1,
         Vector{Any}(undef, length(src.code)),
         Vector{Vector{ChildState}}(undef, length(src.code)),
@@ -244,12 +243,11 @@ generate_lower(codestate::CodeState, expr::Expr) = Meta.lower(moduleof(codestate
 generate_lower(codestate::CodeState, val) = val
 
 function code_state_from_call(codestate::CodeState, wt)
-    # @nospecialize wt
     # @show :code_state_from_call
     if !haskey(codestate.interpstate.meths, wt)
         @static if VERSION >= v"1.8.0-DEV"
             match = _which(wt)
-            if match === nothing 
+            if match === nothing
                 @show :code_state_from_call wt match
                 return nothing
             end
@@ -258,7 +256,7 @@ function code_state_from_call(codestate::CodeState, wt)
             sparam_vals = mi.sparam_vals
         else
             meth = _which(wt)
-            if meth === nothing 
+            if meth === nothing
                 @show :code_state_from_call wt meth
                 return nothing
             end
@@ -298,7 +296,6 @@ function code_state_from_call(codestate::CodeState, wt)
 end
 
 function update_code_state(codestate::CodeState, callable, parms)
-    # @nospecialize callable
     codestate.pc = 1
     codestate.ssavalues = Vector{Any}(undef, length(codestate.src.code))
     # codestate.childstats = Vector{Statistics}(undef, length(codestate.src.code))
@@ -330,4 +327,3 @@ function check_code_statistics(codestate::CodeState)
     !isassigned(codestate.childstats, codestate.pc) ||
     codestate.childstats[codestate.pc].elapsed < codestate.interpstate.options.budget
 end
-

@@ -58,7 +58,12 @@ function lookup_lower_new(codestate::CodeState, args)
 end
 function lookup_lower_new_opaque_closure(codestate::CodeState, args)
     @show :new_opaque_closure args
-    nothing
+    type = quote_all(lookup_lower(codestate, args[1]))
+    @show type typeof(type)
+    parms = Any[quote_all(lookup_lower(codestate, arg)) for arg in @view args[2:end]]
+    @show parms
+    eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth),
+        Expr(:new_opaque_closure, type, parms...))
 end
 function lookup_lower_splatnew(codestate::CodeState, args)
     # @show :splatnew args
@@ -71,6 +76,7 @@ function lookup_lower_splatnew(codestate::CodeState, args)
     eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth),
         Expr(:splatnew, type, parms...))
 end
+
 function rootmodule(mod::Module)
     ans = mod
     parent = parentmodule(mod)
@@ -81,18 +87,15 @@ function rootmodule(mod::Module)
     end
     ans
 end
-function rootmodule(callable::Base.Callable)
-    @nospecialize callable
-    parent = parentmodule(callable)::Module
+function rootmodule(callable)
+    parent = parentmodule(callable)
     rootmodule(parent)
 end
 function clear_child_state(codestate::CodeState, callable)
-    @nospecialize callable
     codestate.childstates[codestate.pc][codestate.cc] =
         callable, nothing
 end
 function set_child_state(codestate::CodeState, callable, parms)
-    @nospecialize callable
     if !isassigned(codestate.childstates[codestate.pc], codestate.cc)
         wt = world_type(callable, parms)
         childstate = code_state_from_call(codestate, wt)
@@ -108,13 +111,62 @@ function set_child_state(codestate::CodeState, callable, parms)
                 childstate
             else
                 prev_childstate
-            end  
+            end
         else
             wt = world_type(callable, parms)
             childstate = code_state_from_call(codestate, wt)
             codestate.childstates[codestate.pc][codestate.cc] = callable, childstate
             childstate
-        end 
+        end
+    end
+end
+function to_intercept(codestate::CodeState, callable)
+    if haskey(codestate.interpstate.intercepts, callable)
+        clear_child_state(codestate, callable)
+        codestate.interpstate.intercepts[callable]
+    else
+        nothing
+    end
+end
+function to_interpret(codestate::CodeState, callable, parms)
+    root = rootmodule(callable)
+    if root in codestate.interpstate.options.modules
+        childstate = set_child_state(codestate, callable, parms)
+        if childstate isa CodeState
+            update_code_state(childstate, callable, parms)
+            return childstate
+        end
+    elseif root in codestate.interpstate.options.limiteds && check_code_statistics(codestate)
+        childstate = set_child_state(codestate, callable, parms)
+        if childstate isa CodeState
+            if check_interp_statistics(codestate.interpstate, childstate.mod_or_meth)
+                update_code_state(childstate, callable, parms)
+                return childstate
+            end
+        end
+    end
+    return nothing
+end
+function lookup_lower_call(codestate::CodeState, callable, parms)
+    if (ans = to_intercept(codestate, callable)) !== nothing
+        intercept = ans::Base.Callable
+        return intercept(codestate, parms)
+    elseif callable isa Core.Builtin || callable isa Core.IntrinsicFunction
+        clear_child_state(codestate, callable)
+    elseif (ans = to_interpret(codestate, callable, parms)) !== nothing
+        childstate = ans::CodeState
+        return interpret_lower(childstate)
+    else
+        clear_child_state(codestate, callable)
+    end
+    # eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth),
+    #   Expr(:call, fun, parms...))
+    if codestate.mod_or_meth isa Module
+        return Base.invokelatest(callable, parms...)
+    else
+        # fun(parms...)
+        # Base.invoke_in_world(codestate.wc, fun, parms...)
+        return Base.invokelatest(callable, parms...)
     end
 end
 function lookup_lower_call(codestate::CodeState, args)
@@ -127,42 +179,11 @@ function lookup_lower_call(codestate::CodeState, args)
     # @show parms
     if fun isa Base.Callable
         callable = fun
-        root = rootmodule(callable)
-        if callable isa Core.Builtin || callable isa Core.IntrinsicFunction 
-            clear_child_state(codestate, callable)
-        elseif haskey(codestate.interpstate.intercepts, callable)
-            clear_child_state(codestate, callable)
-            intercept = codestate.interpstate.intercepts[callable]
-            return intercept(codestate, parms)
-        elseif root in codestate.interpstate.options.modules
-            childstate = set_child_state(codestate, callable, parms)
-            if childstate isa CodeState
-                update_code_state(childstate, callable, parms)
-                return interpret_lower(childstate)
-            end
-        elseif root in codestate.interpstate.options.limiteds && check_code_statistics(codestate)
-            childstate = set_child_state(codestate, callable, parms)
-            if childstate isa CodeState
-                if check_interp_statistics(codestate.interpstate, childstate.mod_or_meth)
-                    update_code_state(childstate, callable, parms)
-                    return interpret_lower(childstate)
-                else
-                    clear_child_state(codestate, callable)
-                end
-            end    
-        else
-            clear_child_state(codestate, callable)
-        end
-    end
-    # eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth),
-    #   Expr(:call, fun, parms...))
-    if codestate.mod_or_meth isa Module
-        Base.invokelatest(fun, parms...)
+        lookup_lower_call(codestate, callable, parms)
     else
-        # fun(parms...)
-        # Base.invoke_in_world(codestate.wc, fun, parms...)
+        @show fun typeof(fun)
         Base.invokelatest(fun, parms...)
-    end
+    end            
 end
 
 function lookup_lower_cfunction(codestate::CodeState, args)
@@ -471,11 +492,11 @@ function assign_lower(codestate::CodeState, var, val)
     elseif var isa Symbol
         symbol = var
         eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth),
-            Expr(:(=), symbol, val))
+            Expr(:(=), symbol, quote_all(val)))
     elseif var isa GlobalRef
         globalref = var
         eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth),
-            Expr(:(=), globalref, val))
+            Expr(:(=), globalref, quote_all(val)))
     else
         @show :assign_lower typeof(var) var val
         @assert false
@@ -490,6 +511,7 @@ function prepare_calls(codestate)
 end
 
 function interpret_lower_node(codestate::CodeState, node)
+    @nospecialize node
     codestate.interpstate.options.debug && @show :interpret_lower codestate.pc codestate.src.code[codestate.pc]
     time = time_ns()
     try
