@@ -266,12 +266,18 @@ function code_state_from_call(codestate::CodeState, wt)
             src = Base.uncompressed_ast(meth)
             # src = Base.uncompressed_ir(meth)
         else
-            generator = meth.generator
-            if codestate.mod_or_meth isa Module
-                expr_or_src = Base.invokelatest(generator, sparam_vals..., generator.argnames...)
-            else
-                # expr_or_src = generator(sparam_vals..., generator.argnames...)
-                expr_or_src = Base.invokelatest(generator, sparam_vals..., generator.argnames...)
+            local expr_or_src
+            try
+                generator = meth.generator
+                if codestate.mod_or_meth isa Module
+                    expr_or_src = Base.invokelatest(generator, sparam_vals..., generator.argnames...)
+                else
+                    # expr_or_src = generator(sparam_vals..., generator.argnames...)
+                    expr_or_src = Base.invokelatest(generator, sparam_vals..., generator.argnames...)
+                end
+            catch exception
+                @show :code_state_from_call exception
+                return nothing
             end
             if expr_or_src isa Core.CodeInfo
                 src = expr_or_src

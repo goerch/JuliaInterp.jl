@@ -181,7 +181,7 @@ function lookup_lower_call(codestate::CodeState, args)
         callable = fun
         lookup_lower_call(codestate, callable, parms)
     else
-        @show fun typeof(fun)
+        # @show fun typeof(fun)
         Base.invokelatest(fun, parms...)
     end            
 end
@@ -542,7 +542,7 @@ function interpret_lower_node(codestate::CodeState, node)
         end
     catch
         exceptions = Compat.current_exceptions()
-        # codestate.interpstate.options.debug && @show :interpret_lower last(exceptions)
+        codestate.interpstate.options.debug && @show :interpret_lower last(exceptions)
         append!(codestate.interpstate.exceptions, exceptions)
         if isempty(codestate.handlers)
             rethrow(pop!(codestate.interpstate.exceptions).exception)
