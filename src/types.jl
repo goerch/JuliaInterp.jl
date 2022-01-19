@@ -117,7 +117,7 @@ typeof_lower(val) = typeof(val)
 function world_type(callable, parms)
     wc = Base.get_world_counter()
     t = Base.to_tuple_type(typeof_lower.(parms))
-    tt = Base.signature_type(callable, t)
+    tt::Type = Base.signature_type(callable, t)
     (wc, tt)
 end
 
@@ -243,6 +243,7 @@ generate_lower(codestate::CodeState, expr::Expr) = Meta.lower(moduleof(codestate
 generate_lower(codestate::CodeState, val) = val
 
 function code_state_from_call(codestate::CodeState, wt)
+    @nospecialize wt
     # @show :code_state_from_call
     if !haskey(codestate.interpstate.meths, wt)
         @static if VERSION >= v"1.8.0-DEV"
@@ -252,8 +253,9 @@ function code_state_from_call(codestate::CodeState, wt)
                 return nothing
             end
             meth = match.method
-            mi = Core.Compiler.specialize_method(match)
-            sparam_vals = mi.sparam_vals
+            # mi = Core.Compiler.specialize_method(match)
+            # sparam_vals = mi.sparam_vals
+            (ti, sparam_vals) = Core.Compiler.normalize_typevars(meth, wt[2], match.sparams)
         else
             meth = _which(wt)
             if meth === nothing

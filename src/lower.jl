@@ -1,4 +1,4 @@
-quote_all(val) = QuoteNode(val)
+quote_lower(val) = Core.Compiler.quoted(val)
 
 function lookup_lower_boundscheck(codestate::CodeState, args)
     # @show :boundscheck args
@@ -48,9 +48,9 @@ end
 
 function lookup_lower_new(codestate::CodeState, args)
     # @show :new args
-    type = quote_all(lookup_lower(codestate, args[1]))
+    type = quote_lower(lookup_lower(codestate, args[1]))
     # @show type typeof(type)
-    parms = Any[quote_all(lookup_lower(codestate, arg)) for arg in @view args[2:end]]
+    parms = Any[quote_lower(lookup_lower(codestate, arg)) for arg in @view args[2:end]]
     # @show parms
     # ccall(:jl_new_structv, Any, (Any, Ptr{Any}, UInt), type, parms, length(parms))
     eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth),
@@ -58,19 +58,19 @@ function lookup_lower_new(codestate::CodeState, args)
 end
 function lookup_lower_new_opaque_closure(codestate::CodeState, args)
     @show :new_opaque_closure args
-    type = quote_all(lookup_lower(codestate, args[1]))
+    type = quote_lower(lookup_lower(codestate, args[1]))
     @show type typeof(type)
-    parms = Any[quote_all(lookup_lower(codestate, arg)) for arg in @view args[2:end]]
+    parms = Any[quote_lower(lookup_lower(codestate, arg)) for arg in @view args[2:end]]
     @show parms
     eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth),
         Expr(:new_opaque_closure, type, parms...))
 end
 function lookup_lower_splatnew(codestate::CodeState, args)
     # @show :splatnew args
-    type = quote_all(lookup_lower(codestate, args[1]))
+    type = quote_lower(lookup_lower(codestate, args[1]))
     # @show type typeof(type)
     # parms = ((lookup_lower(codestate, arg) for arg in @view args[2:end])...,)
-    parms = Any[quote_all(lookup_lower(codestate, arg)) for arg in @view args[2:end]]
+    parms = Any[quote_lower(lookup_lower(codestate, arg)) for arg in @view args[2:end]]
     # @show parms
     # ccall(:jl_new_structt, Any, (Any, Any), type, parms[1])
     eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth),
@@ -88,7 +88,7 @@ function rootmodule(mod::Module)
     ans
 end
 function rootmodule(callable)
-    parent = parentmodule(callable)
+    parent::Module = parentmodule(callable)
     rootmodule(parent)
 end
 function clear_child_state(codestate::CodeState, callable)
@@ -148,13 +148,14 @@ function to_interpret(codestate::CodeState, callable, parms)
     return nothing
 end
 function lookup_lower_call(codestate::CodeState, callable, parms)
+    @nospecialize callable
     if (ans = to_intercept(codestate, callable)) !== nothing
-        intercept = ans::Base.Callable
+        intercept::Base.Callable = ans
         return intercept(codestate, parms)
     elseif callable isa Core.Builtin || callable isa Core.IntrinsicFunction
         clear_child_state(codestate, callable)
     elseif (ans = to_interpret(codestate, callable, parms)) !== nothing
-        childstate = ans::CodeState
+        childstate::CodeState = ans
         return interpret_lower(childstate)
     else
         clear_child_state(codestate, callable)
@@ -183,13 +184,13 @@ function lookup_lower_call(codestate::CodeState, args)
     else
         # @show fun typeof(fun)
         Base.invokelatest(fun, parms...)
-    end            
+    end                        
 end
 
 function lookup_lower_cfunction(codestate::CodeState, args)
     # @nospecialize args
     # @show :cfunction args
-    type = lookup_lower(codestate, args[1])
+    type = quote_lower(lookup_lower(codestate, args[1]))
     # @show type typeof(type)
     if codestate.mod_or_meth isa Method && !isempty(codestate.sparam_vals)
         rt = ccall(:jl_instantiate_type_in_env, Any, (Any, Any, Ptr{Any}),
@@ -203,7 +204,7 @@ function lookup_lower_cfunction(codestate::CodeState, args)
     end
     cc = args[5]
     # @show rt at cc
-    parm = quote_all(lookup_lower(codestate, args[2]))
+    parm = QuoteNode(lookup_lower(codestate, args[2]))
     # @show parm
     eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth),
         Expr(:cfunction, type, parm, rt, at, cc))
@@ -211,7 +212,7 @@ end
 function lookup_lower_foreigncall(codestate::CodeState, args)
     # @nospecialize args
     # @show :foreigncall args
-    fun = quote_all(lookup_lower(codestate, args[1]))
+    fun = quote_lower(lookup_lower(codestate, args[1]))
     # @show fun typeof(fun)
     if codestate.mod_or_meth isa Method && !isempty(codestate.sparam_vals)
         rt = ccall(:jl_instantiate_type_in_env, Any, (Any, Any, Ptr{Any}),
@@ -228,7 +229,7 @@ function lookup_lower_foreigncall(codestate::CodeState, args)
     cc = args[5]
     # @show rt at nreq cc
     # parms = ((lookup_lower(codestate, arg) for arg in args[6:end]))...,)
-    parms = Any[quote_all(lookup_lower(codestate, arg)) for arg in args[6:end]]
+    parms = Any[quote_lower(lookup_lower(codestate, arg)) for arg in args[6:end]]
     # @show parms
     eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth),
         Expr(:foreigncall, fun, rt, at, nreq, cc, parms...))
@@ -492,11 +493,11 @@ function assign_lower(codestate::CodeState, var, val)
     elseif var isa Symbol
         symbol = var
         eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth),
-            Expr(:(=), symbol, quote_all(val)))
+            Expr(:(=), symbol, quote_lower(val)))
     elseif var isa GlobalRef
         globalref = var
         eval_ast(codestate.interpstate, moduleof(codestate.mod_or_meth),
-            Expr(:(=), globalref, quote_all(val)))
+            Expr(:(=), globalref, quote_lower(val)))
     else
         @show :assign_lower typeof(var) var val
         @assert false

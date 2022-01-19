@@ -7,11 +7,11 @@ function tracer(files)
     try
         for file in files
             try
-                mod = @eval Main (module IsolatedTests using Base, Test, Random, Distributed, Compat, JuliaInterp; end)
+                mod::Module = @eval Main (module IsolatedTests using Base, Test, Random, Distributed, Compat, JuliaInterp; end)
                 options = JuliaInterp.options(false, false, [Test, mod], [Base], UInt(1_000_000))
-                @testset verbose=true begin
+                # @testset verbose=true begin
                     JuliaInterp.include(mod::Module, file, options)
-                end
+                # end
             catch exception
                 @show :toplevel exception
                 rethrow()

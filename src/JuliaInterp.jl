@@ -12,7 +12,7 @@ function include(mod, path, options)
     prev = get(tls, :SOURCE_PATH, nothing)
     tls[:SOURCE_PATH] = path
     try
-        expr = Meta.parseall(code, filename=path)
+        expr::Expr = Meta.parseall(code, filename=path)
         interpret_ast(mod, expr, options)
     finally
         if prev === nothing
